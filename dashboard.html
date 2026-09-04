@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="E-Summit 2026 Dashboard — Team Portal & Admin Panel.">
+  <meta name="theme-color" content="#e9e1d2">
+  <title>Dashboard — E-Summit 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="config.js"></script>
+  <script src="auth.js"></script>
+</head>
+<body class="dash-body">
+  <div class="site-grain" aria-hidden="true"></div>
+
+  <!-- ═══ Dashboard Header ═══ -->
+  <header class="dash-header">
+    <div class="dash-header-inner">
+      <a class="wordmark" href="index.html" aria-label="E-Summit 2026 home">
+        <span aria-hidden="true">E—</span><span>SUMMIT</span><sup>26</sup>
+      </a>
+      <div class="dash-header-meta">
+        <span class="dash-role-badge" id="dashRoleBadge">LOADING</span>
+        <button class="dash-logout-btn" id="logoutBtn" type="button">
+          Logout <span aria-hidden="true">↗</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══ Dashboard Content ═══ -->
+  <main class="dash-main" id="dashMain">
+    <div class="dash-loading" id="dashLoading">
+      <div class="dash-loading-spinner"></div>
+      <p class="mono-label">LOADING PORTAL</p>
+    </div>
+  </main>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
