@@ -1078,12 +1078,21 @@ function setUpRegistrationForm() {
     const track = payload.track;
     const college = payload.college;
 
+    // The server renames temporary uploads to their official Group ID path.
+    // Keep the local crop visible immediately, then point future loads at the
+    // official path returned by the registration response.
+    rosterData.forEach((member, index) => {
+      if (!member.photo_url) return;
+      const extension = member.photo_url.split(".").pop();
+      member.photo_url = `/api/teams/photos/${assignedGroupId}_member_${index + 1}.${extension}`;
+    });
+
     let membersListHtml = "";
     payload.members.forEach((m, idx) => {
       membersListHtml += `
         <div style="margin-bottom:0.75rem;padding:0.85rem;background:rgba(255,255,255,0.7);border-radius:12px;border:1px solid rgba(26,24,20,0.12);display:flex;gap:1rem;align-items:center;">
           <div style="width:48px;height:48px;border-radius:50%;border:2px solid var(--ink);overflow:hidden;flex-shrink:0;background:#eee;">
-            <img src="${getApiAssetUrl(m.photo_url) || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(m.name || 'Member') + '&background=1a1814&color=e9e1d2'}" style="width:100%;height:100%;object-fit:cover;">
+            <img src="${m._pendingPreview || getApiAssetUrl(m.photo_url) || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(m.name || 'Member') + '&background=1a1814&color=e9e1d2'}" alt="${m.name || 'Member'} photo" style="width:100%;height:100%;object-fit:cover;">
           </div>
           <div style="flex:1;">
             <div style="font-weight:700;font-size:0.95rem;">${idx === 0 ? "★ Leader: " : `Member ${idx + 1}: `}${m.name || "N/A"} <span style="font-size:0.75rem;color:var(--oxide);font-family:var(--mono);">(${m.role})</span></div>
@@ -1095,12 +1104,12 @@ function setUpRegistrationForm() {
     });
 
     status.innerHTML = `
-      <div class="registration-success-card" style="padding:2rem;background:rgba(250,247,242,0.95);border:2px solid var(--oxide);border-radius:24px;box-shadow:0 15px 40px rgba(0,0,0,0.12);">
+      <div class="registration-success-card registration-success-card--green">
         <div class="success-header" style="display:flex;align-items:center;gap:1rem;border-bottom:2px dashed rgba(26,24,20,0.15);padding-bottom:1rem;">
-          <div style="width:42px;height:42px;border-radius:50%;background:var(--oxide);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:bold;">✓</div>
+          <div class="success-icon success-icon--green">✓</div>
           <div>
             <h3 style="margin:0;font-size:1.3rem;font-weight:800;">Team Registration Successful!</h3>
-            <p style="margin:0.25rem 0 0;font-size:0.95rem;color:var(--oxide);font-family:var(--mono);font-weight:800;letter-spacing:0.04em;">ASSIGNED TEAM GROUP ID: ${assignedGroupId}</p>
+            <p class="success-group-id">ASSIGNED TEAM GROUP ID: ${assignedGroupId}</p>
           </div>
         </div>
         
@@ -1111,14 +1120,88 @@ function setUpRegistrationForm() {
         </div>
 
         <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid rgba(26,24,20,0.12);display:flex;flex-direction:column;gap:0.75rem;text-align:center;">
-          <p style="margin:0;font-size:0.85rem;font-family:var(--mono);color:var(--oxide);font-weight:700;">Registration saved. Keep your Group ID safe for portal login.</p>
+          <p class="success-save-note">Registration saved. Keep your Group ID safe for portal login.</p>
           <div style="display:flex;gap:1rem;justify-content:center;">
+            <button type="button" class="button button--ink" id="downloadAllIdCardsBtn" style="flex:1;justify-content:center;">Download virtual ID cards ↓</button>
             <a class="button button--ink" href="login.html" style="flex:1;justify-content:center;text-decoration:none;">Login Now →</a>
           </div>
         </div>
       </div>
     `;
+
+    document.getElementById("downloadAllIdCardsBtn")?.addEventListener("click", () => {
+      payload.members.forEach((member, index) => downloadRegistrationIdCardPNG({
+        group_id: assignedGroupId,
+        team_name: teamName,
+        track,
+        college
+      }, { ...member, photo_url: rosterData[index].photo_url, _pendingPreview: rosterData[index]._pendingPreview }, index));
+    });
   });
+}
+
+function downloadRegistrationIdCardPNG(team, member, index) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1200;
+  canvas.height = 760;
+  const context = canvas.getContext("2d");
+  const background = context.createLinearGradient(0, 0, 1200, 760);
+  background.addColorStop(0, "#1a1814");
+  background.addColorStop(1, "#30291f");
+  context.fillStyle = background;
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.fillStyle = "#d3e83d";
+  context.fillRect(0, 0, 1200, 18);
+  context.fillStyle = "#e9e1d2";
+  context.font = "700 28px monospace";
+  context.fillText("E-SUMMIT 2026 / OFFICIAL VIRTUAL ID", 64, 86);
+  context.font = "800 58px Archivo, Arial, sans-serif";
+  context.fillText(member.name || "TEAM MEMBER", 64, 180);
+  context.fillStyle = "#d84b2d";
+  context.font = "700 24px monospace";
+  context.fillText(member.role || "PARTICIPANT", 64, 224);
+  context.fillStyle = "#e9e1d2";
+  context.font = "500 25px monospace";
+  context.fillText(`GROUP ID  ${team.group_id}`, 64, 310);
+  context.fillText(`TRACK     ${team.track}`, 64, 358);
+  context.fillText(`COLLEGE   ${team.college}`, 64, 406);
+  context.fillText(`MEMBER    ${String(index + 1).padStart(2, "0")}`, 64, 454);
+  context.fillStyle = "#d3e83d";
+  context.font = "700 22px monospace";
+  context.fillText("KEEP THIS PASS FOR CHECK-IN", 64, 660);
+
+  const imageSource = member._pendingPreview || getApiAssetUrl(member.photo_url);
+  if (imageSource) {
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+    image.onload = () => {
+      context.save();
+      context.beginPath();
+      context.arc(1010, 300, 125, 0, Math.PI * 2);
+      context.clip();
+      context.drawImage(image, 885, 175, 250, 250);
+      context.restore();
+      context.strokeStyle = "#d3e83d";
+      context.lineWidth = 8;
+      context.beginPath();
+      context.arc(1010, 300, 129, 0, Math.PI * 2);
+      context.stroke();
+      canvas.toBlob((blob) => triggerPNGDownload(blob, `${team.group_id}-${member.name || `member-${index + 1}`}-virtual-id.png`), "image/png");
+    };
+    image.onerror = () => canvas.toBlob((blob) => triggerPNGDownload(blob, `${team.group_id}-member-${index + 1}-virtual-id.png`), "image/png");
+    image.src = imageSource;
+    return;
+  }
+  canvas.toBlob((blob) => triggerPNGDownload(blob, `${team.group_id}-member-${index + 1}-virtual-id.png`), "image/png");
+}
+
+function triggerPNGDownload(blob, filename) {
+  if (!blob) return;
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = filename.replace(/[^a-z0-9._-]+/gi, "-");
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
 }
 
 // ════════════════════════════════════════════════════════════════

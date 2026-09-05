@@ -205,7 +205,7 @@ const Auth = (() => {
       }
 
       const headers = {
-        "Content-Type": "application/json",
+        ...(opts.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
         Authorization: `Bearer ${token}`,
         ...(opts.headers || {}),
       };

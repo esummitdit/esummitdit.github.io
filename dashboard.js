@@ -352,8 +352,32 @@ document.addEventListener("DOMContentLoaded", async () => {
             <input type="search" id="teamSearchInput" placeholder="Search by team name, group ID, or member verification code…" class="dash-search-input">
           </div>
 
+          ${isTechOrMaster ? `
+          <div class="dash-csv-tools" aria-label="Team CSV tools">
+            <div>
+              <strong>Team data CSV</strong>
+              <p>Export every team and member field, edit it directly, then import the CSV to update the vault.</p>
+            </div>
+            <div class="dash-csv-actions">
+              <button type="button" class="button button--secondary" id="exportTeamsCsvBtn">Export CSV ↓</button>
+              ${session.role === 'master_admin' ? `
+                <label class="button button--ink" for="importTeamsCsvInput">Import edited CSV ↑</label>
+                <input id="importTeamsCsvInput" class="sr-only" type="file" accept=".csv,text/csv">
+              ` : ''}
+            </div>
+          </div>
+          ` : ''}
+
+          ${session.role === 'master_admin' ? `
+          <div class="dash-danger-tools" aria-label="Master admin team deletion tools">
+            <button type="button" class="button button--secondary" id="selectAllTeamsBtn">Select all teams</button>
+            <button type="button" class="button button--secondary" id="deleteSelectedTeamsBtn">Delete selected</button>
+            <button type="button" class="button button--ink" id="deleteAllTeamsBtn">Delete every team</button>
+          </div>
+          ` : ''}
+
           <div class="dash-teams-list" id="teamsListContainer">
-            ${teams.length ? teams.map(t => renderTeamRow(t, isTechOrMaster)).join('') : '<p style="padding: 2rem; text-align: center; color: var(--muted-ink); font-family: var(--mono);">No teams registered yet.</p>'}
+            ${teams.length ? teams.map(t => renderTeamRow(t, session.role === 'master_admin', session.role === 'master_admin')).join('') : '<p style="padding: 2rem; text-align: center; color: var(--muted-ink); font-family: var(--mono);">No teams registered yet.</p>'}
           </div>
 
           ${session.role === 'master_admin' ? `
@@ -375,6 +399,36 @@ document.addEventListener("DOMContentLoaded", async () => {
           ` : ''}
         </div>
       `;
+
+      document.getElementById("exportTeamsCsvBtn")?.addEventListener("click", async () => {
+        const response = await Auth.apiFetch("/teams/admin/csv");
+        if (!response.ok) {
+          alert("Unable to export team CSV.");
+          return;
+        }
+        const blob = await response.blob();
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "esummit-teams.csv";
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+      });
+
+      document.getElementById("importTeamsCsvInput")?.addEventListener("change", async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        if (!confirm("Import this CSV and replace the current team records?")) return;
+        const body = new FormData();
+        body.append("file", file);
+        const response = await Auth.apiFetch("/teams/admin/csv", { method: "POST", body });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          alert(result.detail || "Unable to import team CSV.");
+          return;
+        }
+        alert(`Imported ${result.teams} team record(s). The dashboard will refresh.`);
+        window.location.reload();
+      });
 
       // ── Search ──
       const searchInput = document.getElementById("teamSearchInput");
@@ -418,6 +472,39 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
         });
       });
+
+      if (session.role === "master_admin") {
+        const teamsContainer = document.getElementById("teamsListContainer");
+        const selectedTeamIds = () => [...teamsContainer.querySelectorAll(".dash-team-select:checked")].map(input => input.value);
+        const deleteSelectedTeams = async (ids) => {
+          if (!ids.length) {
+            alert("Select at least one team first.");
+            return;
+          }
+          const label = ids.length === teams.length ? "ALL registered teams" : `${ids.length} selected team(s)`;
+          if (!confirm(`First confirmation: permanently delete ${label}, including member photos?`)) return;
+          const typed = prompt('Second confirmation: type DELETE TEAMS to continue.');
+          if (typed !== "DELETE TEAMS") return;
+
+          const response = await Auth.apiFetch("/admin/teams/bulk-delete", {
+            method: "POST",
+            body: JSON.stringify({ group_ids: ids, confirmation: typed })
+          });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            alert(result.detail || "Unable to delete selected teams.");
+            return;
+          }
+          alert(`Deleted ${result.deleted.length} team record(s).`);
+          window.location.reload();
+        };
+
+        document.getElementById("deleteSelectedTeamsBtn")?.addEventListener("click", () => deleteSelectedTeams(selectedTeamIds()));
+        document.getElementById("deleteAllTeamsBtn")?.addEventListener("click", () => deleteSelectedTeams(teams.map(team => team.group_id)));
+        document.getElementById("selectAllTeamsBtn")?.addEventListener("click", () => {
+          teamsContainer.querySelectorAll(".dash-team-select").forEach(input => { input.checked = true; });
+        });
+      }
 
       // ── Master Admin: Register Admin Outlook ID & Assign Department ──
       const createAdminBtn = document.getElementById("createAdminBtn");
@@ -500,7 +587,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  function renderTeamRow(team, canDelete) {
+  function renderTeamRow(team, canDelete, isMasterAdmin) {
     const memberCount = team.members ? team.members.length : 0;
     const allCodes = (team.members || []).map(m => m.verification_code || '').join(' ');
     const searchable = `${team.group_id} ${team.team_name} ${team.track} ${team.college} ${allCodes}`.toLowerCase();
@@ -515,6 +602,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <span class="dash-team-chevron">▾</span>
         </button>
         <div class="dash-team-row-body" id="team-${team.group_id}">
+          ${isMasterAdmin ? `<label class="dash-team-select-label"><input class="dash-team-select" type="checkbox" value="${team.group_id}"> Select for bulk actions</label>` : ''}
           <div class="dash-team-meta">
             <span><strong>Institution:</strong> ${team.college}</span>
           </div>

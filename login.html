@@ -141,6 +141,20 @@
               <label for="forgotNewPw">New Team Password</label>
               <input id="forgotNewPw" type="password" placeholder="At least 6 characters" required minlength="6">
             </div>
+            <div class="field-group">
+              <label for="forgotNewSecurityQuestion">New Security Question</label>
+              <select id="forgotNewSecurityQuestion" required>
+                <option value="">Choose a new security question</option>
+                <option value="What is your team lead's favorite tech stack or tool?">What is your team lead's favorite tech stack or tool?</option>
+                <option value="In which city was your project or team founded?">In which city was your project or team founded?</option>
+                <option value="What was the name of your first hackathon project?">What was the name of your first hackathon project?</option>
+                <option value="What is your team's secret mascot or code phrase?">What is your team's secret mascot or code phrase?</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="forgotNewSecurityAnswer">New Security Answer</label>
+              <input id="forgotNewSecurityAnswer" placeholder="Enter a new security answer" required>
+            </div>
             <button class="button button--ink" type="submit" id="submitForgotBtn" style="width:100%; justify-content:center; margin-top:0.5rem;">
               Reset Team Password & Log In <span aria-hidden="true">→</span>
             </button>
@@ -299,9 +313,11 @@
           const groupId = "ES2026_" + document.getElementById("forgotGroupId").value.padStart(4, "0");
           const securityAnswer = document.getElementById("forgotSecAnswer").value.trim();
           const newPassword = document.getElementById("forgotNewPw").value;
+          const newSecurityQuestion = document.getElementById("forgotNewSecurityQuestion").value;
+          const newSecurityAnswer = document.getElementById("forgotNewSecurityAnswer").value.trim();
 
-          if (!securityAnswer || !newPassword) {
-            forgotError.textContent = "Please fill in your security answer and new password.";
+          if (!securityAnswer || !newPassword || !newSecurityQuestion || !newSecurityAnswer) {
+            forgotError.textContent = "Please provide the current answer, a new password, and a new security question and answer.";
             return;
           }
 
@@ -313,7 +329,9 @@
               body: JSON.stringify({
                 group_id: groupId,
                 security_answer: securityAnswer,
-                new_password: newPassword
+                new_password: newPassword,
+                new_security_question: newSecurityQuestion,
+                new_security_answer: newSecurityAnswer
               })
             });
             const data = await res.json();
