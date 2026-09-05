@@ -100,25 +100,22 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!res.ok) throw new Error("Failed to load team data.");
       const team = await res.json();
 
+      main.setAttribute("aria-busy", "false");
       main.innerHTML = `
         <div class="dash-container">
-          <!-- Team Overview Card -->
-          <div class="dash-team-overview">
+          <section class="dash-team-overview" aria-labelledby="team-overview-title">
             <div class="dash-overview-header">
               <div class="dash-group-id-display">
-                <span class="mono-label">OFFICIAL GROUP ID</span>
+                <span class="mono-label">E-SUMMIT 2026 / TEAM PORTAL</span>
+                <h1 id="team-overview-title" class="dash-team-name">${team.team_name}</h1>
                 <span class="dash-group-id">${team.group_id}</span>
               </div>
               <div class="dash-status-pill">
                 <span class="pulse-dot"></span>
-                <span>REGISTERED</span>
+                <span>Registration confirmed</span>
               </div>
             </div>
             <div class="dash-overview-details">
-              <div class="dash-detail">
-                <span class="mono-label">TEAM NAME</span>
-                <span class="dash-detail-value">${team.team_name}</span>
-              </div>
               <div class="dash-detail">
                 <span class="mono-label">EVENT TRACK</span>
                 <span class="dash-detail-value">${team.track}</span>
@@ -128,20 +125,25 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <span class="dash-detail-value">${team.college}</span>
               </div>
             </div>
-          </div>
+            <div class="dash-arrival-note">
+              <span aria-hidden="true">01</span>
+              <p><strong>Before you arrive:</strong> download each attendee pass and keep the verification code ready for the check-in desk.</p>
+            </div>
+          </section>
 
-          <!-- Team Roster & Digital ID Passes -->
-          <div class="dash-section-head">
+          <section aria-labelledby="passes-title">
+          <div class="dash-section-head dash-section-head--passes">
             <span class="step-num">${String(team.members.length).padStart(2, "0")}</span>
             <div>
-              <h2 class="dash-section-title">Team Roster & Official Digital Pass Cards</h2>
-              <p class="section-hint">Download your official Digital ID Card below. Show this 12-digit code to event staff for instant entry verification.</p>
+              <h2 id="passes-title" class="dash-section-title">Your attendee passes</h2>
+              <p class="section-hint">Each pass belongs to one person. Download it before arrival; staff will verify the code at check-in.</p>
             </div>
           </div>
 
           <div class="dash-roster-grid">
             ${team.members.map((m, i) => renderDigitalIdCardHTML(team, m, i)).join('')}
           </div>
+          </section>
         </div>
       `;
 
@@ -172,28 +174,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     const code = member.verification_code || "8492-3019-4821";
 
     return `
-      <div class="dash-member-card ${isLeader ? 'dash-member-card--leader' : ''}" style="border: 2px solid var(--ink); border-radius: 12px; padding: 1.5rem; background: var(--paper); box-shadow: 4px 4px 0 var(--ink); margin-bottom: 1.5rem;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 2px solid rgba(26,24,20,0.1); padding-bottom: 0.75rem;">
+      <article class="dash-member-card ${isLeader ? 'dash-member-card--leader' : ''}">
+        <div class="dash-pass-header">
           <div>
-            <span class="mono-label" style="font-size: 0.7rem; letter-spacing: 0.08em; color: var(--accent);">E-SUMMIT 2026 // OFFICIAL PASS</span>
-            <h3 style="margin: 0.2rem 0 0; font-size: 1.2rem; font-weight: 800;">${member.name || 'Team Member'}</h3>
-            <span style="font-size: 0.8rem; color: var(--muted-ink); font-family: var(--mono);">${member.role || 'Participant'}</span>
+            <span class="dash-pass-kicker">${isLeader ? 'TEAM LEAD / OFFICIAL PASS' : 'E-SUMMIT 2026 / OFFICIAL PASS'}</span>
+            <h3>${member.name || 'Team Member'}</h3>
+            <span class="dash-pass-role">${member.role || 'Participant'}</span>
           </div>
-          <img src="${photo}" alt="${member.name}" style="width: 54px; height: 54px; border-radius: 8px; border: 2px solid var(--ink); object-fit: cover;" onerror="this.src='https://ui-avatars.com/api/?name=User&background=1a1814&color=e9e1d2'">
+          <img class="dash-pass-photo" src="${photo}" alt="Portrait of ${member.name || 'team member'}" onerror="this.src='https://ui-avatars.com/api/?name=User&background=1a1814&color=e9e1d2'">
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.8rem;">
+        <dl class="dash-pass-facts">
           <div>
-            <span class="mono-label">GROUP ID</span>
-            <p style="margin: 0; font-family: var(--mono); font-weight: 700; font-size: 1rem;">${team.group_id}</p>
+            <dt>Group ID</dt><dd>${team.group_id}</dd>
           </div>
           <div>
-            <span class="mono-label">EVENT TRACK</span>
-            <p style="margin: 0; font-size: 0.85rem; font-weight: 600;">${team.track}</p>
+            <dt>Event track</dt><dd>${team.track}</dd>
           </div>
-        </div>
+        </dl>
 
-        <div style="font-size: 0.78rem; font-family: var(--mono); color: var(--ink); margin-bottom: 1rem; line-height: 1.5; background: rgba(26,24,20,0.04); padding: 0.65rem 0.85rem; border-radius: 8px;">
+        <div class="dash-pass-contact">
           <div>✉ <strong>Inst Email:</strong> ${member.email || 'N/A'}</div>
           <div>✉ <strong>Personal:</strong> ${member.personal_email || 'N/A'}</div>
           <div>📞 <strong>Phone:</strong> ${member.phone || 'N/A'}</div>
@@ -201,15 +201,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         </div>
 
         <!-- 12-Digit Verification Security Code -->
-        <div style="background: var(--ink); color: var(--paper); padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1rem; text-align: center;">
-          <span style="display: block; font-size: 0.65rem; letter-spacing: 0.1em; color: rgba(233,225,210,0.7); margin-bottom: 0.2rem;">STAFF VERIFICATION CODE</span>
-          <span style="font-family: var(--mono); font-weight: 700; font-size: 1.15rem; letter-spacing: 0.15em; color: #ffeb3b;">${code}</span>
+        <div class="dash-verification-code" aria-label="Staff verification code ${code}">
+          <span>Staff verification code</span><strong>${code}</strong>
         </div>
 
-        <button type="button" class="button button--secondary" id="downloadIdCardBtn_${index}" style="width: 100%; justify-content: center; font-size: 0.85rem;">
-          Download ID Card (PNG) 📥
+        <button type="button" class="button button--secondary dash-download-pass" id="downloadIdCardBtn_${index}" aria-label="Download ${member.name || 'team member'}'s ID pass as PNG">
+          Download pass <span aria-hidden="true">↓</span>
         </button>
-      </div>
+      </article>
     `;
   }
 
@@ -308,6 +307,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const userDept = session.department || "Technical Team";
       const isTechOrMaster = session.role === "master_admin" || userDept === "Technical Team";
+      main.setAttribute("aria-busy", "false");
 
       main.innerHTML = `
         <div class="dash-container">
@@ -348,7 +348,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           </div>
 
           <div class="dash-search-bar">
-            <input type="text" id="teamSearchInput" placeholder="Search by team name, group ID, or member verification code…" class="dash-search-input">
+            <label class="sr-only" for="teamSearchInput">Search registered teams</label>
+            <input type="search" id="teamSearchInput" placeholder="Search by team name, group ID, or member verification code…" class="dash-search-input">
           </div>
 
           <div class="dash-teams-list" id="teamsListContainer">
@@ -392,7 +393,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.querySelectorAll(".dash-team-row-header").forEach(header => {
         header.addEventListener("click", () => {
           const row = header.closest(".dash-team-row");
-          row.classList.toggle("is-expanded");
+          const expanded = row.classList.toggle("is-expanded");
+          header.setAttribute("aria-expanded", String(expanded));
         });
       });
 
@@ -505,14 +507,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     return `
       <div class="dash-team-row" data-searchable="${searchable}">
-        <div class="dash-team-row-header">
+        <button class="dash-team-row-header" type="button" aria-expanded="false" aria-controls="team-${team.group_id}">
           <span class="dash-team-id mono-label">${team.group_id}</span>
           <span class="dash-team-name">${team.team_name}</span>
           <span class="dash-team-track">${team.track}</span>
           <span class="dash-team-count">${memberCount} ${memberCount === 1 ? 'member' : 'members'}</span>
           <span class="dash-team-chevron">▾</span>
-        </div>
-        <div class="dash-team-row-body">
+        </button>
+        <div class="dash-team-row-body" id="team-${team.group_id}">
           <div class="dash-team-meta">
             <span><strong>Institution:</strong> ${team.college}</span>
           </div>
