@@ -42,6 +42,7 @@ body.is-loading.is-launching .site-header::after { opacity: .04; }
 .site-nav a, .header-action, .site-footer a { text-decoration: none; }.site-nav a:hover { color: var(--oxide); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .35rem; }
 .header-actions { justify-self: end; display: flex; align-items: center; gap: .85rem; }
 .header-login { font-family: var(--mono); font-size: .69rem; font-weight: 600; text-transform: uppercase; text-decoration: none; color: var(--ink); padding: .65rem 1rem; border: 1px solid rgba(26,24,20,0.25); border-radius: 999px; transition: all .25s cubic-bezier(.2,.8,.2,1); letter-spacing: .02em; }
+.header-login--active { display: inline-flex; align-items: center; gap: .45rem; max-width: 16rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-color: var(--ink); background: rgba(255,255,255,.35); }
 .header-login:hover { border-color: var(--ink); background: rgba(26,24,20,0.06); transform: translateY(-2px); }
 .header-action { padding: .65rem 1rem; border: 1px solid var(--ink); border-radius: 999px; background: var(--acid); font-family: var(--mono); font-size: .69rem; font-weight: 600; text-transform: uppercase; box-shadow: 0 4px 14px rgba(211,232,61,0.35); transition: all .25s cubic-bezier(.2,.8,.2,1); }
 .header-action:hover, .button:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(26,24,20,0.18); }

@@ -210,7 +210,14 @@
   </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
+      // Logged-in users never need to see or interact with the login form.
+      // The API verifies the token before redirecting to the portal.
+      if (await Auth.validateSession()) {
+        window.location.replace("dashboard.html");
+        return;
+      }
+
       const roleTeam = document.getElementById("roleTeam");
       const roleAdmin = document.getElementById("roleAdmin");
       const teamForm = document.getElementById("teamLoginForm");

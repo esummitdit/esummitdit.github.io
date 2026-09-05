@@ -3,18 +3,18 @@
 /**
  * Dashboard — Departmental Permissions, Digital ID Passes & Canvas PNG Downloader
  */
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const main = document.getElementById("dashMain");
   const roleBadge = document.getElementById("dashRoleBadge");
   const logoutBtn = document.getElementById("logoutBtn");
 
   // ── Auth Guard ──
-  if (!Auth.isAuthenticated()) {
-    window.location.href = "login.html";
+  const session = await Auth.validateSession();
+  if (!session) {
+    window.location.replace("login.html");
     return;
   }
 
-  const session = Auth.getSession();
   logoutBtn.addEventListener("click", () => Auth.logout());
 
   // Check if first-time admin needs to change temporary password

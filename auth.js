@@ -9,6 +9,10 @@
  */
 const Auth = (() => {
   const SESSION_KEY = "esummit_jwt_token";
+  const LOGOUT_EVENT_KEY = "esummit_logout_event";
+  const logoutChannel = "BroadcastChannel" in window
+    ? new BroadcastChannel("esummit-auth")
+    : null;
 
   function _getToken() {
     return sessionStorage.getItem(SESSION_KEY);
@@ -21,6 +25,31 @@ const Auth = (() => {
       sessionStorage.removeItem(SESSION_KEY);
     }
   }
+
+  function _notifyOtherPagesOfLogout() {
+    logoutChannel?.postMessage({ type: "logout" });
+    try {
+      // This stores no credential. It is only a short-lived signal for tabs
+      // that do not support BroadcastChannel.
+      localStorage.setItem(LOGOUT_EVENT_KEY, String(Date.now()));
+      localStorage.removeItem(LOGOUT_EVENT_KEY);
+    } catch {
+      // Private browsing can disable storage; the current page still logs out.
+    }
+  }
+
+  function _clearRemoteSession() {
+    _setToken(null);
+    window.dispatchEvent(new Event("esummit:logout"));
+  }
+
+  logoutChannel?.addEventListener("message", (event) => {
+    if (event.data?.type === "logout") _clearRemoteSession();
+  });
+
+  window.addEventListener("storage", (event) => {
+    if (event.key === LOGOUT_EVENT_KEY && event.newValue) _clearRemoteSession();
+  });
 
   function _decodePayload(token) {
     try {
@@ -72,9 +101,10 @@ const Auth = (() => {
       }
     },
 
-    /** Clear session and redirect to login. */
+    /** Clear this session, notify open E-Summit tabs, then redirect. */
     logout() {
       _setToken(null);
+      _notifyOtherPagesOfLogout();
       window.location.href = "login.html";
     },
 
@@ -100,6 +130,30 @@ const Auth = (() => {
     /** Check if user is authenticated with a valid token. */
     isAuthenticated() {
       return this.getToken() !== null;
+    },
+
+    /**
+     * Confirm the locally stored token with the API on every page landing.
+     * A network outage does not destroy an otherwise valid local session;
+     * an explicit 401/403 does.
+     */
+    async validateSession() {
+      const localSession = this.getSession();
+      const token = this.getToken();
+      if (!localSession || !token) return null;
+
+      try {
+        const response = await fetch(`${API_BASE}/auth/session`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) {
+          if (response.status === 401 || response.status === 403) _setToken(null);
+          return null;
+        }
+        return { ...localSession, ...(await response.json()) };
+      } catch {
+        return localSession;
+      }
     },
 
     /**

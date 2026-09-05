@@ -58,13 +58,13 @@ function initializePage() {
   setUpRevealObserver(reduceMotion, restoredAwayFromTop);
   if (restoredAwayFromTop) document.body.classList.add("is-restored");
   setUpSculptureControl(sceneState, reduceMotion);
-  setUpSessionAwareHomepage();
+  void setUpSessionAwareHomepage();
   setUpRegistrationForm();
   setUpFaqAccordion();
 }
 
-function setUpSessionAwareHomepage() {
-  const session = typeof Auth !== "undefined" ? Auth.getSession() : null;
+async function setUpSessionAwareHomepage() {
+  const session = typeof Auth !== "undefined" ? await Auth.validateSession() : null;
   if (!session) return;
 
   const isTeam = session.role === "team";
@@ -74,12 +74,26 @@ function setUpSessionAwareHomepage() {
   const lockedNotice = document.getElementById("registrationLockedNotice");
   const registrationForm = document.getElementById("registrationForm");
   const label = isTeam
-    ? `Team ${session.group_id || "portal"}`
-    : "Admin portal";
+    ? session.team_name || session.group_id || "Team portal"
+    : session.name || session.email || "Administrator";
 
   if (sessionLink) {
     sessionLink.href = dashboardHref;
-    sessionLink.textContent = label;
+    const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    icon.setAttribute("viewBox", "0 0 24 24");
+    icon.setAttribute("width", "15");
+    icon.setAttribute("height", "15");
+    icon.setAttribute("fill", "none");
+    icon.setAttribute("stroke", "currentColor");
+    icon.setAttribute("stroke-width", "2");
+    icon.setAttribute("stroke-linecap", "round");
+    icon.setAttribute("stroke-linejoin", "round");
+    icon.setAttribute("aria-hidden", "true");
+    icon.innerHTML = isTeam
+      ? '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'
+      : '<rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/>';
+    sessionLink.replaceChildren(icon, document.createTextNode(label));
+    sessionLink.classList.add("header-login--active");
     sessionLink.setAttribute("aria-label", `Open ${label}`);
   }
 
@@ -115,6 +129,11 @@ function setUpSessionAwareHomepage() {
     `;
   }
 }
+
+window.addEventListener("esummit:logout", () => {
+  // Each open page returns to its signed-out state without retaining a token.
+  window.location.reload();
+});
 
 function restoreReloadPosition() {
   const navigation = performance.getEntriesByType("navigation")[0];
