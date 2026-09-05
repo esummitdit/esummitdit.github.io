@@ -217,77 +217,111 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ═══════════════════════════════════════
   function downloadDigitalIdCardPNG(team, member, index) {
     const canvas = document.createElement("canvas");
-    canvas.width = 640;
-    canvas.height = 380;
+    canvas.width = 1400;
+    canvas.height = 900;
     const ctx = canvas.getContext("2d");
 
-    // Background
-    ctx.fillStyle = "#e9e1d2";
+    const background = ctx.createLinearGradient(0, 0, 1400, 900);
+    background.addColorStop(0, "#1a1814");
+    background.addColorStop(1, "#30291f");
+    ctx.fillStyle = background;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Border
-    ctx.lineWidth = 6;
-    ctx.strokeStyle = "#1a1814";
-    ctx.strokeRect(12, 12, canvas.width - 24, canvas.height - 24);
-
-    // Top Header Bar
-    ctx.fillStyle = "#1a1814";
-    ctx.fillRect(12, 12, canvas.width - 24, 54);
-
+    ctx.fillStyle = "#d3e83d";
+    ctx.fillRect(0, 0, 1400, 20);
     ctx.fillStyle = "#e9e1d2";
-    ctx.font = "bold 20px Archivo, sans-serif";
-    ctx.fillText("E—SUMMIT 26 // DIGITAL ID PASS", 30, 46);
-
-    ctx.fillStyle = "#d32f2f";
-    ctx.fillRect(canvas.width - 150, 24, 120, 30);
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 12px DM Mono, monospace";
-    ctx.fillText("VERIFIED PASS", canvas.width - 140, 44);
-
-    // Member Info
-    ctx.fillStyle = "#1a1814";
-    ctx.font = "bold 26px Archivo, sans-serif";
-    ctx.fillText(member.name || "Participant", 30, 115);
-
-    ctx.fillStyle = "#55524c";
-    ctx.font = "16px DM Mono, monospace";
-    ctx.fillText(`ROLE: ${member.role || "Participant"}`, 30, 142);
-
-    ctx.font = "14px Archivo, sans-serif";
-    ctx.fillText(`TEAM: ${team.team_name}`, 30, 175);
-    ctx.fillText(`TRACK: ${team.track}`, 30, 198);
-    ctx.fillText(`COLLEGE: ${team.college}`, 30, 221);
-
-    // Group ID Badge
-    ctx.fillStyle = "#1a1814";
-    ctx.fillRect(30, 242, 160, 36);
+    ctx.font = "700 30px monospace";
+    ctx.fillText("DIT UNIVERSITY  /  E-SUMMIT 2026", 72, 86);
+    ctx.font = "500 18px monospace";
+    ctx.fillText("OFFICIAL DIGITAL VENUE PASS", 72, 120);
+    ctx.font = "800 62px Archivo, Arial, sans-serif";
+    ctx.fillText(member.name || "TEAM MEMBER", 72, 218);
+    ctx.fillStyle = "#d84b2d";
+    ctx.font = "700 25px monospace";
+    ctx.fillText(member.role || "PARTICIPANT", 72, 262);
     ctx.fillStyle = "#e9e1d2";
-    ctx.font = "bold 16px DM Mono, monospace";
-    ctx.fillText(`ID: ${team.group_id}`, 45, 266);
+    ctx.font = "500 24px monospace";
+    ctx.fillText(`TEAM      ${team.team_name}`, 72, 344);
+    ctx.fillText(`GROUP ID  ${team.group_id}`, 72, 390);
+    ctx.fillText(`TRACK     ${team.track}`, 72, 436);
+    ctx.fillText(`COLLEGE   ${team.college}`, 72, 482);
+    ctx.fillText(`MEMBER    ${String(index + 1).padStart(2, "0")} / ${(team.members || []).length}`, 72, 528);
+    ctx.fillText(`EMAIL     ${member.email || "-"}`, 72, 574);
+    ctx.fillText(`PHONE     ${member.phone || "-"}`, 72, 620);
+    ctx.fillStyle = "#d3e83d";
+    ctx.font = "700 22px monospace";
+    ctx.fillText("SCAN QR AT VENUE CHECK-IN", 72, 820);
 
-    // 12-Digit Verification Box
-    ctx.fillStyle = "#1a1814";
-    ctx.fillRect(30, 295, canvas.width - 60, 54);
+    const qrPayload = JSON.stringify({
+      issuer: "DIT University E-Summit 2026",
+      type: "venue-entry-pass",
+      group_id: team.group_id,
+      team_name: team.team_name,
+      track: team.track,
+      college: team.college,
+      member_index: index + 1,
+      member_name: member.name,
+      role: member.role,
+      email: member.email,
+      personal_email: member.personal_email,
+      phone: member.phone,
+      college_id: member.college_id,
+      note: member.note,
+      photo_url: member.photo_url,
+      secret_id: member.verification_code
+    });
+    const qrHolder = document.createElement("div");
+    if (typeof QRCode === "function") {
+      new QRCode(qrHolder, { text: qrPayload, width: 260, height: 260, colorDark: "#1a1814", colorLight: "#e9e1d2" });
+    }
+    const drawCard = () => {
+      const qrCanvas = qrHolder.querySelector("canvas");
+      const qrImage = qrHolder.querySelector("img");
+      if (qrCanvas) ctx.drawImage(qrCanvas, 1010, 470, 260, 260);
+      if (qrImage) ctx.drawImage(qrImage, 1010, 470, 260, 260);
+      if (qrCanvas || qrImage) {
+        ctx.strokeStyle = "#d3e83d";
+        ctx.lineWidth = 8;
+        ctx.strokeRect(1002, 462, 276, 276);
+      }
 
-    ctx.fillStyle = "#e9e1d2";
-    ctx.font = "10px DM Mono, monospace";
-    ctx.fillText("STAFF VERIFICATION CODE", 45, 312);
+      const image = new Image();
+      image.crossOrigin = "anonymous";
+      image.onload = () => {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(1135, 260, 112, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.drawImage(image, 1023, 148, 224, 224);
+        ctx.restore();
+        ctx.strokeStyle = "#d84b2d";
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.arc(1135, 260, 116, 0, Math.PI * 2);
+        ctx.stroke();
+        downloadCanvas(canvas, team, member, index);
+      };
+      image.onerror = () => downloadCanvas(canvas, team, member, index);
+      image.src = getApiAssetUrl(member.photo_url) || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name || "Member")}&background=1a1814&color=e9e1d2`;
+    };
+    const qrImage = qrHolder.querySelector("img");
+    if (qrImage && !qrImage.complete) {
+      qrImage.onload = drawCard;
+    } else {
+      drawCard();
+    }
+  }
 
-    ctx.fillStyle = "#ffeb3b";
-    ctx.font = "bold 22px DM Mono, monospace";
-    ctx.fillText(member.verification_code || "8492-3019-4821", 45, 338);
-
-    // Trigger PNG Download
+  function downloadCanvas(canvas, team, member, index) {
     canvas.toBlob((blob) => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `ID_Pass_${team.group_id}_${(member.name || "Member").replace(/\s+/g, "_")}.png`;
+      a.download = `DIT_E-Summit_2026_${team.group_id}_${(member.name || `Member_${index + 1}`).replace(/\s+/g, "_")}.png`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    });
+    }, "image/png");
   }
 
   // ═══════════════════════════════════════

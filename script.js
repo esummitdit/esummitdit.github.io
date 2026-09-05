@@ -1065,6 +1065,10 @@ function setUpRegistrationForm() {
       }
       const resData = await response.json();
       assignedGroupId = resData.group_id;
+      payload.members = payload.members.map((member, index) => ({
+        ...member,
+        verification_code: resData.members?.[index]?.verification_code || ""
+      }));
     } catch (err) {
       console.error("Registration request failed:", err);
       alert(`Registration was not saved. ${err.message || "Please try again."}`);
@@ -1088,7 +1092,12 @@ function setUpRegistrationForm() {
     });
 
     let membersListHtml = "";
-    payload.members.forEach((m, idx) => {
+    const displayMembers = payload.members.map((member, index) => ({
+      ...member,
+      ...rosterData[index],
+      verification_code: member.verification_code
+    }));
+    displayMembers.forEach((m, idx) => {
       membersListHtml += `
         <div style="margin-bottom:0.75rem;padding:0.85rem;background:rgba(255,255,255,0.7);border-radius:12px;border:1px solid rgba(26,24,20,0.12);display:flex;gap:1rem;align-items:center;">
           <div style="width:48px;height:48px;border-radius:50%;border:2px solid var(--ink);overflow:hidden;flex-shrink:0;background:#eee;">
@@ -1130,11 +1139,12 @@ function setUpRegistrationForm() {
     `;
 
     document.getElementById("downloadAllIdCardsBtn")?.addEventListener("click", () => {
-      payload.members.forEach((member, index) => downloadRegistrationIdCardPNG({
+      displayMembers.forEach((member, index) => downloadRegistrationIdCardPNG({
         group_id: assignedGroupId,
         team_name: teamName,
         track,
-        college
+        college,
+        member_count: displayMembers.length
       }, { ...member, photo_url: rosterData[index].photo_url, _pendingPreview: rosterData[index]._pendingPreview }, index));
     });
   });
@@ -1142,57 +1152,103 @@ function setUpRegistrationForm() {
 
 function downloadRegistrationIdCardPNG(team, member, index) {
   const canvas = document.createElement("canvas");
-  canvas.width = 1200;
-  canvas.height = 760;
+  canvas.width = 1400;
+  canvas.height = 900;
   const context = canvas.getContext("2d");
-  const background = context.createLinearGradient(0, 0, 1200, 760);
+  const background = context.createLinearGradient(0, 0, 1400, 900);
   background.addColorStop(0, "#1a1814");
   background.addColorStop(1, "#30291f");
   context.fillStyle = background;
   context.fillRect(0, 0, canvas.width, canvas.height);
   context.fillStyle = "#d3e83d";
-  context.fillRect(0, 0, 1200, 18);
+  context.fillRect(0, 0, 1400, 20);
   context.fillStyle = "#e9e1d2";
-  context.font = "700 28px monospace";
-  context.fillText("E-SUMMIT 2026 / OFFICIAL VIRTUAL ID", 64, 86);
-  context.font = "800 58px Archivo, Arial, sans-serif";
-  context.fillText(member.name || "TEAM MEMBER", 64, 180);
+  context.font = "700 30px monospace";
+  context.fillText("DIT UNIVERSITY  /  E-SUMMIT 2026", 72, 86);
+  context.font = "500 18px monospace";
+  context.fillText("OFFICIAL DIGITAL VENUE PASS", 72, 120);
+  context.font = "800 62px Archivo, Arial, sans-serif";
+  context.fillText(member.name || "TEAM MEMBER", 72, 218);
   context.fillStyle = "#d84b2d";
-  context.font = "700 24px monospace";
-  context.fillText(member.role || "PARTICIPANT", 64, 224);
+  context.font = "700 25px monospace";
+  context.fillText(member.role || "PARTICIPANT", 72, 262);
   context.fillStyle = "#e9e1d2";
-  context.font = "500 25px monospace";
-  context.fillText(`GROUP ID  ${team.group_id}`, 64, 310);
-  context.fillText(`TRACK     ${team.track}`, 64, 358);
-  context.fillText(`COLLEGE   ${team.college}`, 64, 406);
-  context.fillText(`MEMBER    ${String(index + 1).padStart(2, "0")}`, 64, 454);
+  context.font = "500 24px monospace";
+  context.fillText(`TEAM      ${team.team_name}`, 72, 344);
+  context.fillText(`GROUP ID  ${team.group_id}`, 72, 390);
+  context.fillText(`TRACK     ${team.track}`, 72, 436);
+  context.fillText(`COLLEGE   ${team.college}`, 72, 482);
+  context.fillText(`MEMBER    ${String(index + 1).padStart(2, "0")} / ${team.member_count || "-"}`, 72, 528);
+  context.fillText(`EMAIL     ${member.email || "-"}`, 72, 574);
+  context.fillText(`PHONE     ${member.phone || "-"}`, 72, 620);
   context.fillStyle = "#d3e83d";
   context.font = "700 22px monospace";
-  context.fillText("KEEP THIS PASS FOR CHECK-IN", 64, 660);
+  context.fillText("SCAN QR AT VENUE CHECK-IN", 72, 820);
 
   const imageSource = member._pendingPreview || getApiAssetUrl(member.photo_url);
-  if (imageSource) {
-    const image = new Image();
-    image.crossOrigin = "anonymous";
-    image.onload = () => {
-      context.save();
-      context.beginPath();
-      context.arc(1010, 300, 125, 0, Math.PI * 2);
-      context.clip();
-      context.drawImage(image, 885, 175, 250, 250);
-      context.restore();
-      context.strokeStyle = "#d3e83d";
-      context.lineWidth = 8;
-      context.beginPath();
-      context.arc(1010, 300, 129, 0, Math.PI * 2);
-      context.stroke();
-      canvas.toBlob((blob) => triggerPNGDownload(blob, `${team.group_id}-${member.name || `member-${index + 1}`}-virtual-id.png`), "image/png");
-    };
-    image.onerror = () => canvas.toBlob((blob) => triggerPNGDownload(blob, `${team.group_id}-member-${index + 1}-virtual-id.png`), "image/png");
-    image.src = imageSource;
-    return;
+  const qrPayload = JSON.stringify({
+    issuer: "DIT University E-Summit 2026",
+    type: "venue-entry-pass",
+    group_id: team.group_id,
+    team_name: team.team_name,
+    track: team.track,
+    college: team.college,
+    member_index: index + 1,
+    member_name: member.name,
+    role: member.role,
+    email: member.email,
+    personal_email: member.personal_email,
+    phone: member.phone,
+    college_id: member.college_id,
+    note: member.note,
+    photo_url: member.photo_url,
+    secret_id: member.verification_code
+  });
+  const qrHolder = document.createElement("div");
+  if (typeof QRCode === "function") {
+    new QRCode(qrHolder, { text: qrPayload, width: 260, height: 260, colorDark: "#1a1814", colorLight: "#e9e1d2" });
   }
-  canvas.toBlob((blob) => triggerPNGDownload(blob, `${team.group_id}-member-${index + 1}-virtual-id.png`), "image/png");
+
+  const finishCard = () => {
+    const qrCanvas = qrHolder.querySelector("canvas");
+    const qrImage = qrHolder.querySelector("img");
+    if (qrCanvas) context.drawImage(qrCanvas, 1010, 470, 260, 260);
+    if (qrImage) context.drawImage(qrImage, 1010, 470, 260, 260);
+    context.strokeStyle = "#d3e83d";
+    context.lineWidth = 8;
+    context.strokeRect(1002, 462, 276, 276);
+    if (imageSource) {
+      const image = new Image();
+      image.crossOrigin = "anonymous";
+      image.onload = () => {
+        context.save();
+        context.beginPath();
+        context.arc(1135, 260, 112, 0, Math.PI * 2);
+        context.clip();
+        context.drawImage(image, 1023, 148, 224, 224);
+        context.restore();
+        context.strokeStyle = "#d84b2d";
+        context.lineWidth = 8;
+        context.beginPath();
+        context.arc(1135, 260, 116, 0, Math.PI * 2);
+        context.stroke();
+        canvas.toBlob((blob) => triggerPNGDownload(blob, `${team.group_id}-${member.name || `member-${index + 1}`}-virtual-id.png`), "image/png");
+      };
+      image.onerror = () => canvas.toBlob((blob) => triggerPNGDownload(blob, `${team.group_id}-member-${index + 1}-virtual-id.png`), "image/png");
+      image.src = imageSource;
+      return;
+    }
+    canvas.toBlob((blob) => triggerPNGDownload(blob, `${team.group_id}-member-${index + 1}-virtual-id.png`), "image/png");
+  };
+
+  const qrImage = qrHolder.querySelector("img");
+  if (qrImage && !qrImage.complete) {
+    qrImage.onload = finishCard;
+  } else if (imageSource || qrHolder.querySelector("canvas") || qrImage) {
+    finishCard();
+  } else {
+    canvas.toBlob((blob) => triggerPNGDownload(blob, `${team.group_id}-member-${index + 1}-virtual-id.png`), "image/png");
+  }
 }
 
 function triggerPNGDownload(blob, filename) {
