@@ -6,7 +6,9 @@
   <meta name="description" content="E-Summit 2026 by CIIES at DIT University. A national meeting place for people who build, question, and start.">
   <meta name="theme-color" content="#e9e1d2">
   <title>E-Summit 2026 — CIIES × DIT University</title>
-  <style>.skip-opening body { visibility: hidden; }.skip-opening body.is-restored { visibility: visible; }</style>
+  <style>
+    .skip-opening .loading-overlay { display: none !important; }
+  </style>
   <script>
     (() => {
       try {
@@ -14,11 +16,13 @@
         const isReturnLoad = navigation?.type === "reload" || navigation?.type === "back_forward";
         const scrollKey = `e-summit:scroll:${window.location.pathname}`;
         const savedScroll = Number(sessionStorage.getItem(scrollKey)) || 0;
-        if (window.location.hash || (isReturnLoad && savedScroll > 8)) {
+        const hash = window.location.hash;
+        const isNonTopAnchor = Boolean(hash && hash !== "#top" && hash !== "#");
+        if (isNonTopAnchor || (isReturnLoad && savedScroll > 60)) {
           document.documentElement.classList.add("skip-opening");
         }
       } catch {
-        // The later boot step falls back to the browser's restored scroll position.
+        // Fallback safely to standard boot
       }
     })();
   </script>
@@ -34,16 +38,20 @@
 </head>
 <body>
   <div class="site-grain" aria-hidden="true"></div>
+  <div id="ambientCursorGlow" class="ambient-cursor-glow" aria-hidden="true"></div>
 
   <div id="loadingOverlay" class="loading-overlay" aria-hidden="true">
     <div class="loading-rule loading-rule--top"></div>
     <div id="loadingBranding" class="loading-copy">
       <p class="mono-label">CIIES / DIT UNIVERSITY</p>
       <p class="loading-title">E—SUMMIT<br><span>2026</span></p>
-      <p class="loading-note">A place for unfinished ideas.</p>
+      <p class="loading-note" id="loadingHumorNote">Warming up the servers. Please pretend to be amazed.</p>
     </div>
     <div id="loadingCanvasContainer" class="loading-canvas"></div>
-    <div class="loading-footer mono-label"><span>OPENING THE DOORS</span><span aria-hidden="true">01 / 01</span></div>
+    <div class="loading-footer mono-label">
+      <span>HOLD TIGHT • BREWING FRESH IDEAS</span>
+      <span aria-hidden="true"><span id="splashCounter" style="color:var(--acid); font-weight:700;">00%</span> • 01 / 01</span>
+    </div>
     <div class="loading-rule loading-rule--bottom"></div>
   </div>
 
@@ -73,14 +81,16 @@
         <h1 id="hero-title" class="reveal">E-SUMMIT<br>AT DIT<br><em>2026.</em></h1>
         <div class="hero-intro reveal">
           <p>A three-day gathering at DIT University for students, founders, mentors and ideas ready to be tested.</p>
-          <a class="button button--ink" href="#registration">Register your team <span aria-hidden="true">→</span></a>
-          <a class="text-link" href="#events">See the programme <span aria-hidden="true">↓</span></a>
-          <button class="object-trigger" id="shapeStudyButton" type="button" aria-controls="three-canvas-container">Set the form in motion <span aria-hidden="true">↻</span></button>
+          <div class="hero-actions">
+            <a class="button button--ink" href="#registration">Register your team <span aria-hidden="true">→</span></a>
+            <a class="text-link" href="#events">See the programme <span aria-hidden="true">↓</span></a>
+            <button class="object-trigger" id="shapeStudyButton" type="button" aria-controls="three-canvas-container">Set the form in motion <span aria-hidden="true">↻</span></button>
+          </div>
         </div>
       </div>
 
       <div class="hero-object reveal">
-        <div class="object-caption object-caption--top mono-label" aria-hidden="true"><span>OBJECT / 01</span><span>KEEP MOVING</span></div>
+        <div class="object-caption object-caption--top mono-label" aria-hidden="true"><span id="polyformNameDisplay">OBJECT / ICOSAHEDRON</span><span>KEEP MOVING</span></div>
         <div id="three-canvas-container" class="three-canvas" role="img" aria-label="A slowly rotating abstract wireframe sculpture"></div>
         <div class="object-caption object-caption--bottom mono-label" aria-hidden="true"><span>BUILD / QUESTION / BEGIN</span><span>×</span></div>
       </div>

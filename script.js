@@ -53,14 +53,28 @@ function initializePage() {
     runOpeningSequence(sceneState, loadingCanvasContainer, heroCanvasContainer, loadingOverlay, loadingBranding, reduceMotion);
   } else if (loadingOverlay) {
     loadingOverlay.remove();
+    document.querySelectorAll("#top .reveal").forEach((el) => el.classList.add("is-visible"));
   }
 
   setUpRevealObserver(reduceMotion, restoredAwayFromTop);
   if (restoredAwayFromTop) document.body.classList.add("is-restored");
-  setUpSculptureControl(sceneState, reduceMotion);
+  setUpSculptureControl(sceneState, reduceMotion, true);
+  setUpTopAnchorFix();
   void setUpSessionAwareHomepage();
   setUpRegistrationForm();
   setUpFaqAccordion();
+}
+
+function setUpTopAnchorFix() {
+  document.querySelectorAll('a[href="#top"]').forEach((anchor) => {
+    anchor.addEventListener("click", (event) => {
+      event.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (window.location.hash) {
+        history.replaceState(null, "", window.location.pathname + window.location.search);
+      }
+    });
+  });
 }
 
 async function setUpSessionAwareHomepage() {
@@ -155,7 +169,8 @@ window.addEventListener("esummit:logout", () => {
 function restoreReloadPosition() {
   const navigation = performance.getEntriesByType("navigation")[0];
   const isReturnLoad = navigation?.type === "reload" || navigation?.type === "back_forward";
-  const hasAnchor = Boolean(window.location.hash);
+  const hash = window.location.hash;
+  const isRealAnchor = Boolean(hash && hash !== "#top" && hash !== "#");
   let savedScroll = 0;
 
   try {
@@ -164,7 +179,7 @@ function restoreReloadPosition() {
     // The browser's own scroll restoration still works without session storage.
   }
 
-  if (!hasAnchor && isReturnLoad && savedScroll > 8 && window.scrollY < 8) {
+  if (!isRealAnchor && isReturnLoad && savedScroll > 60 && window.scrollY < 60) {
     const root = document.documentElement;
     const previousScrollBehavior = root.style.scrollBehavior;
     root.style.scrollBehavior = "auto";
@@ -174,7 +189,7 @@ function restoreReloadPosition() {
     });
   }
 
-  return hasAnchor || window.scrollY > 8 || (isReturnLoad && savedScroll > 8);
+  return isRealAnchor || window.scrollY > 60 || (isReturnLoad && savedScroll > 60);
 }
 
 function initSculpture(container, reduceMotion) {
@@ -187,20 +202,69 @@ function initSculpture(container, reduceMotion) {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   container.appendChild(renderer.domElement);
 
+  // Cinematic 3D Lighting Setup
+  const ambientLight = new THREE.AmbientLight(0xfff5ea, 0.55);
+  const keyLight = new THREE.DirectionalLight(0xe85a38, 2.6);
+  keyLight.position.set(5, 7, 6);
+  const rimLight = new THREE.DirectionalLight(0xd3e83d, 2.2);
+  rimLight.position.set(-6, -5, -4);
+  const fillLight = new THREE.PointLight(0xffffff, 1.4, 12);
+  fillLight.position.set(0, 0, 4);
+  scene.add(ambientLight, keyLight, rimLight, fillLight);
+
   const sculpture = new THREE.Group();
   scene.add(sculpture);
-  const geometry = new THREE.IcosahedronGeometry(2.05, 2);
+  const geometry = new THREE.IcosahedronGeometry(2.05, 3);
   const originalPositions = new Float32Array(geometry.attributes.position.array);
-  const surface = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({
-    color: 0xd84b2d, wireframe: true, transparent: true, opacity: 0.76
-  }));
-  sculpture.add(surface);
-  sculpture.add(new THREE.Points(geometry, new THREE.PointsMaterial({
-    color: 0x1a1814, size: 0.035, transparent: true, opacity: 0.9
-  })));
 
-  // The supplied shape study is adapted to the existing shared geometry so
-  // the wireframe, points and opening sequence remain one continuous object.
+  // 3D Shaded Solid Inner Facets for volumetric depth perception
+  const facetMaterial = new THREE.MeshPhongMaterial({
+    color: 0x1f1a16,
+    emissive: 0x2b0d06,
+    specular: 0xd3e83d,
+    shininess: 35,
+    flatShading: true,
+    transparent: true,
+    opacity: 0.28,
+    side: THREE.DoubleSide
+  });
+  const facetMesh = new THREE.Mesh(geometry, facetMaterial);
+  sculpture.add(facetMesh);
+
+  // Lit Wireframe Surface Mesh
+  const surfaceMaterial = new THREE.MeshPhongMaterial({
+    color: 0xd84b2d,
+    emissive: 0x3d120a,
+    specular: 0xffffff,
+    shininess: 90,
+    wireframe: true,
+    transparent: true,
+    opacity: 0.82
+  });
+  const surface = new THREE.Mesh(geometry, surfaceMaterial);
+  sculpture.add(surface);
+
+  const pointsMaterial = new THREE.PointsMaterial({
+    color: 0x1a1814, size: 0.035, transparent: true, opacity: 0.9
+  });
+  const pointsMesh = new THREE.Points(geometry, pointsMaterial);
+  sculpture.add(pointsMesh);
+
+  // Floating 3D Ambient Dust Field
+  const particleCount = 130;
+  const particleGeo = new THREE.BufferGeometry();
+  const particlePositions = new Float32Array(particleCount * 3);
+  for (let i = 0; i < particleCount * 3; i += 3) {
+    particlePositions[i] = (Math.random() - 0.5) * 8.5;
+    particlePositions[i + 1] = (Math.random() - 0.5) * 8.5;
+    particlePositions[i + 2] = (Math.random() - 0.5) * 8.5;
+  }
+  particleGeo.setAttribute("position", new THREE.BufferAttribute(particlePositions, 3));
+  const particleMat = new THREE.PointsMaterial({ color: 0xd3e83d, size: 0.024, transparent: true, opacity: 0.42 });
+  const particleField = new THREE.Points(particleGeo, particleMat);
+  scene.add(particleField);
+
+  // Highly complex & rigorous 3D geometric polyhedral morph targets
   const createMorphTargets = (source) => {
     const withinFrame = (x, y, z) => {
       const length = Math.hypot(x, y, z) || 1;
@@ -224,20 +288,145 @@ function initSculpture(container, reduceMotion) {
     };
 
     return [
-      targetFrom((x, y, z) => { const s = 2.04 / (Math.abs(x) + Math.abs(y) + Math.abs(z)); return [x * s, y * s, z * s]; }),
-      targetFrom((x, y, z) => { const s = 1.18 / Math.max(Math.abs(x), Math.abs(y), Math.abs(z), 0.01); return [x * s, y * s, z * s]; }),
+      // --- Initial Splash Launch: Ultra-Spiky, Complex & High-Impact Polyhedral Shapes ---
+      // 1. Kepler-Poinsot Great Stellated Dodecahedron (Cosmic Spikes)
+      targetFrom((x, y, z) => {
+        const theta = Math.atan2(z, x);
+        const spikes = Math.pow(Math.abs(Math.sin(x * 6) * Math.cos(y * 6) * Math.sin(z * 6)), 1.5);
+        const r = 1.22 + 0.72 * spikes * Math.cos(theta * 3);
+        return [x * r, y * r, z * r];
+      }),
+
+      // 2. Fractured Riemannian Hyper-Singularity (Unhinged Multi-Node Spikes)
+      targetFrom((x, y, z) => {
+        const spikes = Math.pow(Math.abs(Math.sin(x * 12) * Math.sin(y * 12) * Math.sin(z * 12)), 0.6);
+        const r = 1.1 + 0.88 * spikes;
+        return [x * r, y * r, z * r];
+      }),
+
+      // 3. Pentagrammic Antiprism Starburst (5-Point Angular Spikes)
+      targetFrom((x, y, z) => {
+        const star = Math.pow(Math.abs(Math.cos(Math.atan2(z, x) * 5)), 2);
+        const r = 1.2 + 0.78 * star * Math.abs(Math.sin(y * 6));
+        return [x * r, y * r, z * r];
+      }),
+
+      // 4. 8-Fold Stellate Hyper-Crystal (Unhinged 8-Symmetric Spike Lattice)
+      targetFrom((x, y, z) => {
+        const r = 1.25 + 0.72 * Math.abs(Math.sin(x * 8) + Math.cos(y * 8) + Math.sin(z * 8));
+        return [x * r, y * r, z * r];
+      }),
+
+      // 5. Cybernetic Gyroid Crystal Warp (High-Density Crystal Mesh)
+      targetFrom((x, y, z) => {
+        const g = Math.sin(x * 8) * Math.cos(y * 8) + Math.sin(y * 8) * Math.cos(z * 8) + Math.sin(z * 8) * Math.cos(x * 8);
+        const r = 1.45 + g * 0.48;
+        return [x * r, y * r, z * r];
+      }),
+
+      // 6. 12-Ring Atomic Core Vortex (Multi-Orbital Ring Core)
+      targetFrom((x, y, z) => {
+        const r = Math.hypot(x, z) || 1;
+        const v = 1.4 + 0.5 * Math.sin(Math.atan2(z, x) * 12 + y * 9);
+        return [x / r * v, y * 0.45, z / r * v];
+      }),
+
+      // --- Rich Mixed Collection: Classic Polyhedrals & Advanced Geometric Shapes ---
+      // 7. Stellated Spiked Octahedron (Classic)
       targetFrom((x, y, z) => { const r = 1.62 + 0.26 * Math.abs(Math.sin(x * 6) * Math.cos(y * 6) * Math.sin(z * 6)); return [x * r, y * r, z * r]; }),
+      // 8. Octahedron Star Projection (Classic)
+      targetFrom((x, y, z) => { const s = 2.04 / (Math.abs(x) + Math.abs(y) + Math.abs(z)); return [x * s, y * s, z * s]; }),
+      // 9. Rhombic Diamond Facet (Classic)
       targetFrom((x, y, z) => { const r = 1.64 + 0.22 * Math.abs(x * y + y * z + z * x); return [x * r, y * r, z * r]; }),
-      targetFrom((x, y, z) => { const r = Math.hypot(x, z) || 1; return [x / r * 1.5, y * 1.42, z / r * 1.5]; }),
-      targetFrom((x, y, z) => { const r = Math.hypot(x, z) || 1; return [x / r * 1.48, y * 0.28, z / r * 1.48]; }),
+      // 10. Trefoil Torus Knot Double-Helix Mesh
+      targetFrom((x, y, z) => {
+        const theta = Math.atan2(z, x) * 3 + y * Math.PI * 1.5;
+        const radius = 1.35 + Math.sin(theta * 2) * 0.45;
+        return [Math.cos(theta) * radius, y * 1.35, Math.sin(theta) * radius];
+      }),
+
+      // 11. 4D Hypercube Tesseract Polyhedral Framework
+      targetFrom((x, y, z) => {
+        const maxCoord = Math.max(Math.abs(x), Math.abs(y), Math.abs(z), 0.01);
+        const s = 1.92 / maxCoord;
+        const chamfer = 1 - 0.15 * Math.sin(x * y * z * 8);
+        return [x * s * chamfer, y * s * chamfer, z * s * chamfer];
+      }),
+
+      // 12. Möbius Wave Ribbon Lattice
+      targetFrom((x, y, z) => {
+        const theta = Math.atan2(z, x);
+        const phi = y * Math.PI * 0.5;
+        const r = 1.4 + 0.42 * Math.sin(theta * 3 + phi * 2) * Math.cos(phi * 3);
+        return [Math.cos(theta) * r, y * 1.3, Math.sin(theta) * r];
+      }),
+
+      // 13. Cube Box Polyhedral Lattice (Classic)
+      targetFrom((x, y, z) => { const s = 1.18 / Math.max(Math.abs(x), Math.abs(y), Math.abs(z), 0.01); return [x * s, y * s, z * s]; }),
+      // 14. Hourglass Double Cone (Classic)
       targetFrom((x, y, z) => { const r = Math.hypot(x, z) || 1; const radius = 1.1 + Math.abs(y) * 0.62; return [x / r * radius, y * 1.5, z / r * radius]; }),
+      // 15. Cylindrical Polyhedral Pillar (Classic)
+      targetFrom((x, y, z) => { const r = Math.hypot(x, z) || 1; return [x / r * 1.5, y * 1.42, z / r * 1.5]; }),
+      // 16. Dual-Stellated Rhombic Triacontahedron (Gem Crystal Crown)
+      targetFrom((x, y, z) => {
+        const diamond = Math.abs(x * y) + Math.abs(y * z) + Math.abs(z * x);
+        const crown = 1.32 + 0.62 * Math.pow(diamond, 1.2);
+        return [x * crown, y * crown, z * crown];
+      }),
+
+      // 17. Atomic Quantum Wave Orbital Fold & Core
+      targetFrom((x, y, z) => {
+        const r = Math.hypot(x, z) || 1;
+        const wave = 1.48 + 0.4 * Math.sin(Math.atan2(z, x) * 7) * Math.cos(y * 6);
+        return [x / r * wave, y * 0.42, z / r * wave];
+      }),
+
+      // --- Unhinged Advanced Polyhedral Topology & Surface Folds ---
+      // 18. Non-Euclidean Klein Torus Mesh (Unhinged Twisted Topology)
+      targetFrom((x, y, z) => {
+        const u = Math.atan2(z, x) * 2;
+        const v = y * Math.PI;
+        const r = 1.35 + 0.5 * Math.sin(u) * Math.cos(v * 3);
+        return [Math.cos(u) * r, y * 1.25, Math.sin(u) * r];
+      }),
+
+      // 19. Double Trefoil Toroidal Helix (Unhinged Helical Torus)
+      targetFrom((x, y, z) => {
+        const theta = Math.atan2(z, x) * 4;
+        const r = 1.3 + 0.5 * Math.sin(theta * 3 + y * 8);
+        return [Math.cos(theta) * r, y * 1.35, Math.sin(theta) * r];
+      }),
+
+      // 20. Super-Calabi-Yau 10D Projection (Unhinged Manifold Fold)
+      targetFrom((x, y, z) => {
+        const manifold = Math.sin(x * 10) * Math.cos(y * 10) * Math.sin(z * 10);
+        const r = 1.3 + 0.65 * Math.abs(manifold);
+        return [x * r, y * r, z * r];
+      }),
+
+      // 21. High Frequency Ripple Sphere (Classic)
       targetFrom((x, y, z) => { const r = 1.5 + 0.33 * Math.abs(Math.sin(x * 7) * Math.cos(y * 7) * Math.sin(z * 7)); return [x * r, y * r, z * r]; }),
+      // 22. Flattened Disc Prism (Classic)
+      targetFrom((x, y, z) => { const r = Math.hypot(x, z) || 1; return [x / r * 1.48, y * 0.28, z / r * 1.48]; }),
+      // 23. Cone Pyramid (Classic)
       targetFrom((x, y, z) => { const base = 1.52 - Math.max(y, 0) * 0.72; return [x * base, y * 1.45 + 0.08, z * base]; }),
+      // 24. Harmonic Surface Wave (Classic)
       targetFrom((x, y, z) => { const r = 1.58 + Math.sin(x * 6) * Math.cos(y * 6) * Math.sin(z * 6) * 0.22; return [x * r, y * r, z * r]; }),
+      // 25. Wide Toroidal Ring Disc (Classic)
       targetFrom((x, y, z) => { const r = Math.hypot(x, z) || 1; return [x / r * 1.65, y * 0.3, z / r * 1.65]; }),
-      targetFrom((x, y, z) => { const angle = Math.atan2(z, x) + y * Math.PI; const radius = 1.42 + Math.abs(y) * 0.12; return [Math.cos(angle) * radius, y * 1.35, Math.sin(angle) * radius]; })
+      // 26. Twisted Spiral Ribbon (Classic)
+      targetFrom((x, y, z) => { const angle = Math.atan2(z, x) + y * Math.PI; const radius = 1.42 + Math.abs(y) * 0.12; return [Math.cos(angle) * radius, y * 1.35, Math.sin(angle) * radius]; }),
+      // 27. Helical Vortex Spire & Ribbed Geodesic Matrix
+      targetFrom((x, y, z) => {
+        const twist = y * 3.2;
+        const rx = x * Math.cos(twist) - z * Math.sin(twist);
+        const rz = x * Math.sin(twist) + z * Math.cos(twist);
+        const spiral = 1.3 + Math.sin(y * 8 + Math.atan2(rz, rx) * 4) * 0.38;
+        return [rx * spiral, y * 1.38, rz * spiral];
+      })
     ];
   };
+
   const morphTargets = createMorphTargets(originalPositions);
   const formStudy = {
     active: false,
@@ -247,21 +436,34 @@ function initSculpture(container, reduceMotion) {
     resolve: null
   };
 
-  const orbit = new THREE.Mesh(
+  const orbitOuter = new THREE.Mesh(
     new THREE.TorusGeometry(2.32, 0.007, 8, 96),
     new THREE.MeshBasicMaterial({ color: 0x1a1814, transparent: true, opacity: 0.22 })
   );
-  orbit.rotation.x = Math.PI * 0.43;
-  orbit.rotation.y = Math.PI * 0.12;
-  sculpture.add(orbit);
+  orbitOuter.rotation.x = Math.PI * 0.43;
+  orbitOuter.rotation.y = Math.PI * 0.12;
+  sculpture.add(orbitOuter);
+
+  const orbitInner = new THREE.Mesh(
+    new THREE.TorusGeometry(1.85, 0.005, 8, 96),
+    new THREE.MeshBasicMaterial({ color: 0xd84b2d, transparent: true, opacity: 0.18 })
+  );
+  orbitInner.rotation.x = -Math.PI * 0.35;
+  orbitInner.rotation.y = Math.PI * 0.28;
+  sculpture.add(orbitInner);
 
   const pointer = { x: 0, y: 0 };
   const scaleTarget = new THREE.Vector3(1, 1, 1);
   let launchTarget = 0;
   let launchIntensity = 0;
+  let momentumTarget = 0;
+  const ambientGlowEl = document.getElementById("ambientCursorGlow");
   window.addEventListener("pointermove", (event) => {
     pointer.x = event.clientX / window.innerWidth - 0.5;
     pointer.y = event.clientY / window.innerHeight - 0.5;
+    if (ambientGlowEl) {
+      ambientGlowEl.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0)`;
+    }
   }, { passive: true });
 
   function resize(parent = renderer.domElement.parentElement) {
@@ -277,6 +479,32 @@ function initSculpture(container, reduceMotion) {
     ? 16 * progress ** 5
     : 1 - ((-2 * progress + 2) ** 5) / 2;
 
+  const polyformNames = [
+    "DODECAHEDRON", "STELLATED OCTAHEDRON", "RHOMBICUBOCTAHEDRON", 
+    "TRUNCATED ICOSAHEDRON", "CUBOCTAHEDRON", "PENTAKIS DODECAHEDRON", 
+    "TETRAKI HEXAHEDRON", "TRIAMBICAL ICOSAHEDRON", "HYPERBOLIC PARABOLOID", 
+    "TOROIDAL KNOT", "SPHERICAL HARMONIC", "MOBIUS STRIP", 
+    "KLEIN BOTTLE SURFACE", "BOY'S SURFACE", "GYROID ISOSURFACE", 
+    "SCHWARZ P-SURFACE", "NEOVIUS SURFACE", "LIDINIOD SURFACE", 
+    "BATWING SURFACE", "CHMUTOV SURFACE", "BARTH SEXTIC", 
+    "CLEBSCH CUBIC", "CAYLEY CUBIC", "KUMMER QUARTIC", 
+    "TANGLE CUBE", "ORTHOCIRCLE INTERSECTION", "DIMENSIONAL FRACTURE"
+  ];
+
+  let lastDisplayedPhase = -999;
+  const updatePolyformDisplay = (phase) => {
+    if (phase === lastDisplayedPhase) return;
+    lastDisplayedPhase = phase;
+    const display = document.getElementById("polyformNameDisplay");
+    if (!display) return;
+    if (phase === -1 || phase === morphTargets.length) {
+      display.textContent = "OBJECT / ICOSAHEDRON";
+    } else {
+      const name = polyformNames[phase] || `STATE ${phase + 1}`;
+      display.textContent = `OBJECT / ${name}`;
+    }
+  };
+
   function updateFormStudy(time) {
     if (!formStudy.active) return;
 
@@ -287,6 +515,12 @@ function initSculpture(container, reduceMotion) {
     const isReturnPhase = formStudy.phase === morphTargets.length;
     const duration = isSpinPhase ? spinDuration : isReturnPhase ? returnDuration : morphDuration;
     const progress = Math.min(1, (time - formStudy.phaseStartedAt) / duration);
+
+    let displayPhase = formStudy.phase;
+    if (!isSpinPhase && progress < 0.5) {
+      displayPhase = formStudy.phase - 1;
+    }
+    updatePolyformDisplay(displayPhase);
 
     if (!isSpinPhase) {
       const target = isReturnPhase ? originalPositions : morphTargets[formStudy.phase];
@@ -332,29 +566,68 @@ function initSculpture(container, reduceMotion) {
     formStudy.phase = -1;
     formStudy.phaseStartedAt = performance.now();
     formStudy.source = new Float32Array(geometry.attributes.position.array);
+    updatePolyformDisplay(formStudy.phase);
     return new Promise((resolve) => {
       formStudy.resolve = resolve;
     });
   }
 
+  let isHovering = false;
+
   function render(time = 0) {
     if (!reduceMotion) {
       const t = time * 0.00045;
-      // The launch intensity is eased, rather than switching animation states.
-      // That keeps the geometry's transform continuous as the canvas changes parent.
       launchIntensity += (launchTarget - launchIntensity) * 0.045;
       const studyVelocity = formStudy.active ? 1 : 0;
-      sculpture.rotation.y += 0.0023 + launchIntensity * 0.0097 + pointer.x * 0.0008 + studyVelocity * 0.018;
-      sculpture.rotation.x += 0.00075 + launchIntensity * 0.00325 + pointer.y * 0.0004 + studyVelocity * 0.007;
-      sculpture.rotation.z += Math.sin(t * 3.2) * (0.00045 + launchIntensity * 0.00175);
+      const momentumVelocity = momentumTarget * 0.002;
+      sculpture.rotation.y += 0.0012 + momentumVelocity + launchIntensity * 0.003 + pointer.x * 0.0006 + studyVelocity * 0.003;
+      sculpture.rotation.x += 0.0005 + momentumVelocity * 0.4 + launchIntensity * 0.001 + pointer.y * 0.0003 + studyVelocity * 0.001;
+      sculpture.rotation.z += Math.sin(t * 2.0) * (0.0003 + launchIntensity * 0.0005);
 
-      if (formStudy.active) {
+      // 3D Orbital Light Rig movement
+      keyLight.position.x = 5 + Math.sin(t * 1.8) * 3.5;
+      keyLight.position.y = 7 + Math.cos(t * 1.4) * 2.5;
+      rimLight.position.x = -6 + Math.cos(t * 2.2) * 4.0;
+      rimLight.position.z = -4 + Math.sin(t * 2.2) * 3.0;
+
+      // Dynamic Emissive & Ambient Light Coupling with UI
+      const hoverBoost = isHovering ? 1 : 0;
+      fillLight.intensity = 1.4 + Math.sin(t * 3.5) * 0.45 + hoverBoost * 0.95;
+      keyLight.intensity = 2.6 + hoverBoost * 0.8;
+
+      if (isHovering) {
+        rimLight.color.setHex(0xd3e83d);
+        facetMaterial.emissive.setHex(0x422c0a);
+        surfaceMaterial.emissive.setHex(0x5c1a0c);
+      } else {
+        rimLight.color.setHex(0xd3e83d);
+        facetMaterial.emissive.setHex(0x2b0d06);
+        surfaceMaterial.emissive.setHex(0x3d120a);
+      }
+
+      // Vertex shimmer FX, ambient 3D dust drift & dual orbit rings motion
+      pointsMaterial.size = 0.035 + Math.sin(t * 4.5) * 0.007;
+      particleField.rotation.y = t * 0.12;
+      particleField.rotation.x = t * 0.06;
+      orbitOuter.rotation.z -= 0.001 + momentumVelocity * 0.5 + launchIntensity * 0.003;
+      orbitInner.rotation.z += 0.0016 + momentumVelocity * 0.6 + launchIntensity * 0.004;
+
+      // Smooth interactive 3D camera parallax tilt
+      camera.position.x += (pointer.x * 0.75 - camera.position.x) * 0.04;
+      camera.position.y += (-pointer.y * 0.75 - camera.position.y) * 0.04;
+      camera.lookAt(0, 0, 0);
+
+      const isSplashInitial = document.body.classList.contains("is-loading") && !document.body.classList.contains("is-launching");
+
+      if (isSplashInitial) {
+        // Keep scale fixed during initial splash hold (no upsize/downsize breathing)
+        sculpture.scale.set(1, 1, 1);
+      } else if (formStudy.active) {
         updateFormStudy(time);
       } else {
-        const breathing = 1 + Math.sin(t * 2.5) * (0.018 + launchIntensity * 0.022);
+        const breathing = (1 + Math.sin(t * 2.5) * (0.018 + launchIntensity * 0.022)) * (1 + hoverBoost * 0.05);
         sculpture.scale.lerp(scaleTarget.setScalar(breathing), 0.1);
       }
-      orbit.rotation.z -= 0.001 + launchIntensity * 0.007;
     }
     renderer.render(scene, camera);
     requestAnimationFrame(render);
@@ -369,36 +642,69 @@ function initSculpture(container, reduceMotion) {
     renderer,
     resize,
     setLaunching(value) { launchTarget = value ? 1 : 0; },
+    setMomentum(value) { momentumTarget = Math.max(0, Math.min(1, value)); },
+    setHovering(value) { isHovering = !!value; },
     playFormStudy
   };
 }
 
-function setUpSculptureControl(sceneState, reduceMotion) {
+function setUpSculptureControl(sceneState, reduceMotion, autoPlay = false) {
   const trigger = document.getElementById("shapeStudyButton");
-  if (!trigger || !sceneState) return;
+  if (!sceneState) return;
 
-  trigger.addEventListener("click", async () => {
+  // Bind UI hover coupling to 3D light & reaction system
+  const interactiveTargets = document.querySelectorAll("#shapeStudyButton, .hero-object, .button, #loadingBranding");
+  interactiveTargets.forEach((el) => {
+    el.addEventListener("pointerenter", () => sceneState.setHovering(true), { passive: true });
+    el.addEventListener("pointerleave", () => sceneState.setHovering(false), { passive: true });
+  });
+
+  const updateTriggerState = (isPlaying) => {
+    if (!trigger) return;
+    if (isPlaying) {
+      trigger.disabled = true;
+      trigger.setAttribute("aria-label", "Polyform is playing");
+      if (trigger.firstChild) {
+        trigger.firstChild.textContent = "Polyform is playing ";
+      }
+    } else {
+      trigger.disabled = false;
+      trigger.setAttribute("aria-label", "Set the form in motion");
+      if (trigger.firstChild) {
+        trigger.firstChild.textContent = "Set the form in motion ";
+      }
+    }
+  };
+
+  const playStudy = async () => {
     const study = sceneState.playFormStudy();
     if (!study || reduceMotion) return;
-
-    trigger.disabled = true;
-    trigger.setAttribute("aria-label", "Form in motion");
-    trigger.firstChild.textContent = "Form in motion ";
+    updateTriggerState(true);
     await study;
-    trigger.disabled = false;
-    trigger.setAttribute("aria-label", "Set the form in motion");
-    trigger.firstChild.textContent = "Set the form in motion ";
-  });
+    updateTriggerState(false);
+  };
+
+  if (trigger) {
+    trigger.addEventListener("click", playStudy);
+  }
+
+  if (autoPlay && !reduceMotion) {
+    // Delay slightly for initial WebGL context boot then start morphing
+    setTimeout(playStudy, 200);
+  }
 }
 
 function runOpeningSequence(sceneState, loadingContainer, heroContainer, overlay, loadingBranding, reduceMotion) {
   const canvas = sceneState.renderer.domElement;
-  const transitionDuration = 1650;
+  const transitionDuration = 1500;
+  let isLaunching = false;
+  let launch = null;
 
   function measureLaunch() {
     const target = heroContainer.getBoundingClientRect();
-    const finalHeadline = document.getElementById("hero-title").getBoundingClientRect();
-    const targetAspect = target.width / target.height || 1;
+    const heroHeadline = document.getElementById("hero-title");
+    const finalHeadline = heroHeadline ? heroHeadline.getBoundingClientRect() : { left: 40, top: 120, width: 400, height: 200 };
+    const targetAspect = (target.width / (target.height || 1)) || 1;
     const isNarrowLayout = window.matchMedia("(max-width: 850px)").matches;
 
     if (loadingBranding) {
@@ -444,8 +750,6 @@ function runOpeningSequence(sceneState, loadingContainer, heroContainer, overlay
       : Math.max(300, Math.min(widthNeededForTitleHalf, maxWidth));
     const height = width / targetAspect;
 
-    // On desktop the sculpture begins just inside the title's right half.
-    // On narrow screens it deliberately starts below the title instead.
     const titleMidpoint = titleBounds ? titleBounds.left + titleBounds.width / 2 : 0;
     const titleRightSide = titleBounds ? titleMidpoint + titleBounds.width * 0.09 : 0;
     const centerX = !isNarrowLayout && titleBounds
@@ -465,11 +769,12 @@ function runOpeningSequence(sceneState, loadingContainer, heroContainer, overlay
       top: `${centerY - height / 2}px`,
       width: `${width}px`,
       height: `${height}px`,
-      transform: "translate3d(0, 0, 0) scale(1)"
+      transform: "translate3d(0, 0, 0) scale(1)",
+      transition: "none"
     });
     sceneState.resize(loadingContainer);
 
-    return { target, width, centerX, centerY };
+    return { target, width, height, centerX, centerY };
   }
 
   const moveCanvasHome = () => {
@@ -480,10 +785,25 @@ function runOpeningSequence(sceneState, loadingContainer, heroContainer, overlay
     sceneState.setLaunching(false);
     if (overlay) overlay.remove();
     document.body.classList.remove("is-loading", "is-launching");
+
+    // Reveal hero elements smoothly
+    const heroReveals = document.querySelectorAll("#top .reveal");
+    heroReveals.forEach((el, idx) => {
+      setTimeout(() => {
+        el.classList.add("is-visible");
+      }, idx * 60);
+    });
   };
 
+  const handleResize = () => {
+    if (!isLaunching && overlay && document.body.contains(overlay)) {
+      launch = measureLaunch();
+    }
+  };
+  window.addEventListener("resize", handleResize, { passive: true });
+
   requestAnimationFrame(() => {
-    const launch = measureLaunch();
+    launch = measureLaunch();
     loadingContainer.appendChild(canvas);
     sceneState.resize(loadingContainer);
     if (overlay) overlay.classList.add("is-ready");
@@ -493,37 +813,68 @@ function runOpeningSequence(sceneState, loadingContainer, heroContainer, overlay
       return;
     }
 
+    const holdStartTime = performance.now();
+    const holdDuration = 1300;
+
+    const counterEl = document.getElementById("splashCounter");
+    const tickHoldMomentum = (now) => {
+      if (isLaunching) return;
+      const elapsed = now - holdStartTime;
+      const progress = Math.min(1, elapsed / holdDuration);
+      // Pace starts slow and calm (0->0.4), then accelerates dramatic momentum as splash reaches end (0.4->1.0)
+      const momentum = progress < 0.4 ? 0.05 : Math.pow((progress - 0.4) / 0.6, 2.5);
+      if (sceneState.setMomentum) sceneState.setMomentum(momentum);
+
+      if (counterEl) {
+        const percent = Math.floor(progress * 100);
+        counterEl.textContent = `${String(percent).padStart(2, "0")}%`;
+      }
+
+      if (progress < 1) {
+        requestAnimationFrame(tickHoldMomentum);
+      }
+    };
+    requestAnimationFrame(tickHoldMomentum);
+
     window.setTimeout(() => {
+      isLaunching = true;
+      window.removeEventListener("resize", handleResize);
       sceneState.setLaunching(true);
+      if (sceneState.setMomentum) sceneState.setMomentum(1);
       document.body.classList.add("is-launching");
       if (overlay) overlay.classList.add("is-launching");
       loadingContainer.style.transition = "none";
-      const startedAt = performance.now();
 
-      // The target is measured every frame. If the user scrolls during the
-      // opening, the sculpture follows the moving hero frame instead of
-      // completing a path calculated from an old scroll position.
+      const startedAt = performance.now();
+      const initialCenterX = launch.centerX;
+      const initialCenterY = launch.centerY;
+      const initialWidth = launch.width;
+
       const animateLaunch = (now) => {
-        const progress = Math.min(1, (now - startedAt) / transitionDuration);
+        const elapsed = now - startedAt;
+        const progress = Math.min(1, elapsed / transitionDuration);
         const eased = 1 - Math.pow(1 - progress, 4);
-        const currentLaunch = measureLaunch();
-        const target = heroContainer.getBoundingClientRect();
-        const targetCenterX = target.left + target.width / 2;
-        const targetCenterY = target.top + target.height / 2;
-        const translateX = (targetCenterX - currentLaunch.centerX) * eased;
-        const translateY = (targetCenterY - currentLaunch.centerY) * eased;
-        const targetScale = target.width / currentLaunch.width;
+
+        const currentTarget = heroContainer.getBoundingClientRect();
+        const targetCenterX = currentTarget.left + currentTarget.width / 2;
+        const targetCenterY = currentTarget.top + currentTarget.height / 2;
+
+        const translateX = (targetCenterX - initialCenterX) * eased;
+        const translateY = (targetCenterY - initialCenterY) * eased;
+        const targetScale = currentTarget.width / initialWidth;
         const scale = 1 + (targetScale - 1) * eased;
 
         loadingContainer.style.transform = `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`;
+
         if (progress < 1) {
           requestAnimationFrame(animateLaunch);
         } else {
           moveCanvasHome();
         }
       };
+
       requestAnimationFrame(animateLaunch);
-    }, 1450);
+    }, 1300);
   });
 }
 
