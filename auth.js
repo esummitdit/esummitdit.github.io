@@ -104,7 +104,7 @@ const Auth = (() => {
       } catch (err) {
         return {
           success: false,
-          error: "Server unreachable. Please verify the backend is running.",
+          error: "We couldn't complete the sign-in right now. Please try again in a little while or contact the technical team.",
         };
       }
     },

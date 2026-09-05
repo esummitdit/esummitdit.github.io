@@ -17,6 +17,17 @@
 <body class="dash-body">
   <div class="site-grain" aria-hidden="true"></div>
 
+  
+  <!-- Welcome Splash -->
+  <div class="dashboard-opening" id="dashboardOpening" aria-hidden="true">
+    <div class="dashboard-opening-rule"></div>
+    <div class="dashboard-opening-top"><p class="mono-label">DIT UNIVERSITY / CIIES</p><span class="dashboard-opening-index">SYS / 01</span></div>
+    <h1>DIT E—SUMMIT<br><span>DASHBOARD</span></h1>
+    <p class="dashboard-opening-note" id="dashboardOpeningNote">Welcome back. Your dashboard is ready.</p>
+    <div class="dashboard-opening-progress"><span></span></div>
+    <div class="dashboard-opening-mark"><span></span><span></span><span></span></div>
+  </div>
+
   <!-- ═══ Dashboard Header ═══ -->
   <header class="dash-header">
     <div class="dash-header-inner">
@@ -24,6 +35,7 @@
         <span aria-hidden="true">E—</span><span>SUMMIT</span><sup>26</sup>
       </a>
       <div class="dash-header-meta">
+        <span class="dash-live-status" id="dashLiveStatus"><i></i><span>Checking server</span></span>
         <span class="dash-role-badge" id="dashRoleBadge">LOADING</span>
         <button class="dash-logout-btn" id="logoutBtn" type="button">
           Logout <span aria-hidden="true">↗</span>

@@ -7,6 +7,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   const main = document.getElementById("dashMain");
   const roleBadge = document.getElementById("dashRoleBadge");
   const logoutBtn = document.getElementById("logoutBtn");
+  const opening = document.getElementById("dashboardOpening");
+  const liveStatus = document.getElementById("dashLiveStatus");
+  const openingNote = document.getElementById("dashboardOpeningNote");
+
+  const dismissOpening = () => {
+    if (!opening) return;
+    opening.classList.add("is-leaving");
+    window.setTimeout(() => opening.remove(), 620);
+  };
+
+  setupServerStatus(liveStatus);
 
   // ── Auth Guard ──
   const session = await Auth.validateSession();
@@ -14,6 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.location.replace("login.html");
     return;
   }
+  window.setTimeout(dismissOpening, 850);
 
   logoutBtn.addEventListener("click", () => Auth.logout());
 
@@ -24,10 +36,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   if (session.role === "team") {
+    if (openingNote) openingNote.textContent = "Welcome back. Your team desk is ready.";
     roleBadge.textContent = "TEAM PORTAL";
     roleBadge.classList.add("badge--team");
     renderTeamDashboard(session);
-  } else if (session.role === "master_admin" || session.role === "admin" || session.role === "event_coordinator" || session.role === "team_manager") {
+  } else if (session.role === "master_admin" || session.role === "admin" || session.role === "event_coordinator" || session.role === "team_manager" || session.role === "event_head") {
+    if (openingNote) openingNote.textContent = session.role === "master_admin"
+      ? "Welcome back. The admin desk is ready."
+      : session.role === "event_head"
+        ? "Welcome back. The event overview is ready."
+      : "Welcome back. The staff desk is open.";
     const deptStr = session.department ? session.department.toUpperCase() : "ADMIN";
     roleBadge.textContent = session.role === "master_admin" ? "MASTER ADMIN" : `DEPT: ${deptStr}`;
     roleBadge.classList.add("badge--admin");
@@ -97,7 +115,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           errEl.textContent = data.detail || "Failed to update password.";
         }
       } catch {
-        errEl.textContent = "Server unreachable. Please try again.";
+        errEl.textContent = "Your password changes couldn't be saved right now. Please try again later or contact the technical team.";
       }
     });
   }
@@ -344,7 +362,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const teams = await teamsRes.json();
 
       const userDept = session.department || "Technical Team";
-      const isTechOrMaster = session.role === "master_admin" || userDept === "Technical Team";
+      const isTechOrMaster = session.role === "master_admin" || (userDept === "Technical Team" && session.role !== "event_head");
+      const canExportTeams = isTechOrMaster || session.role === "event_head";
       main.setAttribute("aria-busy", "false");
 
       main.innerHTML = `
@@ -376,6 +395,30 @@ document.addEventListener("DOMContentLoaded", async () => {
             </div>
           </div>
 
+          ${session.role === 'master_admin' ? `
+          <section class="dash-admin-workspace" aria-labelledby="admin-workspace-title">
+            <div class="dash-section-head">
+              <span class="step-num">⚙</span>
+              <div><h2 id="admin-workspace-title" class="dash-section-title">Admin workspace</h2><p class="section-hint">Invite staff with a precise role, department, and controlled first-login password.</p></div>
+            </div>
+            <div class="dash-admin-invite-grid">
+              <form class="dash-admin-invite-form" id="adminInviteForm">
+                <div class="dash-invite-form-head"><span class="mono-label">STAFF INVITE / MASTER CONTROL</span><span class="dash-invite-lock">PRIVATE</span></div>
+                <div class="dash-invite-fields">
+                  <div class="field-group"><label for="inviteName">Full name</label><input id="inviteName" required placeholder="e.g. Ananya Rao"></div>
+                  <div class="field-group"><label for="inviteEmail">Institution email</label><input id="inviteEmail" type="email" required placeholder="name@dit.edu.in"></div>
+                  <div class="field-group"><label for="inviteDepartment">Department</label><select id="inviteDepartment" required><option value="Technical Team">Technical Team</option><option value="Event Operations">Event Operations</option><option value="Academic & Faculty Council">Academic & Faculty Council</option><option value="Design Team">Design Team</option><option value="PR & Sponsorship Team">PR & Sponsorship Team</option><option value="Content & Anchoring Team">Content & Anchoring Team</option></select></div>
+                  <div class="field-group"><label for="inviteRole">Access role</label><select id="inviteRole" required><option value="admin">Department Admin</option><option value="event_coordinator">Event Coordinator</option><option value="team_manager">Team Manager</option><option value="event_head">Event Head / Faculty Read-only</option></select></div>
+                  <div class="field-group"><label for="invitePassword">Temporary password <span>optional</span></label><input id="invitePassword" type="password" minlength="6" placeholder="Auto-generate if empty" autocomplete="new-password"></div>
+                </div>
+                <p id="adminInviteStatus" class="dash-inline-status" role="status"></p>
+                <button class="button button--ink" type="submit">Create secure invite <span aria-hidden="true">→</span></button>
+              </form>
+              <div class="dash-admin-list-panel"><div class="dash-admin-list-head"><span class="mono-label">ACTIVE STAFF</span><span id="adminCountBadge" class="dash-count-badge">0</span></div><div id="adminAccountsList" class="dash-admin-list"></div></div>
+            </div>
+          </section>
+          ` : ''}
+
           <!-- Teams Section -->
           <div class="dash-section-head">
             <span class="step-num">★</span>
@@ -390,7 +433,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             <input type="search" id="teamSearchInput" placeholder="Search by team name, group ID, or member verification code…" class="dash-search-input">
           </div>
 
-          ${isTechOrMaster ? `
+          ${canExportTeams ? `
           <div class="dash-csv-tools" aria-label="Team CSV tools">
             <div>
               <strong>Team data CSV</strong>
@@ -418,25 +461,68 @@ document.addEventListener("DOMContentLoaded", async () => {
             ${teams.length ? teams.map(t => renderTeamRow(t, session.role === 'master_admin', session.role === 'master_admin')).join('') : '<p style="padding: 2rem; text-align: center; color: var(--muted-ink); font-family: var(--mono);">No teams registered yet.</p>'}
           </div>
 
-          ${session.role === 'master_admin' ? `
-          <!-- Admin Management (Master Only) -->
-          <div class="dash-section-head" style="margin-top: 3rem;">
-            <span class="step-num">⚙</span>
-            <div>
-              <h2 class="dash-section-title">Admin Department & Account Management</h2>
-              <p class="section-hint">Register Outlook IDs for event staff, assign department roles, and issue pre-generated temporary passwords.</p>
-            </div>
-          </div>
-
-          <div class="dash-admin-mgmt" id="adminMgmtContainer">
-            <button class="button button--ink" id="createAdminBtn" type="button">
-              + Register Department Admin Outlook ID <span aria-hidden="true">→</span>
-            </button>
-            <div id="adminAccountsList" class="dash-admin-list" style="margin-top: 1rem;"></div>
-          </div>
-          ` : ''}
         </div>
       `;
+
+      document.querySelectorAll("#adminInviteForm select").forEach((select) => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "custom-select-wrapper dashboard-custom-select";
+        const trigger = document.createElement("button");
+        trigger.type = "button";
+        trigger.className = "custom-select-trigger";
+        trigger.setAttribute("aria-haspopup", "listbox");
+        trigger.setAttribute("aria-expanded", "false");
+        const label = document.createElement("span");
+        label.className = "select-label";
+        const chevron = document.createElement("span");
+        chevron.className = "select-chevron";
+        chevron.textContent = "⌄";
+        const options = document.createElement("div");
+        options.className = "custom-select-options";
+        options.setAttribute("role", "listbox");
+        const syncLabel = () => {
+          label.textContent = select.options[select.selectedIndex]?.textContent || "Choose an option";
+          options.querySelectorAll("[role='option']").forEach((option) => option.classList.toggle("is-selected", option.dataset.value === select.value));
+        };
+        [...select.options].forEach((option) => {
+          const item = document.createElement("div");
+          item.className = "custom-option";
+          item.dataset.value = option.value;
+          item.setAttribute("role", "option");
+          item.tabIndex = 0;
+          item.textContent = option.textContent;
+          item.addEventListener("click", () => {
+            select.value = option.value;
+            select.dispatchEvent(new Event("change", { bubbles: true }));
+            syncLabel();
+            wrapper.classList.remove("is-open");
+            trigger.setAttribute("aria-expanded", "false");
+          });
+          item.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") { event.preventDefault(); item.click(); }
+          });
+          options.appendChild(item);
+        });
+        trigger.append(label, chevron);
+        wrapper.append(trigger, options);
+        select.hidden = true;
+        select.parentNode.insertBefore(wrapper, select);
+        syncLabel();
+        trigger.addEventListener("click", () => {
+          const isOpen = wrapper.classList.toggle("is-open");
+          trigger.setAttribute("aria-expanded", String(isOpen));
+          if (isOpen) options.querySelector(".is-selected")?.focus();
+        });
+        trigger.addEventListener("keydown", (event) => {
+          if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") { event.preventDefault(); trigger.click(); }
+        });
+        document.addEventListener("click", (event) => {
+          if (!wrapper.contains(event.target)) { wrapper.classList.remove("is-open"); trigger.setAttribute("aria-expanded", "false"); }
+        });
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") { wrapper.classList.remove("is-open"); trigger.setAttribute("aria-expanded", "false"); }
+        });
+      });
 
       document.getElementById("exportTeamsCsvBtn")?.addEventListener("click", async () => {
         const response = await Auth.apiFetch("/teams/admin/csv");
@@ -506,7 +592,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               alert(err.detail || "Failed to delete team.");
             }
           } catch {
-            alert("Server unreachable.");
+            alert("The team change couldn't be saved right now. Please try again later or contact the technical team.");
           }
         });
       });
@@ -544,61 +630,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
       }
 
-      // ── Master Admin: Register Admin Outlook ID & Assign Department ──
-      const createAdminBtn = document.getElementById("createAdminBtn");
-      if (createAdminBtn) {
-        createAdminBtn.addEventListener("click", async () => {
-          const name = prompt("Enter Admin Full Name (e.g. Juhi Sharma):");
-          if (!name || !name.trim()) return;
-
-          const email = prompt("Enter Admin Outlook Email ID (e.g. 10000xxxxx@dit.edu.in):");
-          if (!email || !email.trim()) return;
-
-          const dept = prompt(
-            "Assign Official Department:\n1. Technical Team\n2. Design Team\n3. PR & Sponsorship Team\n4. Content & Anchoring Team",
-            "Technical Team"
-          );
-          if (!dept) return;
-
-          const customPw = prompt("Set a custom temporary password (or leave blank to auto-generate):", "");
-
-          try {
-            const res = await Auth.apiFetch("/admin/accounts", {
-              method: "POST",
-              body: JSON.stringify({
-                name: name.trim(),
-                email: email.trim(),
-                department: dept.trim(),
-                role: "admin",
-                password: customPw ? customPw.trim() : null
-              }),
-            });
-            const data = await res.json();
-            if (res.ok) {
-              alert(`✅ Department Admin Registered Successfully!\n\nName: ${data.name}\nEmail: ${data.email}\nDepartment: ${data.department}\nTemporary Password: ${data.temp_password}\n\nPass this temporary password to the admin. They will be forced to set their permanent password upon first login.`);
-              location.reload();
-            } else {
-              alert(`Error: ${data.detail || 'Failed to create admin account.'}`);
-            }
-          } catch {
-            alert("Server unreachable.");
-          }
-        });
-
-        // Load admin accounts list
-        Auth.apiFetch("/admin/accounts").then(async res => {
+      // ── Master Admin: Structured staff invite ──
+      const inviteForm = document.getElementById("adminInviteForm");
+      if (inviteForm) {
+        const loadAdminAccounts = async () => {
+          const res = await Auth.apiFetch("/admin/accounts");
           if (!res.ok) return;
           const admins = await res.json();
           const list = document.getElementById("adminAccountsList");
+          document.getElementById("adminCountBadge").textContent = admins.length;
           list.innerHTML = admins.map(a => `
-            <div class="dash-admin-row" style="display:flex; justify-content:space-between; align-items:center; padding:0.85rem 1rem; margin-bottom:0.5rem; background:rgba(255,255,255,0.5); border:1px solid rgba(26,24,20,0.12); border-radius:8px;">
+            <div class="dash-admin-row">
               <div>
-                <strong style="display:block;">${a.name || 'Admin Member'}</strong>
-                <span class="dash-admin-email" style="font-family:var(--mono); font-size:0.85rem;">${a.email}</span>
-                <span class="dash-admin-role-tag" style="margin-left:0.5rem; font-size:0.72rem; text-transform:uppercase; padding:0.15rem 0.5rem; background:var(--ink); color:var(--paper); border-radius:4px; font-family:var(--mono);">${a.department || 'Technical Team'}</span>
-                ${a.must_change_password ? '<span style="font-size:0.72rem; color:var(--oxide); margin-left:0.5rem; font-family:var(--mono);">⚠️ TEMP PW ACTIVE</span>' : '<span style="font-size:0.72rem; color:green; margin-left:0.5rem; font-family:var(--mono);">✓ ACTIVE</span>'}
+                <strong>${a.name || 'Admin Member'}</strong><span class="dash-admin-email">${a.email}</span>
+                <span class="dash-admin-role-tag">${a.role || 'admin'} / ${a.department || 'Technical Team'}</span>
+                <span class="dash-admin-state ${a.must_change_password ? 'is-pending' : 'is-active'}">${a.must_change_password ? 'TEMP PASSWORD ACTIVE' : 'ACTIVE'}</span>
               </div>
-              ${a.role !== 'master_admin' ? `<button class="dash-remove-admin" data-email="${a.email}" style="padding:0.35rem 0.75rem; background:#d32f2f; color:#fff; border:none; border-radius:4px; font-size:0.78rem; cursor:pointer;">Remove Admin</button>` : '<span class="mono-label" style="color:var(--muted-ink);">MASTER (NON-VOLATILE)</span>'}
+              ${a.role !== 'master_admin' ? `<button class="dash-remove-admin" data-email="${a.email}">Remove</button>` : '<span class="mono-label">MASTER</span>'}
             </div>
           `).join('');
 
@@ -609,7 +657,32 @@ document.addEventListener("DOMContentLoaded", async () => {
               if (res.ok) btn.closest(".dash-admin-row").remove();
             });
           });
-        }).catch(() => {});
+        };
+
+        inviteForm.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const status = document.getElementById("adminInviteStatus");
+          status.classList.remove("is-error");
+          status.textContent = "Creating secure invite…";
+          try {
+            const res = await Auth.apiFetch("/admin/accounts", { method: "POST", body: JSON.stringify({
+              name: document.getElementById("inviteName").value.trim(),
+              email: document.getElementById("inviteEmail").value.trim(),
+              department: document.getElementById("inviteDepartment").value,
+              role: document.getElementById("inviteRole").value,
+              password: document.getElementById("invitePassword").value || null
+            }) });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) { status.classList.add("is-error"); status.textContent = data.detail || "Invite could not be created."; return; }
+            status.textContent = `Invite created. Temporary password: ${data.temp_password}`;
+            inviteForm.reset();
+            await loadAdminAccounts();
+          } catch {
+            status.classList.add("is-error");
+            status.textContent = "The invite couldn't be saved right now. Please try again later or contact the technical team.";
+          }
+        });
+        loadAdminAccounts().catch(() => {});
       }
 
     } catch (err) {
