@@ -478,7 +478,7 @@ select option { background-color: #faf7f2; color: #1a1814; padding: 8px; }
 .group-id-input-wrapper { display: flex; align-items: center; border: 1px solid rgba(26,24,20,0.22); border-radius: 10px; background: rgba(255,255,255,0.5); backdrop-filter: blur(4px); overflow: hidden; transition: border-color .2s ease, box-shadow .2s ease; }
 .group-id-input-wrapper:focus-within { border-color: var(--oxide); box-shadow: 0 0 0 3px rgba(216,75,45,0.2); background: rgba(255,255,255,0.9); }
 .group-id-prefix { padding: .8rem 0 .8rem 1.1rem; font-family: var(--mono); font-size: .88rem; font-weight: 700; color: var(--muted-ink); user-select: none; flex-shrink: 0; letter-spacing: .04em; }
-.group-id-input-wrapper input { border: none; background: transparent; padding-left: 0; min-height: 48px; backdrop-filter: none; box-shadow: none; font-family: var(--mono); font-weight: 700; font-size: 1rem; letter-spacing: .08em; }
+.group-id-input-wrapper input { border: none; background: transparent; padding-left: 0; min-height: 48px; backdrop-filter: none; box-shadow: none; font-family: var(--mono); font-weight: 700; font-size: 1rem; letter-spacing: .08em; direction: ltr; text-align: right; unicode-bidi: plaintext; caret-color: var(--oxide); }
 .group-id-input-wrapper input:focus { outline: none; border: none; box-shadow: none; }
 
 /* Password Input */
