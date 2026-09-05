@@ -260,7 +260,6 @@
 
       roleTeam.addEventListener("click", () => setRole("team"));
       roleAdmin.addEventListener("click", () => setRole("admin"));
-      setRole("team");
 
       // ── Password Toggle ──
       passwordToggle.addEventListener("click", () => {
@@ -278,6 +277,9 @@
       const secQStep = document.getElementById("secQStep");
       const secQuestionLabel = document.getElementById("secQuestionLabel");
       const forgotError = document.getElementById("forgotError");
+
+      // Initialize only after every form reference used by setRole exists.
+      setRole("team");
 
       if (openForgotBtn) {
         openForgotBtn.addEventListener("click", () => {
