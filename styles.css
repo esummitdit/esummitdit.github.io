@@ -440,7 +440,7 @@ select option { background-color: #faf7f2; color: #1a1814; padding: 8px; }
    LOGIN PAGE
    ════════════════════════════════════════════ */
 .login-body { background: var(--paper); }
-.login-page { display: grid; grid-template-columns: 42% 58%; min-height: 100vh; }
+.login-page { display: grid; grid-template-columns: 42% 58%; height: 100dvh; min-height: 0; overflow: hidden; }
 .login-branding { position: relative; display: flex; flex-direction: column; justify-content: space-between; padding: clamp(2rem, 4vw, 3.5rem); color: var(--paper); background: linear-gradient(160deg, #14120e 0%, #1e1b16 60%, #201c17 100%); overflow: hidden; }
 .login-branding-inner { position: relative; z-index: 2; display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
 .wordmark--light { color: var(--paper); }
@@ -452,8 +452,9 @@ select option { background-color: #faf7f2; color: #1a1814; padding: 8px; }
 .login-branding-footer { display: flex; justify-content: space-between; color: rgba(233,225,210,0.4); }
 .login-circle { position: absolute; bottom: -8rem; right: -6rem; width: 380px; height: 380px; border: 1px solid rgba(233,225,210,0.15); border-radius: 50%; pointer-events: none; }
 
-.login-form-area { display: flex; align-items: center; justify-content: center; padding: clamp(2rem, 4vw, 4rem); background: var(--paper); overflow-y: auto; }
+.login-form-area { display: flex; min-height: 0; align-items: center; justify-content: center; padding: clamp(1.5rem, 3vw, 3rem); background: var(--paper); overflow-y: auto; }
 .login-form-container { width: 100%; max-width: 520px; }
+.login-form-container.is-recovering .role-selector, .login-form-container.is-recovering .login-server-status, .login-form-container.is-recovering .login-lost-bar { display: none; }
 .login-server-status { display: flex; align-items: center; gap: .55rem; margin: 0 0 1rem; padding: .65rem .8rem; border: 1px solid rgba(26,24,20,.12); border-radius: 10px; background: rgba(255,255,255,.34); color: var(--muted-ink); font: 600 .64rem var(--mono); text-transform: uppercase; letter-spacing: .035em; }.login-server-dot { width: .48rem; height: .48rem; flex: 0 0 auto; border-radius: 50%; background: #b08a18; box-shadow: 0 0 0 3px rgba(176,138,24,.15); }.login-server-status.is-online .login-server-dot { background: #15733b; box-shadow: 0 0 0 3px rgba(21,115,59,.15); }.login-server-status.is-offline .login-server-dot { background: var(--oxide); box-shadow: 0 0 0 3px rgba(216,75,45,.15); }.login-server-time { margin-left: auto; color: var(--muted-ink); font-size: .58rem; }
 
 /* Role Selector */
@@ -476,6 +477,7 @@ select option { background-color: #faf7f2; color: #1a1814; padding: 8px; }
 .login-error { min-height: 1rem; margin: .6rem 0; font-family: var(--mono); font-size: .72rem; color: var(--oxide); font-weight: 600; }
 .login-recovery-help { display: flex; align-items: center; justify-content: center; gap: .35rem; margin-top: .65rem; color: var(--muted-ink); font-size: .72rem; }.login-recovery-help button { padding: .1rem .2rem; border: 0; color: var(--ink); background: transparent; font: 600 .72rem var(--mono); text-decoration: underline; text-underline-offset: .2rem; cursor: pointer; -webkit-tap-highlight-color: transparent; }.login-recovery-help button:hover { color: var(--oxide); }.login-recovery-help button:focus-visible { outline: 2px solid var(--oxide); outline-offset: 3px; border-radius: 4px; }
 .login-success-message { display: flex; align-items: flex-start; gap: .8rem; margin-top: .8rem; padding: 1rem; border: 1px solid rgba(21,115,59,.35); border-radius: 14px; background: rgba(21,115,59,.08); color: var(--ink); }
+.login-success-message[hidden] { display: none; }
 .login-success-icon { display: grid; place-items: center; width: 2rem; height: 2rem; flex: 0 0 auto; border-radius: 50%; background: #15733b; color: #fff; font-weight: 800; }
 .login-success-message h3 { margin: .05rem 0 .3rem; font-size: 1rem; }
 .login-success-message p { margin: 0 0 .8rem; color: var(--muted-ink); font-size: .83rem; line-height: 1.4; }
@@ -693,7 +695,7 @@ select option { background-color: #faf7f2; color: #1a1814; padding: 8px; }
   .hero-side-note { order: 5; }
   .keynote-hero-body { grid-template-columns: 1fr; gap: 1.2rem; }
   .speakers-track-grid { grid-template-columns: 1fr; }
-  .login-page { grid-template-columns: 1fr; min-height: auto; }
+  .login-page { grid-template-columns: 1fr; height: auto; min-height: auto; overflow: visible; }
   .login-branding { min-height: 160px; padding: 2rem 1.5rem; }
   .login-brand-title { font-size: clamp(2.5rem, 8vw, 3.8rem); }
   .login-brand-sub, .login-branding-footer { display: none; }

@@ -275,6 +275,7 @@
       function setRole(role) {
         document.querySelectorAll(".role-card").forEach(c => c.classList.remove("is-active"));
         [teamForm, adminForm, forgotCard].forEach(form => form?.classList.add("login-card--hidden"));
+        loginFormContainer?.classList.remove("is-recovering");
         document.getElementById("roleSelector")?.setAttribute("data-role", role);
         if (role === "team") {
           roleTeam.classList.add("is-active");
@@ -307,6 +308,7 @@
       const forgotSuccess = document.getElementById("forgotSuccess");
       const forgotSuccessGroupId = document.getElementById("forgotSuccessGroupId");
       const returnToTeamLogin = document.getElementById("returnToTeamLogin");
+      const loginFormContainer = document.querySelector(".login-form-container");
 
       // Initialize only after every form reference used by setRole exists.
       setRole("team");
@@ -315,6 +317,7 @@
         openForgotBtn.addEventListener("click", () => {
           [teamForm, adminForm].forEach(form => form?.classList.add("login-card--hidden"));
           forgotCard.classList.remove("login-card--hidden");
+          loginFormContainer?.classList.add("is-recovering");
           resetRecovery();
         });
       }
