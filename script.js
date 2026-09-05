@@ -1111,32 +1111,13 @@ function setUpRegistrationForm() {
         </div>
 
         <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid rgba(26,24,20,0.12);display:flex;flex-direction:column;gap:0.75rem;text-align:center;">
-          <p id="redirectCountdownText" style="margin:0;font-size:0.85rem;font-family:var(--mono);color:var(--oxide);font-weight:700;">Redirecting to Login Page in <span id="countdownSec">7</span> seconds...</p>
+          <p style="margin:0;font-size:0.85rem;font-family:var(--mono);color:var(--oxide);font-weight:700;">Registration saved. Keep your Group ID safe for portal login.</p>
           <div style="display:flex;gap:1rem;justify-content:center;">
             <a class="button button--ink" href="login.html" style="flex:1;justify-content:center;text-decoration:none;">Login Now →</a>
-            <button type="button" class="button button--secondary" id="stayOnPageBtn" style="flex:1;justify-content:center;">Stay Here</button>
           </div>
         </div>
       </div>
     `;
-
-    // Auto-redirect timer
-    let secondsLeft = 7;
-    const timerInterval = setInterval(() => {
-      secondsLeft--;
-      const secEl = document.getElementById("countdownSec");
-      if (secEl) secEl.textContent = secondsLeft;
-      if (secondsLeft <= 0) {
-        clearInterval(timerInterval);
-        window.location.href = "login.html";
-      }
-    }, 1000);
-
-    document.getElementById("stayOnPageBtn")?.addEventListener("click", () => {
-      clearInterval(timerInterval);
-      const textEl = document.getElementById("redirectCountdownText");
-      if (textEl) textEl.textContent = "Auto-redirect paused. You can log in whenever you wish.";
-    });
   });
 }
 
