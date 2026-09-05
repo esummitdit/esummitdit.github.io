@@ -64,8 +64,18 @@ function initializePage() {
 }
 
 async function setUpSessionAwareHomepage() {
-  const session = typeof Auth !== "undefined" ? await Auth.validateSession() : null;
-  if (!session) return;
+  if (typeof Auth === "undefined") return;
+  const immediateSession = Auth.getSession();
+  if (immediateSession) applySessionAwareHomepage(immediateSession);
+
+  const validatedSession = await Auth.validateSession();
+  if (!validatedSession) return;
+  if (!immediateSession || JSON.stringify(immediateSession) !== JSON.stringify(validatedSession)) {
+    applySessionAwareHomepage(validatedSession);
+  }
+}
+
+function applySessionAwareHomepage(session) {
 
   const isTeam = session.role === "team";
   const dashboardHref = "dashboard.html";
@@ -101,10 +111,13 @@ async function setUpSessionAwareHomepage() {
     primaryAction.href = "#top";
     primaryAction.textContent = "Sign out";
     primaryAction.setAttribute("aria-label", "Sign out of E-Summit");
-    primaryAction.addEventListener("click", (event) => {
-      event.preventDefault();
-      Auth.logout();
-    });
+    if (primaryAction.dataset.sessionBound !== "true") {
+      primaryAction.addEventListener("click", (event) => {
+        event.preventDefault();
+        Auth.logout();
+      });
+      primaryAction.dataset.sessionBound = "true";
+    }
   }
 
   document.querySelectorAll('a[href="#registration"]').forEach((link) => {
@@ -1187,36 +1200,29 @@ function downloadRegistrationIdCardPNG(team, member, index) {
 
   const imageSource = member._pendingPreview || getApiAssetUrl(member.photo_url);
   const qrPayload = JSON.stringify({
-    issuer: "DIT University E-Summit 2026",
-    type: "venue-entry-pass",
-    group_id: team.group_id,
-    team_name: team.team_name,
-    track: team.track,
-    college: team.college,
-    member_index: index + 1,
-    member_name: member.name,
-    role: member.role,
-    email: member.email,
-    personal_email: member.personal_email,
-    phone: member.phone,
-    college_id: member.college_id,
-    note: member.note,
-    photo_url: member.photo_url,
-    secret_id: member.verification_code
+    i: "DIT University E-Summit 2026",
+    t: "venue-entry-pass",
+    g: team.group_id,
+    m: index + 1,
+    n: member.name,
+    r: member.role,
+    s: member.verification_code
   });
   const qrHolder = document.createElement("div");
   if (typeof QRCode === "function") {
-    new QRCode(qrHolder, { text: qrPayload, width: 260, height: 260, colorDark: "#1a1814", colorLight: "#e9e1d2" });
+    new QRCode(qrHolder, { text: qrPayload, width: 320, height: 320, correctLevel: QRCode.CorrectLevel.H, colorDark: "#1a1814", colorLight: "#ffffff" });
   }
 
   const finishCard = () => {
     const qrCanvas = qrHolder.querySelector("canvas");
     const qrImage = qrHolder.querySelector("img");
-    if (qrCanvas) context.drawImage(qrCanvas, 1010, 470, 260, 260);
-    if (qrImage) context.drawImage(qrImage, 1010, 470, 260, 260);
+    context.fillStyle = "#ffffff";
+    context.fillRect(970, 430, 340, 340);
+    if (qrCanvas) context.drawImage(qrCanvas, 980, 440, 320, 320);
+    if (qrImage) context.drawImage(qrImage, 980, 440, 320, 320);
     context.strokeStyle = "#d3e83d";
     context.lineWidth = 8;
-    context.strokeRect(1002, 462, 276, 276);
+    context.strokeRect(970, 430, 340, 340);
     if (imageSource) {
       const image = new Image();
       image.crossOrigin = "anonymous";

@@ -252,36 +252,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     ctx.fillText("SCAN QR AT VENUE CHECK-IN", 72, 820);
 
     const qrPayload = JSON.stringify({
-      issuer: "DIT University E-Summit 2026",
-      type: "venue-entry-pass",
-      group_id: team.group_id,
-      team_name: team.team_name,
-      track: team.track,
-      college: team.college,
-      member_index: index + 1,
-      member_name: member.name,
-      role: member.role,
-      email: member.email,
-      personal_email: member.personal_email,
-      phone: member.phone,
-      college_id: member.college_id,
-      note: member.note,
-      photo_url: member.photo_url,
-      secret_id: member.verification_code
+      i: "DIT University E-Summit 2026",
+      t: "venue-entry-pass",
+      g: team.group_id,
+      m: index + 1,
+      n: member.name,
+      r: member.role,
+      s: member.verification_code
     });
     const qrHolder = document.createElement("div");
     if (typeof QRCode === "function") {
-      new QRCode(qrHolder, { text: qrPayload, width: 260, height: 260, colorDark: "#1a1814", colorLight: "#e9e1d2" });
+      new QRCode(qrHolder, { text: qrPayload, width: 320, height: 320, correctLevel: QRCode.CorrectLevel.H, colorDark: "#1a1814", colorLight: "#ffffff" });
     }
     const drawCard = () => {
       const qrCanvas = qrHolder.querySelector("canvas");
       const qrImage = qrHolder.querySelector("img");
-      if (qrCanvas) ctx.drawImage(qrCanvas, 1010, 470, 260, 260);
-      if (qrImage) ctx.drawImage(qrImage, 1010, 470, 260, 260);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(970, 430, 340, 340);
+      if (qrCanvas) ctx.drawImage(qrCanvas, 980, 440, 320, 320);
+      if (qrImage) ctx.drawImage(qrImage, 980, 440, 320, 320);
       if (qrCanvas || qrImage) {
         ctx.strokeStyle = "#d3e83d";
         ctx.lineWidth = 8;
-        ctx.strokeRect(1002, 462, 276, 276);
+        ctx.strokeRect(970, 430, 340, 340);
       }
 
       const image = new Image();
