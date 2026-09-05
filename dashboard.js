@@ -636,29 +636,48 @@ document.addEventListener("DOMContentLoaded", async () => {
           <span class="dash-team-chevron">▾</span>
         </button>
         <div class="dash-team-row-body" id="team-${team.group_id}">
-          ${isMasterAdmin ? `<label class="dash-team-select-label"><input class="dash-team-select" type="checkbox" value="${team.group_id}"> Select for bulk actions</label>` : ''}
-          <div class="dash-team-meta">
-            <span><strong>Institution:</strong> ${team.college}</span>
+          <div class="dash-team-toolbar">
+            ${isMasterAdmin ? `<label class="dash-team-select-label"><input class="dash-team-select" type="checkbox" value="${team.group_id}"> Select for bulk actions</label>` : '<span class="dash-team-readonly">STAFF INSPECTION VIEW</span>'}
+            <span class="dash-team-toolbar-note">${memberCount} ${memberCount === 1 ? 'registered participant' : 'registered participants'}</span>
           </div>
-          <div class="dash-roster-grid dash-roster-grid--compact" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-top: 1rem;">
+          <div class="dash-team-facts">
+            <div><span class="dash-fact-label">Institution</span><strong>${team.college || 'Not provided'}</strong></div>
+            <div><span class="dash-fact-label">Event track</span><strong>${team.track || 'Not provided'}</strong></div>
+            <div><span class="dash-fact-label">Group access</span><strong>Portal credentials active</strong></div>
+          </div>
+          <div class="dash-team-roster-heading"><span>ATTENDEE ROSTER</span><span>SECRET IDs / CHECK-IN</span></div>
+          <div class="dash-roster-grid dash-roster-grid--compact">
             ${(team.members || []).map((m, i) => `
-              <div class="dash-member-card-sm" style="border:1px solid rgba(26,24,20,0.15); padding:0.85rem; border-radius:8px; background:#fff;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
-                  <span class="mono-label">${i === 0 ? '★ LEADER' : `MEMBER 0${i + 1}`}</span>
-                  ${m.photo_url ? `<img src="${getApiAssetUrl(m.photo_url)}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border:1px solid var(--ink);">` : ''}
+              <article class="dash-member-card-sm ${i === 0 ? 'dash-member-card-sm--leader' : ''}">
+                <div class="dash-member-card-sm-top">
+                  <span class="dash-member-index">${i === 0 ? '★ TEAM LEAD' : `MEMBER ${String(i + 1).padStart(2, '0')}`}</span>
+                  <span class="dash-member-status">VERIFIED</span>
                 </div>
-                <strong style="display:block; font-size:0.95rem;">${m.name || 'N/A'}</strong>
-                <span class="dash-sm-detail" style="font-size:0.8rem; color:var(--muted-ink);">${m.email || 'N/A'}</span>
-                <span class="dash-sm-detail" style="font-size:0.8rem;">Role: ${m.role || 'Participant'}</span>
-                <!-- Staff Verification Code Box -->
-                <div style="margin-top:0.5rem; padding:0.4rem 0.6rem; background:#1a1814; color:#ffeb3b; border-radius:4px; font-family:var(--mono); font-size:0.85rem; font-weight:700; text-align:center;">
-                  ${m.verification_code || '8492-3019-4821'}
+                <div class="dash-member-profile">
+                  <div class="dash-member-photo-frame">
+                    <img src="${getApiAssetUrl(m.photo_url) || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.name || 'Member')}&background=1a1814&color=e9e1d2&bold=true`}" alt="${m.name || 'Member'} portrait" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=Member&background=1a1814&color=e9e1d2&bold=true';">
+                  </div>
+                  <div class="dash-member-identity">
+                    <h3>${m.name || 'N/A'}</h3>
+                    <p>${m.role || 'Participant'}</p>
+                    <span>${m.college_id ? `College ID ${m.college_id}` : 'College ID not provided'}</span>
+                  </div>
                 </div>
-              </div>
+                <div class="dash-member-contact">
+                  <div><span>Institutional email</span><strong>${m.email || 'Not provided'}</strong></div>
+                  <div><span>Personal email</span><strong>${m.personal_email || 'Not provided'}</strong></div>
+                  <div><span>Phone / WhatsApp</span><strong>${m.phone || 'Not provided'}</strong></div>
+                </div>
+                <div class="dash-secret-id">
+                  <span>STAFF SECRET ID</span>
+                  <strong>${m.verification_code || 'Not assigned'}</strong>
+                </div>
+                ${m.note ? `<p class="dash-member-note"><span>Member note</span>${m.note}</p>` : ''}
+              </article>
             `).join('')}
           </div>
           ${canDelete ? `
-          <div class="dash-team-actions" style="margin-top: 1rem;">
+          <div class="dash-team-actions">
             <button class="dash-delete-team" data-group-id="${team.group_id}">Delete Team</button>
           </div>
           ` : ''}
