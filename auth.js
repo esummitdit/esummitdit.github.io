@@ -156,7 +156,12 @@ const Auth = (() => {
         });
         if (!response.ok) {
           if (response.status === 401 || response.status === 403) _setToken(null);
-          return null;
+          // Only an explicit authentication rejection invalidates a local
+          // session. This keeps an otherwise successful login working while
+          // a laptop API is restarting or still running an older build.
+          return response.status === 401 || response.status === 403
+            ? null
+            : localSession;
         }
         return { ...localSession, ...(await response.json()) };
       } catch {
