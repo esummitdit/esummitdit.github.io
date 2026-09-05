@@ -29,6 +29,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   logoutBtn.addEventListener("click", () => Auth.logout());
 
+  // ── Privacy Shield for Unattended Screen / Shoulder Surfing ──
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      main?.classList.add("dash-privacy-shield");
+    } else {
+      main?.classList.remove("dash-privacy-shield");
+    }
+  });
+
   // Check if first-time admin needs to change temporary password
   if (session.must_change_password) {
     showMandatoryPasswordChangeModal();

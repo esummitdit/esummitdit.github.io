@@ -52,12 +52,65 @@ const Auth = (() => {
   });
 
   window.addEventListener("esummit:logout", () => {
-    // A logout issued in another open tab must not leave a protected page
-    // visible with stale content.
     if (!window.location.pathname.endsWith("index.html") && window.location.pathname !== "/") {
       window.location.replace("index.html");
     }
   });
+
+  // ── Anti-Tamper Developer Console Banner ──
+  try {
+    console.log(
+      "%cSTOP!\n%cThis browser feature is intended for developers. Pasting code, dumping tokens, or running scripts here gives attackers access to your account and credentials.",
+      "color: #e54b3c; font-family: sans-serif; font-size: 26px; font-weight: bold;",
+      "color: #e0deda; font-family: sans-serif; font-size: 14px; margin-top: 6px;"
+    );
+  } catch {}
+
+  // ── Inactivity Auto-Lock Watchdog (10 Minutes) ──
+  const INACTIVITY_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
+  const BACKGROUND_TIMEOUT_MS = 5 * 60 * 1000;  // 5 minutes away
+  let _idleTimer = null;
+  let _hiddenTimestamp = null;
+
+  function _resetIdleTimer() {
+    if (!_getToken()) return;
+    if (_idleTimer) clearTimeout(_idleTimer);
+    _idleTimer = setTimeout(() => {
+      if (_getToken()) {
+        try { sessionStorage.setItem("esummit_lock_reason", "Session auto-locked due to inactivity to protect your account."); } catch {}
+        _setToken(null);
+        _notifyOtherPagesOfLogout();
+        window.location.replace("login.html?reason=inactivity");
+      }
+    }, INACTIVITY_TIMEOUT_MS);
+  }
+
+  // Activity events that reset the watchdog
+  ["mousemove", "mousedown", "keydown", "scroll", "touchstart"].forEach((evt) => {
+    window.addEventListener(evt, _resetIdleTimer, { passive: true });
+  });
+
+  // Page Visibility: if user minimizes or locks screen for > 5 min, terminate session
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      _hiddenTimestamp = Date.now();
+    } else {
+      if (_hiddenTimestamp && _getToken()) {
+        const awayTime = Date.now() - _hiddenTimestamp;
+        if (awayTime > BACKGROUND_TIMEOUT_MS) {
+          try { sessionStorage.setItem("esummit_lock_reason", "Session locked after being away from this window."); } catch {}
+          _setToken(null);
+          _notifyOtherPagesOfLogout();
+          window.location.replace("login.html?reason=away");
+          return;
+        }
+      }
+      _hiddenTimestamp = null;
+      _resetIdleTimer();
+    }
+  });
+
+  _resetIdleTimer();
 
   function _decodePayload(token) {
     try {

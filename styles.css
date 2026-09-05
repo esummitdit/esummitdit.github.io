@@ -1164,3 +1164,11 @@ select option { background-color: #faf7f2; color: #1a1814; padding: 8px; }
 .spotlight-detail-item:last-child { border-bottom: none; padding-bottom: 0; }
 .spotlight-detail-label { color: rgba(233, 225, 210, 0.55); font-size: 0.72rem; text-transform: uppercase; }
 .spotlight-detail-val { font-weight: 600; color: #ffffff; text-align: right; word-break: break-all; }
+
+/* Unattended Screen Privacy Shield */
+.dash-privacy-shield {
+  filter: blur(16px) !important;
+  user-select: none !important;
+  pointer-events: none !important;
+  transition: filter 0.18s ease-out;
+}

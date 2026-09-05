@@ -449,7 +449,9 @@
         e.preventDefault();
         teamError.textContent = "";
         const groupId = normalizeGroupId(document.getElementById("teamGroupId").value);
-        const password = document.getElementById("teamPasswordInput").value;
+        const passwordInput = document.getElementById("teamPasswordInput");
+        const password = passwordInput.value;
+        passwordInput.value = ""; // Immediate DOM zero-retention
 
         if (!groupId || !password) {
           teamError.textContent = "Please enter both Group ID and Team Password.";
@@ -476,7 +478,9 @@
         e.preventDefault();
         adminError.textContent = "";
         const email = document.getElementById("adminEmail").value.trim();
-        const password = document.getElementById("adminPassword").value;
+        const passwordInput = document.getElementById("adminPassword");
+        const password = passwordInput.value;
+        passwordInput.value = ""; // Immediate DOM zero-retention
 
         if (!email || !password) {
           adminError.textContent = "Please fill in all fields.";
@@ -497,6 +501,26 @@
           btn.innerHTML = 'Access Admin Panel <span aria-hidden="true">→</span>';
         }
       });
+
+      // ── Zero Password Retention on Window Blur / Unattended Laptop ──
+      window.addEventListener("blur", () => {
+        const adminPw = document.getElementById("adminPassword");
+        const teamPw = document.getElementById("teamPasswordInput");
+        if (adminPw && document.activeElement !== adminPw) adminPw.value = "";
+        if (teamPw && document.activeElement !== teamPw) teamPw.value = "";
+      });
+
+      // ── Show Security Auto-Lock Banner if Re-directed ──
+      try {
+        const lockReason = sessionStorage.getItem("esummit_lock_reason");
+        if (lockReason) {
+          sessionStorage.removeItem("esummit_lock_reason");
+          const notice = document.createElement("div");
+          notice.style.cssText = "background: rgba(229, 75, 60, 0.14); border-left: 3px solid #e54b3c; padding: 0.75rem 1rem; margin-bottom: 1.2rem; border-radius: 4px; font-size: 0.78rem;";
+          notice.innerHTML = `<strong style="color:#e54b3c; letter-spacing:0.04em;">SECURITY NOTICE:</strong> ${lockReason}`;
+          document.querySelector(".login-form-container")?.prepend(notice);
+        }
+      } catch {}
 
       // ── Group ID inputs: numeric entry, four-digit display ──
       ["teamGroupId", "forgotGroupId"].forEach((inputId) => {
