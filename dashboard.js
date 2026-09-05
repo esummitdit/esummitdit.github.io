@@ -168,7 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderDigitalIdCardHTML(team, member, index) {
     const isLeader = index === 0;
-    const photo = member.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name || 'User')}&background=1a1814&color=e9e1d2&bold=true`;
+    const photo = getApiAssetUrl(member.photo_url) || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name || 'User')}&background=1a1814&color=e9e1d2&bold=true`;
     const code = member.verification_code || "8492-3019-4821";
 
     return `
@@ -521,7 +521,7 @@ document.addEventListener("DOMContentLoaded", () => {
               <div class="dash-member-card-sm" style="border:1px solid rgba(26,24,20,0.15); padding:0.85rem; border-radius:8px; background:#fff;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
                   <span class="mono-label">${i === 0 ? '★ LEADER' : `MEMBER 0${i + 1}`}</span>
-                  ${m.photo_url ? `<img src="${m.photo_url}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border:1px solid var(--ink);">` : ''}
+                  ${m.photo_url ? `<img src="${getApiAssetUrl(m.photo_url)}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border:1px solid var(--ink);">` : ''}
                 </div>
                 <strong style="display:block; font-size:0.95rem;">${m.name || 'N/A'}</strong>
                 <span class="dash-sm-detail" style="font-size:0.8rem; color:var(--muted-ink);">${m.email || 'N/A'}</span>

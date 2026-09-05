@@ -672,8 +672,8 @@ function setUpRegistrationForm() {
               <span>Upload photo from your device</span>
             </button>
             <div id="member_${member.id}_preview_wrap" class="custom-photo-preview-avatar">
-              ${member.photo_url 
-                ? `<img src="${member.photo_url}" style="width:100%; height:100%; object-fit:cover;">` 
+              ${member.photo_url
+                ? `<img src="${getApiAssetUrl(member.photo_url)}" style="width:100%; height:100%; object-fit:cover;">`
                 : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                      <circle cx="12" cy="7" r="4"></circle>
@@ -959,17 +959,17 @@ function setUpRegistrationForm() {
         body: JSON.stringify(payload)
       });
 
-      if (response.ok) {
-        const resData = await response.json();
-        assignedGroupId = resData.group_id;
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || "Registration could not be saved.");
       }
+      const resData = await response.json();
+      assignedGroupId = resData.group_id;
     } catch (err) {
-      console.warn("Backend server offline, generating fallback preview ID.");
-    }
-
-    if (!assignedGroupId) {
-      const randomSeq = Math.floor(1 + Math.random() * 9999).toString().padStart(4, "0");
-      assignedGroupId = `ES2026_${randomSeq}`;
+      console.error("Registration request failed:", err);
+      alert(`Registration was not saved. ${err.message || "Please try again."}`);
+      resetProgress();
+      return;
     }
 
     updateProgress(100, "Registration Complete!");
@@ -983,7 +983,7 @@ function setUpRegistrationForm() {
       membersListHtml += `
         <div style="margin-bottom:0.75rem;padding:0.85rem;background:rgba(255,255,255,0.7);border-radius:12px;border:1px solid rgba(26,24,20,0.12);display:flex;gap:1rem;align-items:center;">
           <div style="width:48px;height:48px;border-radius:50%;border:2px solid var(--ink);overflow:hidden;flex-shrink:0;background:#eee;">
-            <img src="${m.photo_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(m.name || 'Member') + '&background=1a1814&color=e9e1d2'}" style="width:100%;height:100%;object-fit:cover;">
+            <img src="${getApiAssetUrl(m.photo_url) || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(m.name || 'Member') + '&background=1a1814&color=e9e1d2'}" style="width:100%;height:100%;object-fit:cover;">
           </div>
           <div style="flex:1;">
             <div style="font-weight:700;font-size:0.95rem;">${idx === 0 ? "★ Leader: " : `Member ${idx + 1}: `}${m.name || "N/A"} <span style="font-size:0.75rem;color:var(--oxide);font-family:var(--mono);">(${m.role})</span></div>
@@ -1067,7 +1067,7 @@ function openSpotlightModal(member) {
     document.body.appendChild(modal);
   }
 
-  const photo = member.photo_url || member._pendingPreview || `https://ui-avatars.com/api/?name=${encodeURIComponent(nameVal)}&background=1a1814&color=e9e1d2&bold=true`;
+  const photo = getApiAssetUrl(member.photo_url) || member._pendingPreview || `https://ui-avatars.com/api/?name=${encodeURIComponent(nameVal)}&background=1a1814&color=e9e1d2&bold=true`;
 
   modal.innerHTML = `
     <div class="spotlight-card">
