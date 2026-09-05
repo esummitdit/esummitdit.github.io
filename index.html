@@ -28,6 +28,7 @@
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
   <script src="config.js" defer></script>
+  <script src="auth.js" defer></script>
   <script src="script.js" defer></script>
 </head>
 <body>
@@ -57,8 +58,8 @@
         <a href="#contact">Contact</a>
       </nav>
       <div class="header-actions">
-        <a class="header-login" href="login.html">Login <span aria-hidden="true">↗</span></a>
-        <a class="header-action" href="#registration">Register now <span aria-hidden="true">↘</span></a>
+        <a id="sessionLink" class="header-login" href="login.html">Login <span aria-hidden="true">↗</span></a>
+        <a id="primaryHeaderAction" class="header-action" href="#registration">Register now <span aria-hidden="true">↘</span></a>
       </div>
     </div>
   </header>
@@ -431,6 +432,7 @@
         <h2 id="registration-title">Register<br>your group.</h2>
         <p>Comprehensive registration desk for E-Summit 2026 (Sep 26–28). Select your participant count to dynamically generate member credentials linked to your official Group ID.</p>
       </div>
+      <div id="registrationLockedNotice" class="registration-locked-notice" hidden aria-live="polite"></div>
       <form id="registrationForm" class="registration-form reveal" data-api-endpoint="" novalidate>
         <div class="group-header-card">
           <div class="desk-status-badge">

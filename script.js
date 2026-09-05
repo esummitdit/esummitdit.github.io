@@ -58,8 +58,62 @@ function initializePage() {
   setUpRevealObserver(reduceMotion, restoredAwayFromTop);
   if (restoredAwayFromTop) document.body.classList.add("is-restored");
   setUpSculptureControl(sceneState, reduceMotion);
+  setUpSessionAwareHomepage();
   setUpRegistrationForm();
   setUpFaqAccordion();
+}
+
+function setUpSessionAwareHomepage() {
+  const session = typeof Auth !== "undefined" ? Auth.getSession() : null;
+  if (!session) return;
+
+  const isTeam = session.role === "team";
+  const dashboardHref = "dashboard.html";
+  const sessionLink = document.getElementById("sessionLink");
+  const primaryAction = document.getElementById("primaryHeaderAction");
+  const lockedNotice = document.getElementById("registrationLockedNotice");
+  const registrationForm = document.getElementById("registrationForm");
+  const label = isTeam
+    ? `Team ${session.group_id || "portal"}`
+    : "Admin portal";
+
+  if (sessionLink) {
+    sessionLink.href = dashboardHref;
+    sessionLink.textContent = label;
+    sessionLink.setAttribute("aria-label", `Open ${label}`);
+  }
+
+  if (primaryAction) {
+    primaryAction.href = "#top";
+    primaryAction.textContent = "Sign out";
+    primaryAction.setAttribute("aria-label", "Sign out of E-Summit");
+    primaryAction.addEventListener("click", (event) => {
+      event.preventDefault();
+      Auth.logout();
+    });
+  }
+
+  document.querySelectorAll('a[href="#registration"]').forEach((link) => {
+    link.href = dashboardHref;
+    link.textContent = isTeam ? "Open team portal →" : "Open admin portal →";
+  });
+
+  if (registrationForm) {
+    registrationForm.dataset.registrationLocked = "true";
+    registrationForm.hidden = true;
+  }
+
+  if (lockedNotice) {
+    lockedNotice.hidden = false;
+    lockedNotice.innerHTML = `
+      <p class="eyebrow">SIGNED IN / ${isTeam ? "TEAM ACCOUNT" : "ADMIN ACCOUNT"}</p>
+      <h3>${isTeam ? "Your team is already registered." : "You are signed in as an administrator."}</h3>
+      <p>${isTeam
+        ? "Registration is closed for this session. Your team details and credentials are available in the portal."
+        : "Registration is closed while you are in an administrator session. Use the portal to manage the summit."}</p>
+      <a class="button button--ink" href="${dashboardHref}">${isTeam ? "Open team portal" : "Open admin portal"} <span aria-hidden="true">→</span></a>
+    `;
+  }
 }
 
 function restoreReloadPosition() {
@@ -552,6 +606,7 @@ function setUpRegistrationForm() {
   const rosterGrid = document.getElementById("teamRosterGrid");
   const rosterMemoryBar = document.getElementById("rosterMemoryBar");
   if (!form || !status || !teamSizeSelect || !rosterGrid) return;
+  if (form.dataset.registrationLocked === "true") return;
 
   setUpCustomSelects();
 
