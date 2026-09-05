@@ -10,3 +10,9 @@ function getApiAssetUrl(path) {
   if (!path || /^https?:\/\//i.test(path) || path.startsWith("data:")) return path;
   return `${API_ORIGIN}${path.startsWith("/") ? path : `/${path}`}`;
 }
+
+function normalizeGroupId(value) {
+  const raw = String(value || "").trim().toUpperCase().replace(/^ES2026_/, "");
+  if (!/^\d{1,4}$/.test(raw)) return "";
+  return `ES2026_${raw.padStart(4, "0")}`;
+}

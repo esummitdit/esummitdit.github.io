@@ -237,19 +237,19 @@
       // ── Role Selector ──
       function setRole(role) {
         document.querySelectorAll(".role-card").forEach(c => c.classList.remove("is-active"));
+        [teamForm, adminForm, forgotCard].forEach(form => form?.classList.add("login-card--hidden"));
         if (role === "team") {
           roleTeam.classList.add("is-active");
           teamForm.classList.remove("login-card--hidden");
-          adminForm.classList.add("login-card--hidden");
         } else {
           roleAdmin.classList.add("is-active");
           adminForm.classList.remove("login-card--hidden");
-          teamForm.classList.add("login-card--hidden");
         }
       }
 
       roleTeam.addEventListener("click", () => setRole("team"));
       roleAdmin.addEventListener("click", () => setRole("admin"));
+      setRole("team");
 
       // ── Password Toggle ──
       passwordToggle.addEventListener("click", () => {
@@ -270,8 +270,7 @@
 
       if (openForgotBtn) {
         openForgotBtn.addEventListener("click", () => {
-          teamForm.classList.add("login-card--hidden");
-          adminForm.classList.add("login-card--hidden");
+          [teamForm, adminForm].forEach(form => form?.classList.add("login-card--hidden"));
           forgotCard.classList.remove("login-card--hidden");
           forgotError.textContent = "";
         });
@@ -279,16 +278,14 @@
 
       if (closeForgotBtn) {
         closeForgotBtn.addEventListener("click", () => {
-          forgotCard.classList.add("login-card--hidden");
-          teamForm.classList.remove("login-card--hidden");
+          setRole("team");
         });
       }
 
       if (fetchSecQBtn) {
         fetchSecQBtn.addEventListener("click", async () => {
           forgotError.textContent = "";
-          const rawId = document.getElementById("forgotGroupId").value.padStart(4, "0");
-          const groupId = "ES2026_" + rawId;
+          const groupId = normalizeGroupId(document.getElementById("forgotGroupId").value);
           const apiBase = (typeof API_BASE !== "undefined") ? API_BASE : "/api";
           try {
             const res = await fetch(`${apiBase}/teams/security-question/${groupId}`);
@@ -310,7 +307,7 @@
         forgotCard.addEventListener("submit", async (e) => {
           e.preventDefault();
           forgotError.textContent = "";
-          const groupId = "ES2026_" + document.getElementById("forgotGroupId").value.padStart(4, "0");
+          const groupId = normalizeGroupId(document.getElementById("forgotGroupId").value);
           const securityAnswer = document.getElementById("forgotSecAnswer").value.trim();
           const newPassword = document.getElementById("forgotNewPw").value;
           const newSecurityQuestion = document.getElementById("forgotNewSecurityQuestion").value;
@@ -352,11 +349,10 @@
       teamForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         teamError.textContent = "";
-        const rawId = document.getElementById("teamGroupId").value.padStart(4, "0");
-        const groupId = "ES2026_" + rawId;
+        const groupId = normalizeGroupId(document.getElementById("teamGroupId").value);
         const password = document.getElementById("teamPasswordInput").value;
 
-        if (!rawId || !password) {
+        if (!groupId || !password) {
           teamError.textContent = "Please enter both Group ID and Team Password.";
           return;
         }
@@ -403,9 +399,15 @@
         }
       });
 
-      // ── Group ID input: numbers only ──
-      document.getElementById("teamGroupId").addEventListener("input", (e) => {
-        e.target.value = e.target.value.replace(/[^0-9]/g, "");
+      // ── Group ID inputs: numeric entry, four-digit display ──
+      ["teamGroupId", "forgotGroupId"].forEach((inputId) => {
+        const input = document.getElementById(inputId);
+        input.addEventListener("input", (event) => {
+          event.target.value = event.target.value.replace(/[^0-9]/g, "").slice(0, 4);
+        });
+        input.addEventListener("blur", (event) => {
+          if (event.target.value) event.target.value = event.target.value.padStart(4, "0");
+        });
       });
 
       // Do this after the controls are active. A slow API check must never
