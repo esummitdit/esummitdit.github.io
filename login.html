@@ -116,47 +116,56 @@
             <input id="teamPasswordInput" name="team_secret" type="password" placeholder="••••••••" required autocomplete="new-password" spellcheck="false">
           </div>
 
-          <div style="display:flex; justify-content:flex-end; margin-bottom:0.75rem;">
-            <button type="button" id="openForgotPwBtn" style="background:none; border:none; font-size:0.8rem; color:var(--muted-ink); text-decoration:underline; cursor:pointer;">Forgot Team Password?</button>
-          </div>
-
           <div id="teamLoginError" class="login-error" role="alert"></div>
 
           <button class="button button--ink login-submit" type="submit" id="teamLoginBtn">
             Access Team Portal <span aria-hidden="true">→</span>
           </button>
+          <div class="login-recovery-help">
+            <span>Can't get in?</span>
+            <button type="button" id="openForgotPwBtn">Forgot password</button>
+          </div>
         </form>
 
-        <!-- Forgot Password Modal -->
-        <form class="login-card login-card--hidden" id="forgotPwCard" style="border: 2px solid var(--ink);" novalidate>
+        <!-- Team account recovery -->
+        <form class="login-card login-card--hidden recovery-card" id="forgotPwCard" novalidate aria-labelledby="recovery-title">
+          <div class="recovery-topline"><span>TEAM ACCOUNT RECOVERY</span><span id="recoveryStep" aria-live="polite">STEP 1 OF 2</span></div>
           <div class="login-card-header">
-            <span class="step-num">🔑</span>
+            <span class="step-num">02</span>
             <div>
-              <h2 class="login-card-title">Forgot Team Password?</h2>
-              <p class="section-hint">Enter your Group ID, answer your security question, and reset your password.</p>
+              <h2 id="recovery-title" class="login-card-title">Reset your team password</h2>
+              <p class="section-hint">First find the recovery question saved for your team. Then set new credentials.</p>
             </div>
           </div>
 
-          <div class="field-group">
-            <label for="forgotGroupId">Group ID</label>
-            <div class="group-id-input-wrapper">
-              <span class="group-id-prefix">ES2026_</span>
-              <input id="forgotGroupId" name="recovery_group_code" type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="0001" required autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-form-type="other">
-            </div>
-          </div>
-
-          <button type="button" class="button button--secondary" id="fetchSecQBtn" style="width:100%; justify-content:center; margin-bottom:1rem;">
-            Find Security Question <span aria-hidden="true">↓</span>
-          </button>
-
-          <div id="secQStep" style="display:none;">
+          <div id="recoveryLookupStep">
             <div class="field-group">
-              <label id="secQuestionLabel" style="font-weight:700; color:var(--ink); display:block; margin-bottom:0.4rem;"></label>
-              <input id="forgotSecAnswer" placeholder="Your security answer" required>
+              <label for="forgotGroupId">Group ID</label>
+              <div class="group-id-input-wrapper">
+                <span class="group-id-prefix">ES2026_</span>
+                <input id="forgotGroupId" name="recovery_group_code" type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="0001" required autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-form-type="other">
+              </div>
+            </div>
+
+            <button type="button" class="button button--secondary" id="fetchSecQBtn" style="width:100%; justify-content:center; margin-bottom:1rem;">
+              Continue to recovery question <span aria-hidden="true">→</span>
+            </button>
+          </div>
+
+          <fieldset id="secQStep" class="recovery-credentials" hidden>
+            <legend>Confirm your team</legend>
+            <div class="field-group">
+              <p id="secQuestionLabel" class="recovery-question"></p>
+              <label for="forgotSecAnswer">Your saved answer</label>
+              <input id="forgotSecAnswer" type="text" autocomplete="off" placeholder="Enter the answer you originally set" required>
             </div>
             <div class="field-group">
               <label for="forgotNewPw">New Team Password</label>
-              <input id="forgotNewPw" type="password" placeholder="At least 6 characters" required minlength="6">
+              <input id="forgotNewPw" type="password" autocomplete="new-password" placeholder="At least 6 characters" required minlength="6">
+            </div>
+            <div class="field-group">
+              <label for="forgotNewPwConfirm">Confirm New Password</label>
+              <input id="forgotNewPwConfirm" type="password" autocomplete="new-password" placeholder="Re-enter the new password" required minlength="6">
             </div>
             <div class="field-group">
               <label for="forgotNewSecurityQuestion">New Security Question</label>
@@ -173,9 +182,9 @@
               <input id="forgotNewSecurityAnswer" placeholder="Enter a new security answer" required>
             </div>
             <button class="button button--ink" type="submit" id="submitForgotBtn" style="width:100%; justify-content:center; margin-top:0.5rem;">
-              Reset Team Password & Log In <span aria-hidden="true">→</span>
+              Save new credentials <span aria-hidden="true">→</span>
             </button>
-          </div>
+          </fieldset>
 
           <div id="forgotError" class="login-error" role="alert"></div>
 
@@ -188,7 +197,7 @@
             </div>
           </div>
 
-          <button type="button" id="closeForgotBtn" style="background:none; border:none; color:var(--muted-ink); font-size:0.8rem; margin-top:0.75rem; text-decoration:underline; cursor:pointer; width:100%; text-align:center;">Cancel & Return to Login</button>
+          <button type="button" id="closeForgotBtn" class="recovery-cancel">← Back to team sign in</button>
         </form>
 
         <!-- Admin Login Form -->
@@ -266,6 +275,7 @@
       function setRole(role) {
         document.querySelectorAll(".role-card").forEach(c => c.classList.remove("is-active"));
         [teamForm, adminForm, forgotCard].forEach(form => form?.classList.add("login-card--hidden"));
+        document.getElementById("roleSelector")?.setAttribute("data-role", role);
         if (role === "team") {
           roleTeam.classList.add("is-active");
           teamForm.classList.remove("login-card--hidden");
@@ -305,8 +315,7 @@
         openForgotBtn.addEventListener("click", () => {
           [teamForm, adminForm].forEach(form => form?.classList.add("login-card--hidden"));
           forgotCard.classList.remove("login-card--hidden");
-          forgotError.textContent = "";
-          forgotSuccess.hidden = true;
+          resetRecovery();
         });
       }
 
@@ -320,19 +329,31 @@
         fetchSecQBtn.addEventListener("click", async () => {
           forgotError.textContent = "";
           const groupId = normalizeGroupId(document.getElementById("forgotGroupId").value);
+          if (!groupId) {
+            forgotError.textContent = "Enter the four digits of your Group ID first.";
+            document.getElementById("forgotGroupId").focus();
+            return;
+          }
           const apiBase = (typeof API_BASE !== "undefined") ? API_BASE : "/api";
+          fetchSecQBtn.disabled = true;
+          fetchSecQBtn.innerHTML = 'Finding your recovery question… <span aria-hidden="true">⟳</span>';
           try {
             const res = await fetch(`${apiBase}/teams/security-question/${groupId}`);
             const data = await res.json();
             if (res.ok) {
               secQuestionLabel.textContent = "Security Question: " + data.security_question;
-              secQStep.style.display = "block";
-              fetchSecQBtn.style.display = "none";
+              secQStep.hidden = false;
+              document.getElementById("recoveryLookupStep").hidden = true;
+              document.getElementById("recoveryStep").textContent = "STEP 2 OF 2";
+              document.getElementById("forgotSecAnswer").focus();
             } else {
-              forgotError.textContent = data.detail || "Group ID not found.";
+              forgotError.textContent = "We couldn’t find that Group ID. Check the four digits and try again.";
             }
           } catch {
             forgotError.textContent = "We couldn't retrieve the security question right now. Please try again later or contact the technical team.";
+          } finally {
+            fetchSecQBtn.disabled = false;
+            fetchSecQBtn.innerHTML = 'Continue to recovery question <span aria-hidden="true">→</span>';
           }
         });
       }
@@ -344,6 +365,7 @@
           const groupId = normalizeGroupId(document.getElementById("forgotGroupId").value);
           const securityAnswer = document.getElementById("forgotSecAnswer").value.trim();
           const newPassword = document.getElementById("forgotNewPw").value;
+          const confirmPassword = document.getElementById("forgotNewPwConfirm").value;
           const newSecurityQuestion = document.getElementById("forgotNewSecurityQuestion").value;
           const newSecurityAnswer = document.getElementById("forgotNewSecurityAnswer").value.trim();
 
@@ -351,8 +373,21 @@
             forgotError.textContent = "Please provide the current answer, a new password, and a new security question and answer.";
             return;
           }
+          if (newPassword !== confirmPassword) {
+            forgotError.textContent = "The two new passwords do not match.";
+            document.getElementById("forgotNewPwConfirm").focus();
+            return;
+          }
+          if (newPassword.length < 6) {
+            forgotError.textContent = "Choose a new password with at least 6 characters.";
+            document.getElementById("forgotNewPw").focus();
+            return;
+          }
 
           const apiBase = (typeof API_BASE !== "undefined") ? API_BASE : "/api";
+          const submitButton = document.getElementById("submitForgotBtn");
+          submitButton.disabled = true;
+          submitButton.innerHTML = 'Saving new credentials… <span aria-hidden="true">⟳</span>';
           try {
             const res = await fetch(`${apiBase}/teams/forgot-password`, {
               method: "POST",
@@ -370,17 +405,32 @@
               forgotError.textContent = "";
               forgotSuccessGroupId.textContent = groupId;
               forgotSuccess.hidden = false;
-              secQStep.style.display = "none";
-              fetchSecQBtn.style.display = "none";
-              document.getElementById("closeForgotBtn").style.display = "none";
+              secQStep.hidden = true;
+              document.getElementById("recoveryLookupStep").hidden = true;
+              document.getElementById("closeForgotBtn").hidden = true;
               forgotSuccess.scrollIntoView({ behavior: "smooth", block: "center" });
             } else {
               forgotError.textContent = data.detail || "Failed to reset password.";
             }
           } catch {
             forgotError.textContent = "Your password changes couldn't be saved right now. Please try again later or contact the technical team.";
+          } finally {
+            submitButton.disabled = false;
+            submitButton.innerHTML = 'Save new credentials <span aria-hidden="true">→</span>';
           }
         });
+      }
+
+      function resetRecovery() {
+        forgotCard.reset();
+        forgotError.textContent = "";
+        forgotSuccess.hidden = true;
+        secQStep.hidden = true;
+        document.getElementById("recoveryLookupStep").hidden = false;
+        document.getElementById("recoveryStep").textContent = "STEP 1 OF 2";
+        closeForgotBtn.hidden = false;
+        fetchSecQBtn.disabled = false;
+        fetchSecQBtn.innerHTML = 'Continue to recovery question <span aria-hidden="true">→</span>';
       }
 
       returnToTeamLogin?.addEventListener("click", (event) => {
