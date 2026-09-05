@@ -1,7 +1,7 @@
 :root {
   --paper: #e9e1d2; --paper-deep: #d8cdb9; --ink: #1a1814; --muted-ink: #60594e;
   --oxide: #d84b2d; --acid: #d3e83d; --line: rgba(26, 24, 20, 0.15);
-  --display: "Archivo", Arial, sans-serif; --mono: "DM Mono", monospace;
+  --display: "Archivo", Arial, sans-serif; --mono: "DM Mono", monospace; --header-height: 76px;
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
@@ -46,6 +46,10 @@ body.is-loading.is-launching .site-header::after { opacity: .04; }
 .header-login:hover { border-color: var(--ink); background: rgba(26,24,20,0.06); transform: translateY(-2px); }
 .header-action { padding: .65rem 1rem; border: 1px solid var(--ink); border-radius: 999px; background: var(--acid); font-family: var(--mono); font-size: .69rem; font-weight: 600; text-transform: uppercase; box-shadow: 0 4px 14px rgba(211,232,61,0.35); transition: all .25s cubic-bezier(.2,.8,.2,1); }
 .header-action:hover, .button:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(26,24,20,0.18); }
+
+/* Anchor destinations need room below the sticky header. This keeps the
+   rounded section frame fully visible instead of pinning it to the header. */
+:where(section[id], footer[id]) { scroll-margin-top: calc(var(--header-height) + clamp(1.25rem, 2vw, 2rem)); }
 
 .hero { position: relative; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(350px, .9fr); grid-template-rows: 1fr auto; max-width: 1500px; min-height: calc(100vh - 76px); margin: auto; padding: clamp(2rem, 4vw, 4rem) 2rem 2rem; overflow: hidden; }
 .hero-grid { position: absolute; inset: 0 2rem; background-image: repeating-linear-gradient(to right, transparent, transparent calc(58.1% - 1px), rgba(26,24,20,.06) calc(58.1% - 1px), rgba(26,24,20,.06) 58.1%), repeating-linear-gradient(to bottom, transparent, transparent calc(4rem - 1px), rgba(26,24,20,.05) calc(4rem - 1px), rgba(26,24,20,.05) 4rem); pointer-events: none; }
