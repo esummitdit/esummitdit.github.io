@@ -132,7 +132,11 @@ async function setUpSessionAwareHomepage() {
 
 window.addEventListener("esummit:logout", () => {
   // Each open page returns to its signed-out state without retaining a token.
-  window.location.reload();
+  if (window.location.pathname.endsWith("dashboard.html") || window.location.pathname.endsWith("login.html")) {
+    window.location.replace("index.html");
+  } else {
+    window.location.reload();
+  }
 });
 
 function restoreReloadPosition() {

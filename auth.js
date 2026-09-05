@@ -51,6 +51,14 @@ const Auth = (() => {
     if (event.key === LOGOUT_EVENT_KEY && event.newValue) _clearRemoteSession();
   });
 
+  window.addEventListener("esummit:logout", () => {
+    // A logout issued in another open tab must not leave a protected page
+    // visible with stale content.
+    if (!window.location.pathname.endsWith("index.html") && window.location.pathname !== "/") {
+      window.location.replace("index.html");
+    }
+  });
+
   function _decodePayload(token) {
     try {
       const payload = token.split(".")[1];
@@ -101,11 +109,11 @@ const Auth = (() => {
       }
     },
 
-    /** Clear this session, notify open E-Summit tabs, then redirect. */
+    /** Clear this session, notify open E-Summit tabs, then return home. */
     logout() {
       _setToken(null);
       _notifyOtherPagesOfLogout();
-      window.location.href = "login.html";
+      window.location.href = "index.html";
     },
 
     /** Get raw JWT token for API calls. */

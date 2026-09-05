@@ -210,14 +210,7 @@
   </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      // Logged-in users never need to see or interact with the login form.
-      // The API verifies the token before redirecting to the portal.
-      if (await Auth.validateSession()) {
-        window.location.replace("dashboard.html");
-        return;
-      }
-
+    document.addEventListener("DOMContentLoaded", () => {
       const roleTeam = document.getElementById("roleTeam");
       const roleAdmin = document.getElementById("roleAdmin");
       const teamForm = document.getElementById("teamLoginForm");
@@ -395,6 +388,12 @@
       // ── Group ID input: numbers only ──
       document.getElementById("teamGroupId").addEventListener("input", (e) => {
         e.target.value = e.target.value.replace(/[^0-9]/g, "");
+      });
+
+      // Do this after the controls are active. A slow API check must never
+      // make the Admin/Team selector feel unclickable.
+      void Auth.validateSession().then((session) => {
+        if (session) window.location.replace("dashboard.html");
       });
     });
   </script>
