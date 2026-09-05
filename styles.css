@@ -472,6 +472,11 @@ select option { background-color: #faf7f2; color: #1a1814; padding: 8px; }
 .login-card-header { display: flex; align-items: flex-start; gap: .85rem; margin-bottom: 1.6rem; }
 .login-card-title { margin: 0; font-size: 1.15rem; font-weight: 700; letter-spacing: -.03em; }
 .login-error { min-height: 1rem; margin: .6rem 0; font-family: var(--mono); font-size: .72rem; color: var(--oxide); font-weight: 600; }
+.login-success-message { display: flex; align-items: flex-start; gap: .8rem; margin-top: .8rem; padding: 1rem; border: 1px solid rgba(21,115,59,.35); border-radius: 14px; background: rgba(21,115,59,.08); color: var(--ink); }
+.login-success-icon { display: grid; place-items: center; width: 2rem; height: 2rem; flex: 0 0 auto; border-radius: 50%; background: #15733b; color: #fff; font-weight: 800; }
+.login-success-message h3 { margin: .05rem 0 .3rem; font-size: 1rem; }
+.login-success-message p { margin: 0 0 .8rem; color: var(--muted-ink); font-size: .83rem; line-height: 1.4; }
+.login-success-message .button { width: 100%; justify-content: center; min-width: 0; padding: .7rem .8rem; font-size: .65rem; }
 .login-submit { width: 100%; justify-content: center; margin-top: .4rem; }
 
 /* Group ID Prefix Input */

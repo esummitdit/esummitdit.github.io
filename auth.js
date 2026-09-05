@@ -110,10 +110,10 @@ const Auth = (() => {
     },
 
     /** Clear this session, notify open E-Summit tabs, then return home. */
-    logout() {
+    logout(destination = "index.html") {
       _setToken(null);
       _notifyOtherPagesOfLogout();
-      window.location.href = "index.html";
+      window.location.href = destination;
     },
 
     /** Get raw JWT token for API calls. */

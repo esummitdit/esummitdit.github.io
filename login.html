@@ -173,6 +173,15 @@
 
           <div id="forgotError" class="login-error" role="alert"></div>
 
+          <div id="forgotSuccess" class="login-success-message" hidden aria-live="polite">
+            <div class="login-success-icon" aria-hidden="true">✓</div>
+            <div>
+              <h3>Password updated successfully.</h3>
+              <p>Your team password and security question have been reset for <strong id="forgotSuccessGroupId"></strong>.</p>
+              <a href="#" id="returnToTeamLogin" class="button button--ink">Return to Team Login <span aria-hidden="true">→</span></a>
+            </div>
+          </div>
+
           <button type="button" id="closeForgotBtn" style="background:none; border:none; color:var(--muted-ink); font-size:0.8rem; margin-top:0.75rem; text-decoration:underline; cursor:pointer; width:100%; text-align:center;">Cancel & Return to Login</button>
         </form>
 
@@ -277,6 +286,9 @@
       const secQStep = document.getElementById("secQStep");
       const secQuestionLabel = document.getElementById("secQuestionLabel");
       const forgotError = document.getElementById("forgotError");
+      const forgotSuccess = document.getElementById("forgotSuccess");
+      const forgotSuccessGroupId = document.getElementById("forgotSuccessGroupId");
+      const returnToTeamLogin = document.getElementById("returnToTeamLogin");
 
       // Initialize only after every form reference used by setRole exists.
       setRole("team");
@@ -286,6 +298,7 @@
           [teamForm, adminForm].forEach(form => form?.classList.add("login-card--hidden"));
           forgotCard.classList.remove("login-card--hidden");
           forgotError.textContent = "";
+          forgotSuccess.hidden = true;
         });
       }
 
@@ -346,9 +359,13 @@
             });
             const data = await res.json();
             if (res.ok) {
-              alert("Password reset successful! Logging you into your Team Portal…");
-              const result = await Auth.login("team", { group_id: groupId, password: newPassword });
-              if (result.success) window.location.href = "dashboard.html";
+              forgotError.textContent = "";
+              forgotSuccessGroupId.textContent = groupId;
+              forgotSuccess.hidden = false;
+              secQStep.style.display = "none";
+              fetchSecQBtn.style.display = "none";
+              document.getElementById("closeForgotBtn").style.display = "none";
+              forgotSuccess.scrollIntoView({ behavior: "smooth", block: "center" });
             } else {
               forgotError.textContent = data.detail || "Failed to reset password.";
             }
@@ -357,6 +374,14 @@
           }
         });
       }
+
+      returnToTeamLogin?.addEventListener("click", (event) => {
+        event.preventDefault();
+        document.getElementById("teamGroupId").value = normalizeGroupId(forgotSuccessGroupId.textContent).replace("ES2026_", "");
+        setRole("team");
+        document.getElementById("teamPasswordInput").value = "";
+        document.getElementById("teamPasswordInput").focus();
+      });
 
       // ── Team Login ──
       teamForm.addEventListener("submit", async (e) => {

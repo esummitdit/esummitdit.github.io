@@ -58,9 +58,17 @@ document.addEventListener("DOMContentLoaded", async () => {
             </div>
             <div id="changePwError" class="login-error" style="margin-bottom:1rem;" role="alert"></div>
             <button class="button button--ink" type="submit" style="width:100%; justify-content:center;">
-              Set New Password & Continue <span aria-hidden="true">→</span>
+              Save New Password <span aria-hidden="true">→</span>
             </button>
           </form>
+          <div id="adminPasswordSuccess" class="login-success-message" hidden aria-live="polite">
+            <div class="login-success-icon" aria-hidden="true">✓</div>
+            <div>
+              <h3>Password updated successfully.</h3>
+              <p>Your administrator password is now active. You are not logged in automatically.</p>
+              <button type="button" class="button button--ink" id="adminReturnToLogin" style="width:100%; justify-content:center;">Return to Login <span aria-hidden="true">→</span></button>
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -80,8 +88,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
         const data = await res.json();
         if (res.ok) {
-          alert("Password changed successfully! Please log in with your new password.");
-          Auth.logout();
+          document.getElementById("changePasswordForm").hidden = true;
+          document.getElementById("adminPasswordSuccess").hidden = false;
+          document.getElementById("adminReturnToLogin").addEventListener("click", () => {
+            Auth.logout("login.html");
+          }, { once: true });
         } else {
           errEl.textContent = data.detail || "Failed to update password.";
         }
