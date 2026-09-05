@@ -627,6 +627,8 @@ function setUpRegistrationForm() {
   const status = document.getElementById("formStatus");
   const teamSizeSelect = document.getElementById("teamSize");
   const rosterGrid = document.getElementById("teamRosterGrid");
+  const registrationOrbit = document.querySelector(".registration-orbit");
+  const registrationCompanion = document.querySelector(".registration-companion");
   const rosterMemoryBar = document.getElementById("rosterMemoryBar");
   if (!form || !status || !teamSizeSelect || !rosterGrid) return;
   if (form.dataset.registrationLocked === "true") return;
@@ -657,6 +659,28 @@ function setUpRegistrationForm() {
     });
   }
   window._saveCurrentInputsToState = saveCurrentInputsToState;
+
+  if (registrationOrbit) {
+    const companionMessage = registrationCompanion?.querySelector(".companion-message");
+    const updateOrbit = () => {
+      const completedFields = [...form.querySelectorAll("input, select, textarea")]
+        .filter((field) => field.type !== "file" && field.value.trim()).length;
+      const state = completedFields >= 8 ? "ready" : completedFields > 0 ? "moving" : "start";
+      registrationOrbit.classList.toggle("is-progressing", completedFields > 0);
+      registrationOrbit.classList.toggle("is-complete", completedFields >= 8);
+      registrationCompanion?.setAttribute("data-companion-state", state);
+      if (companionMessage) {
+        companionMessage.textContent = state === "ready"
+          ? "That’s the whole crew. Ready when you are!"
+          : state === "moving"
+            ? "Lovely. Your team is taking shape."
+            : "Start anywhere. I’ll keep watch.";
+      }
+    };
+    form.addEventListener("input", updateOrbit);
+    form.addEventListener("change", updateOrbit);
+    updateOrbit();
+  }
 
   function updateMemoryBar() {
     if (!rosterMemoryBar) return;
@@ -903,9 +927,7 @@ function setUpRegistrationForm() {
   });
 
   rosterData = [
-    { id: 1, name: "", email: "", personal_email: "", college_id: "", phone: "", role: "Team Leader / Primary Contact", photo_url: "", isLeader: true },
-    { id: 2, name: "", email: "", personal_email: "", college_id: "", phone: "", role: "UI/UX & Frontend Lead", photo_url: "", isLeader: false },
-    { id: 3, name: "", email: "", personal_email: "", college_id: "", phone: "", role: "Backend & Systems Lead", photo_url: "", isLeader: false }
+    { id: 1, name: "", email: "", personal_email: "", college_id: "", phone: "", role: "Team Leader / Primary Contact", photo_url: "", isLeader: true }
   ];
   renderRosterStack();
 
