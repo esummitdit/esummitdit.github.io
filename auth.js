@@ -245,12 +245,14 @@ const Auth = (() => {
     },
 
     /**
-     * Wrapper around fetch() that injects the JWT Authorization header.
+     * Wrapper around fetch() that injects the JWT Authorization header with
+     * automatic retry backoff for rate limits (429) and transient network drops.
      * @param {string} url - API endpoint path (appended to API_BASE)
      * @param {RequestInit} opts - fetch options
+     * @param {number} attempt - internal retry counter
      * @returns {Promise<Response>}
      */
-    async apiFetch(url, opts = {}) {
+    async apiFetch(url, opts = {}, attempt = 1) {
       const token = this.getToken();
       if (!token) {
         this.logout();
@@ -263,7 +265,23 @@ const Auth = (() => {
         ...(opts.headers || {}),
       };
 
-      const res = await fetch(`${API_BASE}${url}`, { ...opts, headers });
+      let res;
+      try {
+        res = await fetch(`${API_BASE}${url}`, { ...opts, headers });
+      } catch (networkErr) {
+        if (attempt <= 2) {
+          await new Promise((r) => setTimeout(r, 800 * attempt));
+          return this.apiFetch(url, opts, attempt + 1);
+        }
+        throw networkErr;
+      }
+
+      if (res.status === 429 && attempt <= 2) {
+        const retryHeader = res.headers.get("Retry-After");
+        const waitMs = retryHeader ? Math.min(parseInt(retryHeader, 10) * 1000, 3000) : 1000 * attempt;
+        await new Promise((r) => setTimeout(r, waitMs));
+        return this.apiFetch(url, opts, attempt + 1);
+      }
 
       if (res.status === 401) {
         this.logout();

@@ -20,13 +20,29 @@ if (typeof window !== "undefined" && window.location) {
   const MAX_ZOOM = 1;
   const root = document.documentElement;
 
+  // Browser zoom is an accessibility choice. CSS zoom compounds with it and
+  // can leave a page positioned for a much larger virtual viewport. Detect
+  // desktop browser zoom from the browser frame ratio and let responsive CSS
+  // own the layout at those magnifications.
+  function isBrowserZoomed() {
+    if (!window.outerWidth || !window.innerWidth) return false;
+    return (window.outerWidth / window.innerWidth) > 1.25;
+  }
+
   function applyScaling() {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
+    const browserZoomed = isBrowserZoomed();
 
-    if (viewportWidth <= 1024) {
+    root.classList.toggle("browser-zoom-context", browserZoomed);
+
+    if (viewportWidth <= 1024 || browserZoomed) {
       root.style.zoom = "1";
       root.style.setProperty("--real-vh", `${viewportHeight}px`);
+      // The opening animation uses absolute measurements. Skipping it for a
+      // high browser zoom avoids a distorted, empty intermediate stage while
+      // preserving the desktop scaling system at normal zoom.
+      if (browserZoomed) root.classList.add("skip-opening");
       return;
     }
 
@@ -48,7 +64,8 @@ if (typeof window !== "undefined" && window.location) {
 
     const updateDebugPanel = () => {
       const zoom = root.style.zoom || "1";
-      debugPanel.innerHTML = `<strong>Viewport</strong><span>${window.innerWidth} × ${window.innerHeight}</span><strong>Scale</strong><span>${zoom}</span><strong>Pixel ratio</strong><span>${window.devicePixelRatio}</span>`;
+      const browserScale = isBrowserZoomed() ? "browser zoom" : "normal";
+      debugPanel.innerHTML = `<strong>Viewport</strong><span>${window.innerWidth} × ${window.innerHeight}</span><strong>Scale</strong><span>${zoom}</span><strong>Browser</strong><span>${browserScale}</span><strong>Pixel ratio</strong><span>${window.devicePixelRatio}</span>`;
     };
 
     updateDebugPanel();

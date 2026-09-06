@@ -43,7 +43,7 @@
   <script src="auth.js" defer></script>
   <script src="script.js" defer></script>
 </head>
-<body>
+<body class="site-body">
   <div class="site-grain" aria-hidden="true"></div>
   <div id="ambientCursorGlow" class="ambient-cursor-glow" aria-hidden="true"></div>
 
@@ -103,7 +103,6 @@
       </div>
 
       <aside class="hero-side-note" aria-label="Summit proposition">
-        <span class="side-number" aria-hidden="true">01</span>
         <p>A DIT University space for questions, conversations and work worth sharing.</p>
       </aside>
     </section>
@@ -447,49 +446,22 @@
     <section id="registration" class="registration" aria-labelledby="registration-title">
       <div class="registration-copy reveal">
         <p class="eyebrow">10 / REGISTRATION DESK</p>
-        <h2 id="registration-title">Register<br>your group.</h2>
-        <p>Comprehensive registration desk for E-Summit 2026 (Sep 26–28). Select your participant count to dynamically generate member credentials linked to your official Group ID.</p>
-        <ul class="registration-promise" aria-label="Registration benefits">
-          <li><span>01</span><strong>One secure group account</strong><small>Your Group ID and portal access arrive after submission.</small></li>
-          <li><span>02</span><strong>Build your roster as you go</strong><small>Start solo, then add up to six participants whenever you are ready.</small></li>
-          <li><span>03</span><strong>Save time on every device</strong><small>Designed for quick completion on a phone, tablet, or laptop.</small></li>
-        </ul>
-        <div class="registration-orbit" aria-hidden="true">
-          <div class="orbit-ring orbit-ring--outer"></div>
-          <div class="orbit-ring orbit-ring--inner"></div>
-          <div class="orbit-core"><span>START<br>HERE</span></div>
-          <span class="orbit-node orbit-node--one">01</span>
-          <span class="orbit-node orbit-node--two">02</span>
-          <span class="orbit-node orbit-node--three">03</span>
-          <span class="orbit-spark orbit-spark--one"></span>
-          <span class="orbit-spark orbit-spark--two"></span>
-        </div>
+        <h2 id="registration-title">Make your<br>entry.</h2>
+        <p>One clear form for your team, track, and participants. Add up to six people, then receive the Group ID you’ll use at check-in.</p>
+        <p class="registration-copy-note">Save your Group ID and portal password after submitting.</p>
       </div>
       <div id="registrationLockedNotice" class="registration-locked-notice" hidden aria-live="polite"></div>
       <form id="registrationForm" class="registration-form reveal" data-api-endpoint="" novalidate>
         <div class="registration-form-intro">
           <div>
             <p class="form-kicker">REGISTRATION / 2026</p>
-            <h3>Let's get your team on the list.</h3>
+            <h3>Register your team.</h3>
           </div>
-          <div class="registration-companion" data-companion-state="start" aria-hidden="true">
-            <div class="companion-bubble"><span class="companion-message">Start anywhere. I’ll keep watch.</span></div>
-            <div class="companion-figure">
-              <span class="companion-antenna"></span>
-              <span class="companion-ear companion-ear--left"></span>
-              <span class="companion-ear companion-ear--right"></span>
-              <span class="companion-face"><i></i><i></i><b></b></span>
-              <span class="companion-body"><i></i><i></i></span>
-              <span class="companion-hand companion-hand--left"></span>
-              <span class="companion-hand companion-hand--right"></span>
-            </div>
-          </div>
-          <p class="form-intro-note"><span aria-hidden="true">●</span> Takes about 5 minutes</p>
         </div>
         <div class="group-header-card">
           <div class="desk-status-badge">
             <span class="pulse-dot"></span>
-            <span>REGISTRATION DESK ACTIVE &nbsp;—&nbsp; Official Group ID will be issued upon form submission</span>
+            <span>Group ID issued with your confirmation</span>
           </div>
         </div>
 
@@ -500,7 +472,7 @@
 
         <div class="field-group">
           <label for="teamName">Team / Project Name</label>
-          <input id="teamName" name="teamName" autocomplete="organization" placeholder="e.g. Solo Innovator or Team CyberPulse" required>
+          <input id="teamName" name="teamName" autocomplete="organization" placeholder="e.g. Solo Innovator or Team CyberPulse" required minlength="2" maxlength="100">
         </div>
 
         <div class="field-group field-group--split">
@@ -530,14 +502,14 @@
 
         <div class="field-group">
           <label for="college">College / University / Institution</label>
-          <input id="college" name="college" autocomplete="organization" placeholder="e.g. DIT University, Dehradun" required>
+          <input id="college" name="college" autocomplete="organization" placeholder="e.g. DIT University, Dehradun" required minlength="2" maxlength="160">
         </div>
 
         <div class="form-section-title form-section-title--roster">
           <span class="step-num">02</span>
           <div class="roster-head-text">
-            <h3>Team Roster Stack</h3>
-            <p class="section-hint">Add members dynamically (up to 6). Cards arrange in a responsive grid stack.</p>
+            <h3>Team roster</h3>
+            <p class="section-hint">Add up to six participants.</p>
           </div>
         </div>
 
@@ -552,19 +524,19 @@
         </div>
 
         <!-- Step 03: Team Security & Portal Password -->
-        <div class="form-section-title" style="margin-top: 2rem;">
+        <div class="form-section-title form-section-title--security">
           <span class="step-num">03</span>
-          <h3>Team Portal Security & Recovery</h3>
+          <h3>Portal access & recovery</h3>
         </div>
 
         <div class="field-group field-group--split">
           <div>
             <label for="teamPassword">Team Portal Password</label>
-            <input id="teamPassword" name="teamPassword" type="password" placeholder="Set a password for your team" required minlength="6">
+            <input id="teamPassword" name="teamPassword" type="password" placeholder="Set a password for your team" required minlength="6" maxlength="128">
           </div>
           <div>
             <label for="teamPasswordConfirm">Confirm Team Password</label>
-            <input id="teamPasswordConfirm" name="teamPasswordConfirm" type="password" placeholder="Re-enter password" required minlength="6">
+            <input id="teamPasswordConfirm" name="teamPasswordConfirm" type="password" placeholder="Re-enter password" required minlength="6" maxlength="128">
           </div>
         </div>
 
@@ -581,11 +553,11 @@
           </div>
           <div>
             <label for="securityAnswer">Security Answer</label>
-            <input id="securityAnswer" name="securityAnswer" placeholder="Enter security answer" required>
+            <input id="securityAnswer" name="securityAnswer" placeholder="Enter security answer" required maxlength="256">
           </div>
         </div>
 
-        <button class="button button--accent form-submit-btn" type="submit" style="margin-top: 1.5rem;">Submit Group Registration <span aria-hidden="true">→</span></button>
+        <button class="button button--accent form-submit-btn" type="submit">Submit group registration <span aria-hidden="true">→</span></button>
         <div id="formStatus" class="form-status" aria-live="polite"></div>
       </form>
     </section>
@@ -618,10 +590,12 @@
     </section>
   </main>
 
+  <a class="back-to-top-fab" href="#top" id="backToTopControl" hidden aria-label="Back to top">Top <span aria-hidden="true">↑</span></a>
+
   <footer class="site-footer">
     <a class="wordmark" href="#top" aria-label="Back to top"><span aria-hidden="true">E—</span><span>SUMMIT</span><sup>26</sup></a>
     <p>© 2026 CIIES, DIT University</p>
-    <a href="#top">Back to top <span aria-hidden="true">↑</span></a>
+    <a class="footer-back-top" href="#top" id="footerBackToTop">Back to top <span aria-hidden="true">↑</span></a>
   </footer>
 </body>
 </html>

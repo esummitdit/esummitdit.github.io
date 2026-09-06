@@ -60,6 +60,7 @@ function initializePage() {
   if (restoredAwayFromTop) document.body.classList.add("is-restored");
   setUpSculptureControl(sceneState, reduceMotion, true);
   setUpTopAnchorFix();
+  setUpBackToTopControl();
   void setUpSessionAwareHomepage();
   setUpRegistrationForm();
   setUpFaqAccordion();
@@ -75,6 +76,69 @@ function setUpTopAnchorFix() {
       }
     });
   });
+}
+
+function setUpBackToTopControl() {
+  const control = document.getElementById("backToTopControl");
+  const footerControl = document.getElementById("footerBackToTop");
+  if (!control) return;
+
+  let isMerged = false;
+  let mergeFrame = null;
+
+  const syncVisibility = () => {
+    control.hidden = window.scrollY < Math.max(420, window.innerHeight * 0.65);
+  };
+
+  const syncMergePosition = () => {
+    mergeFrame = null;
+    if (!isMerged || control.hidden || !footerControl) return;
+    const target = footerControl.getBoundingClientRect();
+    const source = control.getBoundingClientRect();
+    const x = target.left + (target.width - source.width) / 2 - source.left;
+    const y = target.top + (target.height - source.height) / 2 - source.top;
+    control.style.setProperty("--merge-x", `${Math.round(x)}px`);
+    control.style.setProperty("--merge-y", `${Math.round(y)}px`);
+  };
+
+  const queueMergePosition = () => {
+    if (!isMerged || mergeFrame) return;
+    mergeFrame = requestAnimationFrame(syncMergePosition);
+  };
+
+  const setMerged = (shouldMerge) => {
+    if (!footerControl || shouldMerge === isMerged) return;
+    isMerged = shouldMerge;
+    control.classList.toggle("is-merged", isMerged);
+    footerControl.classList.toggle("is-covered", isMerged);
+    control.innerHTML = isMerged
+      ? 'Back to top <span aria-hidden="true">↑</span>'
+      : 'Top <span aria-hidden="true">↑</span>';
+
+    if (isMerged) {
+      requestAnimationFrame(syncMergePosition);
+    } else {
+      control.style.removeProperty("--merge-x");
+      control.style.removeProperty("--merge-y");
+    }
+  };
+
+  syncVisibility();
+  window.addEventListener("scroll", () => {
+    syncVisibility();
+    queueMergePosition();
+  }, { passive: true });
+  window.addEventListener("resize", () => {
+    syncVisibility();
+    queueMergePosition();
+  }, { passive: true });
+
+  if (footerControl && "IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(([entry]) => {
+      setMerged(entry.isIntersecting);
+    }, { threshold: 0.15 });
+    observer.observe(footerControl);
+  }
 }
 
 async function setUpSessionAwareHomepage() {
@@ -894,7 +958,10 @@ function setUpRevealObserver(reduceMotion, revealImmediately = false) {
     item.style.setProperty("--reveal-delay", `${Math.min(itemIndex * 80, 400)}ms`);
   });
 
-  if (revealImmediately) {
+  // Content should never appear to be building itself while the visitor is
+  // already scrolling. Keep the opening sequence, but paint page sections
+  // immediately after it is complete.
+  if (revealImmediately || !document.documentElement.classList.contains("enable-scroll-reveals")) {
     document.documentElement.classList.add("is-restoring");
     items.forEach((item) => item.classList.add("is-visible"));
     requestAnimationFrame(() => document.documentElement.classList.remove("is-restoring"));
@@ -1008,6 +1075,48 @@ function setUpRegistrationForm() {
     { id: 1, name: "", email: "", phone: "", role: "Team Leader / Primary Contact", isLeader: true }
   ];
   let removedCache = [];
+  let nextMemberId = 2;
+  let isSubmitting = false;
+  const escapeHTML = (value) => String(value ?? "").replace(/[&<>'"]/g, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+  })[character]);
+
+  const createMember = () => ({
+    id: nextMemberId++, name: "", email: "", personal_email: "", college_id: "", phone: "", role: "", photo_url: "", isLeader: false
+  });
+
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,63}$/;
+  const indianPhonePattern = /^(?:\+91|91)?[6-9]\d{9}$/;
+  const setRegistrationFieldValidity = (field) => {
+    if (!(field instanceof HTMLInputElement || field instanceof HTMLSelectElement || field instanceof HTMLTextAreaElement)) return;
+    const value = field.value.trim();
+    let message = "";
+
+    if (field.type === "email" && value && !emailPattern.test(value)) {
+      message = "Enter a complete email address, for example name@example.com.";
+    } else if (field.id.endsWith("_phone") && value) {
+      const compact = value.replace(/[\s()\-]/g, "");
+      if (!indianPhonePattern.test(compact)) {
+        message = "Enter a valid 10-digit Indian mobile number, optionally prefixed with +91.";
+      }
+    }
+
+    field.setCustomValidity(message);
+    field.toggleAttribute("aria-invalid", Boolean(message));
+  };
+
+  const validateRegistrationForm = () => {
+    form.querySelectorAll("input, select, textarea").forEach(setRegistrationFieldValidity);
+    return form.reportValidity();
+  };
+
+  form.addEventListener("input", (event) => setRegistrationFieldValidity(event.target));
+  form.addEventListener("change", (event) => setRegistrationFieldValidity(event.target));
+  form.addEventListener("blur", (event) => {
+    const field = event.target;
+    setRegistrationFieldValidity(field);
+    if (field instanceof HTMLInputElement && field.value.trim()) field.reportValidity();
+  }, true);
 
   function saveCurrentInputsToState() {
     rosterData.forEach((member) => {
@@ -1102,32 +1211,32 @@ function setUpRegistrationForm() {
         </div>
         <div class="field-group field-group--split">
           <div>
-            <label for="member_${member.id}_name">${isLeader ? "Leader Full Name" : "Participant Name"}</label>
-            <input id="member_${member.id}_name" name="member_${member.id}_name" autocomplete="name" placeholder="Full name" value="${member.name || ''}" required>
+            <label for="member_${member.id}_name">${isLeader ? "Leader Full Name (Mandatory)" : "Participant Name (Mandatory)"}</label>
+            <input id="member_${member.id}_name" name="member_${member.id}_name" autocomplete="name" placeholder="Full name" value="${member.name || ''}" required minlength="2" maxlength="100">
           </div>
           <div>
-            <label for="member_${member.id}_college_id">College Roll No / Student ID (Optional)</label>
-            <input id="member_${member.id}_college_id" name="member_${member.id}_college_id" placeholder="e.g. 2001010045 (if available)" value="${member.college_id || ''}">
+            <label for="member_${member.id}_college_id">College Roll No / Student ID (Mandatory)</label>
+            <input id="member_${member.id}_college_id" name="member_${member.id}_college_id" placeholder="e.g. 2001010045" value="${member.college_id || ''}" required minlength="2" maxlength="64">
           </div>
         </div>
         <div class="field-group field-group--split">
           <div>
-            <label for="member_${member.id}_email">College / Institutional Email</label>
-            <input id="member_${member.id}_email" type="email" name="member_${member.id}_email" autocomplete="email" placeholder="10000xxxxx@dit.edu.in" value="${member.email || ''}" required>
+            <label for="member_${member.id}_email">College / Institutional Email (Mandatory)</label>
+            <input id="member_${member.id}_email" type="email" name="member_${member.id}_email" autocomplete="email" placeholder="10000xxxxx@dit.edu.in" value="${member.email || ''}" required maxlength="254">
           </div>
           <div>
             <label for="member_${member.id}_personal_email">Personal Email ID (Mandatory)</label>
-            <input id="member_${member.id}_personal_email" type="email" name="member_${member.id}_personal_email" autocomplete="email" placeholder="name@gmail.com" value="${member.personal_email || ''}" required>
+            <input id="member_${member.id}_personal_email" type="email" name="member_${member.id}_personal_email" autocomplete="email" placeholder="name@gmail.com" value="${member.personal_email || ''}" required maxlength="254">
           </div>
         </div>
         <div class="field-group field-group--split">
           <div>
-            <label for="member_${member.id}_phone">Phone / WhatsApp</label>
-            <input id="member_${member.id}_phone" type="tel" name="member_${member.id}_phone" autocomplete="tel" placeholder="+91 00000 XXXXX" value="${member.phone || ''}" required>
+            <label for="member_${member.id}_phone">Phone / WhatsApp (Mandatory)</label>
+            <input id="member_${member.id}_phone" type="tel" name="member_${member.id}_phone" inputmode="tel" autocomplete="tel" placeholder="+91 98765 43210" value="${member.phone || ''}" required maxlength="20" title="Use a 10-digit Indian mobile number, optionally prefixed with +91.">
           </div>
           <div>
-            <label for="member_${member.id}_role">Team Role / Specialty</label>
-            <input id="member_${member.id}_role" name="member_${member.id}_role" placeholder="${isLeader ? 'e.g. Lead Developer' : 'e.g. Designer / Pitcher'}" value="${member.role || ''}" required>
+            <label for="member_${member.id}_role">Team Role / Specialty (Mandatory)</label>
+            <input id="member_${member.id}_role" name="member_${member.id}_role" placeholder="${isLeader ? 'e.g. Lead Developer' : 'e.g. Designer / Pitcher'}" value="${member.role || ''}" required minlength="2" maxlength="80">
           </div>
         </div>
         <div class="field-group">
@@ -1143,8 +1252,8 @@ function setUpRegistrationForm() {
               <span>Upload photo from your device</span>
             </button>
             <div id="member_${member.id}_preview_wrap" class="custom-photo-preview-avatar">
-              ${member.photo_url
-                ? `<img src="${getApiAssetUrl(member.photo_url)}" style="width:100%; height:100%; object-fit:cover;">`
+              ${member._pendingPreview || member.photo_url
+                ? `<img src="${member._pendingPreview || getApiAssetUrl(member.photo_url)}" alt="Selected photo preview" style="width:100%; height:100%; object-fit:cover;">`
                 : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                      <circle cx="12" cy="7" r="4"></circle>
@@ -1156,7 +1265,7 @@ function setUpRegistrationForm() {
         </div>
         <div class="field-group">
           <label for="member_${member.id}_note">Member Note / Personal Details</label>
-          <textarea id="member_${member.id}_note" name="member_${member.id}_note" rows="2" class="member-note-textarea" placeholder="${isLeader ? 'e.g. Primary team contact, GitHub/Portfolio, or notes for CIIES organizers' : 'e.g. Skills (React/Python), GitHub link, or personal note to share'}">${member.note || ''}</textarea>
+          <textarea id="member_${member.id}_note" name="member_${member.id}_note" rows="2" class="member-note-textarea" maxlength="1000" placeholder="${isLeader ? 'e.g. Primary team contact, GitHub/Portfolio, or notes for CIIES organizers' : 'e.g. Skills (React/Python), GitHub link, or personal note to share'}">${member.note || ''}</textarea>
         </div>
       `;
 
@@ -1248,8 +1357,7 @@ function setUpRegistrationForm() {
   function addNewMember() {
     if (rosterData.length >= 6) return;
     saveCurrentInputsToState();
-    const newId = rosterData.length + 1;
-    rosterData.push({ id: newId, name: "", email: "", personal_email: "", college_id: "", phone: "", role: "", photo_url: "", isLeader: false });
+    rosterData.push(createMember());
     renderRosterStack();
   }
 
@@ -1269,7 +1377,6 @@ function setUpRegistrationForm() {
     if (rosterData.length >= 6) return;
     saveCurrentInputsToState();
     const restoredObj = removedCache.pop();
-    restoredObj.id = rosterData.length + 1;
     rosterData.push(restoredObj);
     renderRosterStack();
   }
@@ -1281,10 +1388,9 @@ function setUpRegistrationForm() {
     while (rosterData.length < targetCount && rosterData.length < 6) {
       if (removedCache.length > 0) {
         const restoredObj = removedCache.pop();
-        restoredObj.id = rosterData.length + 1;
         rosterData.push(restoredObj);
       } else {
-        rosterData.push({ id: rosterData.length + 1, name: "", email: "", personal_email: "", college_id: "", phone: "", role: "", photo_url: "", isLeader: false });
+        rosterData.push(createMember());
       }
     }
     while (rosterData.length > targetCount && rosterData.length > 1) {
@@ -1323,30 +1429,110 @@ function setUpRegistrationForm() {
       text.textContent = `${statusMsg} (${percent}%)`;
       if (percent > 45) text.classList.add("is-active");
       else text.classList.remove("is-active");
+      // The status travels with the work: each update advances it across the
+      // progress control without moving the form or delaying submission.
+      requestAnimationFrame(() => {
+        const travel = Math.max(0, progressWrap.clientWidth - text.offsetWidth - 28);
+        text.style.transform = `translate3d(${Math.round(travel * (percent / 100))}px, 0, 0)`;
+      });
+    }
+  }
+
+  function completeProgress() {
+    const submitBtn = form.querySelector("button[type='submit']");
+    const progressWrap = document.getElementById("submitProgressWrapper");
+    const progressText = document.getElementById("submitProgressText");
+    progressWrap?.classList.add("is-complete");
+    if (progressText && progressWrap) {
+      progressText.textContent = "Registration complete";
+      progressText.classList.add("is-active");
+      requestAnimationFrame(() => {
+        const travel = Math.max(0, progressWrap.clientWidth - progressText.offsetWidth - 28);
+        progressText.style.transform = `translate3d(${travel}px, 0, 0)`;
+      });
+    }
+    if (submitBtn) {
+      submitBtn.style.display = "inline-flex";
+      submitBtn.disabled = true;
+      submitBtn.classList.add("is-complete");
+      submitBtn.innerHTML = "Registration complete <span aria-hidden=\"true\">✓</span>";
     }
   }
 
   function resetProgress() {
     const submitBtn = form.querySelector("button[type='submit']");
     const progressWrap = document.getElementById("submitProgressWrapper");
-    if (progressWrap) progressWrap.style.display = "none";
+    if (progressWrap) {
+      progressWrap.style.display = "none";
+      progressWrap.classList.remove("is-complete");
+      const progressText = document.getElementById("submitProgressText");
+      if (progressText) progressText.style.transform = "translate3d(0, 0, 0)";
+    }
     if (submitBtn) {
       submitBtn.style.display = "inline-flex";
       submitBtn.disabled = false;
+      submitBtn.classList.remove("is-complete");
       submitBtn.innerHTML = "Submit Group Registration →";
     }
   }
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    if (!form.reportValidity()) return;
+    if (isSubmitting || form.dataset.registrationComplete === "true") return;
+    if (!validateRegistrationForm()) return;
+
+    isSubmitting = true;
 
     saveCurrentInputsToState();
+
+    // Strict global mandate verification across all team members
+    for (let i = 0; i < rosterData.length; i++) {
+      const m = rosterData[i];
+      const num = i + 1;
+      if (!m.name || !m.name.trim()) {
+        alert(`Member 0${num}: Full Name is mandatory.`);
+        document.getElementById(`member_${m.id}_name`)?.focus();
+        isSubmitting = false;
+        return;
+      }
+      if (!m.college_id || !m.college_id.trim()) {
+        alert(`Member 0${num}: College Roll No / Student ID is mandatory.`);
+        document.getElementById(`member_${m.id}_college_id`)?.focus();
+        isSubmitting = false;
+        return;
+      }
+      if (!m.email || !m.email.trim()) {
+        alert(`Member 0${num}: College / Institutional Email is mandatory.`);
+        document.getElementById(`member_${m.id}_email`)?.focus();
+        isSubmitting = false;
+        return;
+      }
+      if (!m.personal_email || !m.personal_email.trim()) {
+        alert(`Member 0${num}: Personal Email ID is mandatory.`);
+        document.getElementById(`member_${m.id}_personal_email`)?.focus();
+        isSubmitting = false;
+        return;
+      }
+      if (!m.phone || !m.phone.trim()) {
+        alert(`Member 0${num}: Phone / WhatsApp number is mandatory.`);
+        document.getElementById(`member_${m.id}_phone`)?.focus();
+        isSubmitting = false;
+        return;
+      }
+      if (!m.role || !m.role.trim()) {
+        alert(`Member 0${num}: Team Role / Specialty is mandatory.`);
+        document.getElementById(`member_${m.id}_role`)?.focus();
+        isSubmitting = false;
+        return;
+      }
+    }
+
     const formData = new FormData(form);
     const rawData = Object.fromEntries(formData.entries());
 
     if (rawData.teamPassword !== rawData.teamPasswordConfirm) {
       alert("Team passwords do not match. Please verify.");
+      isSubmitting = false;
       return;
     }
 
@@ -1383,15 +1569,18 @@ function setUpRegistrationForm() {
 
           if (pRes.ok && pData.photo_url) {
             m.photo_url = pData.photo_url;
+            m._pendingFile = null;
           } else {
             alert(`Photo upload error for member ${i + 1}: ${pData.detail || 'Upload failed.'}`);
             resetProgress();
+            isSubmitting = false;
             return;
           }
         } catch (uploadErr) {
           console.error("Photo upload network error:", uploadErr);
           alert(`Network error uploading photo for member ${i + 1}: ${uploadErr.message}`);
           resetProgress();
+          isSubmitting = false;
           return;
         }
       }
@@ -1419,6 +1608,7 @@ function setUpRegistrationForm() {
     };
 
     let assignedGroupId = null;
+    let registrationResult = null;
 
     try {
       const apiEndpoint = `${getApiBase()}/teams/register`;
@@ -1432,20 +1622,26 @@ function setUpRegistrationForm() {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.detail || "Registration could not be saved.");
       }
-      const resData = await response.json();
-      assignedGroupId = resData.group_id;
+      registrationResult = await response.json();
+      if (!registrationResult?.success || !registrationResult.group_id || !Array.isArray(registrationResult.members) || registrationResult.members.length !== rosterData.length) {
+        throw new Error("The server did not return a complete registration confirmation. Please try again.");
+      }
+      assignedGroupId = registrationResult.group_id;
       payload.members = payload.members.map((member, index) => ({
         ...member,
-        verification_code: resData.members?.[index]?.verification_code || ""
+        verification_code: registrationResult.members[index]?.verification_code || ""
       }));
     } catch (err) {
       console.error("Registration request failed:", err);
       alert(`Registration was not saved. ${err.message || "Please try again."}`);
       resetProgress();
+      isSubmitting = false;
       return;
     }
 
     updateProgress(100, "Registration Complete!");
+    completeProgress();
+    form.dataset.registrationComplete = "true";
 
     const teamName = payload.team_name;
     const track = payload.track;
@@ -1453,57 +1649,60 @@ function setUpRegistrationForm() {
 
     // Use the secure, signed photo URL returned by the server
     rosterData.forEach((member, index) => {
-      if (resData.members?.[index]?.photo_url) {
-        member.photo_url = resData.members[index].photo_url;
+      if (registrationResult.members[index]?.photo_url) {
+        member.photo_url = registrationResult.members[index].photo_url;
       }
     });
 
-    let membersListHtml = "";
     const displayMembers = payload.members.map((member, index) => ({
       ...member,
       ...rosterData[index],
       verification_code: member.verification_code
     }));
-    displayMembers.forEach((m, idx) => {
-      membersListHtml += `
-        <div style="margin-bottom:0.75rem;padding:0.85rem;background:rgba(255,255,255,0.7);border-radius:12px;border:1px solid rgba(26,24,20,0.12);display:flex;gap:1rem;align-items:center;">
-          <div style="width:48px;height:48px;border-radius:50%;border:2px solid var(--ink);overflow:hidden;flex-shrink:0;background:#eee;">
-            <img src="${m._pendingPreview || getApiAssetUrl(m.photo_url) || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(m.name || 'Member') + '&background=1a1814&color=e9e1d2'}" alt="${m.name || 'Member'} photo" style="width:100%;height:100%;object-fit:cover;">
+    const membersListHtml = displayMembers.map((member, index) => {
+      const photo = member._pendingPreview || getApiAssetUrl(member.photo_url) || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name || "Member")}&background=1a1814&color=e9e1d2`;
+      return `
+        <article class="registration-success-member">
+          <img src="${escapeHTML(photo)}" alt="Portrait of ${escapeHTML(member.name || "team member")}">
+          <div>
+            <strong>${index === 0 ? "Team lead" : `Member ${String(index + 1).padStart(2, "0")}`} · ${escapeHTML(member.name || "Not provided")}</strong>
+            <span>${escapeHTML(member.role || "Participant")}</span>
+            <small>${escapeHTML(member.email || "No institutional email")} · ${escapeHTML(member.phone || "No phone")}</small>
           </div>
-          <div style="flex:1;">
-            <div style="font-weight:700;font-size:0.95rem;">${idx === 0 ? "★ Leader: " : `Member ${idx + 1}: `}${m.name || "N/A"} <span style="font-size:0.75rem;color:var(--oxide);font-family:var(--mono);">(${m.role})</span></div>
-            <div style="font-size:0.78rem;color:var(--muted-ink);font-family:var(--mono);margin-top:0.2rem;">✉ Inst: ${m.email || "N/A"} &nbsp;|&nbsp; Personal: ${m.personal_email || "N/A"}</div>
-            <div style="font-size:0.78rem;color:var(--muted-ink);font-family:var(--mono);">📞 ${m.phone || "N/A"}${m.college_id ? ` &nbsp;|&nbsp; 🪪 ID: ${m.college_id}` : ""}</div>
-          </div>
-        </div>
-      `;
-    });
+          <code>${escapeHTML(member.verification_code || "Pending")}</code>
+        </article>`;
+    }).join("");
 
     status.innerHTML = `
-      <div class="registration-success-card registration-success-card--green">
-        <div class="success-header" style="display:flex;align-items:center;gap:1rem;border-bottom:2px dashed rgba(26,24,20,0.15);padding-bottom:1rem;">
+      <section class="registration-success-card registration-success-card--green" tabindex="-1" aria-labelledby="registration-success-title">
+        <div class="success-header">
           <div class="success-icon success-icon--green">✓</div>
           <div>
-            <h3 style="margin:0;font-size:1.3rem;font-weight:800;">Team Registration Successful!</h3>
-            <p class="success-group-id">ASSIGNED TEAM GROUP ID: ${assignedGroupId}</p>
+            <p class="form-kicker">Registration complete</p>
+            <h3 id="registration-success-title">Your team is registered.</h3>
+            <p class="success-group-id">Group ID · ${escapeHTML(assignedGroupId)}</p>
           </div>
         </div>
-        
-        <div style="margin-top:1.2rem;">
-          <p style="margin:0 0 0.8rem;font-size:0.92rem;"><strong>Team:</strong> ${teamName} &nbsp;|&nbsp; <strong>Track:</strong> ${track} &nbsp;|&nbsp; <strong>College:</strong> ${college}</p>
-          <div style="font-weight:700;font-family:var(--mono);font-size:0.75rem;text-transform:uppercase;color:var(--ink);margin-bottom:0.6rem;">Expanded Registered Roster (${payload.members.length} Members):</div>
+        <dl class="registration-success-summary">
+          <div><dt>Team</dt><dd>${escapeHTML(teamName)}</dd></div>
+          <div><dt>Track</dt><dd>${escapeHTML(track)}</dd></div>
+          <div><dt>Institution</dt><dd>${escapeHTML(college)}</dd></div>
+        </dl>
+        <div class="registration-success-roster">
+          <div class="registration-success-roster-head"><span>Registered roster</span><span>${displayMembers.length} ${displayMembers.length === 1 ? "member" : "members"}</span></div>
           ${membersListHtml}
         </div>
-
-        <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid rgba(26,24,20,0.12);display:flex;flex-direction:column;gap:0.75rem;text-align:center;">
+        <div class="registration-success-actions">
           <p class="success-save-note">Registration saved. Keep your Group ID safe for portal login.</p>
-          <div style="display:flex;gap:1rem;justify-content:center;">
-            <button type="button" class="button button--ink" id="downloadAllIdCardsBtn" style="flex:1;justify-content:center;">Download virtual ID cards ↓</button>
-            <a class="button button--ink" href="login" style="flex:1;justify-content:center;text-decoration:none;">Login Now →</a>
+          <div>
+            <button type="button" class="button button--ink" id="downloadAllIdCardsBtn">Download passes <span aria-hidden="true">↓</span></button>
+            <a class="button button--ink" href="login.html">Open portal <span aria-hidden="true">→</span></a>
           </div>
         </div>
-      </div>
+      </section>
     `;
+
+    status.querySelector(".registration-success-card")?.focus({ preventScroll: true });
 
     document.getElementById("downloadAllIdCardsBtn")?.addEventListener("click", () => {
       displayMembers.forEach((member, index) => downloadRegistrationIdCardPNG({
