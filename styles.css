@@ -1,7 +1,7 @@
 :root {
   --paper: #e9e1d2; --paper-deep: #d8cdb9; --ink: #1a1814; --muted-ink: #60594e;
   --oxide: #d84b2d; --acid: #d3e83d; --line: rgba(26, 24, 20, 0.15);
-  --display: "Archivo", Arial, sans-serif; --mono: "DM Mono", monospace; --header-height: 76px;
+  --display: "Archivo", Arial, sans-serif; --mono: "DM Mono", monospace; --header-height: 76px; --real-vh: 100vh;
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
@@ -16,6 +16,11 @@ body {
   position: relative;
   overflow-x: hidden;
 }
+
+.viewport-debug { position: fixed; z-index: 99990; right: 1rem; bottom: 1rem; display: grid; grid-template-columns: auto auto; gap: .35rem 1rem; min-width: 15rem; padding: .9rem 1rem; border: 1px solid rgba(211,232,61,.55); border-radius: .85rem; color: rgba(233,225,210,.86); background: linear-gradient(135deg, rgba(26,24,20,.97), rgba(56,50,39,.97)); box-shadow: 0 14px 32px rgba(26,24,20,.28); font: 600 .68rem/1.35 var(--mono); letter-spacing: .03em; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.viewport-debug[hidden] { display: none; }
+.viewport-debug strong { color: var(--acid); font-weight: 700; text-transform: uppercase; }
+.viewport-debug span { color: var(--paper); text-align: right; }
 
 body::before {
   content: "";
