@@ -2,6 +2,13 @@
 # versioned in this GitHub Pages repository.
 /server/
 
-# Local editor and operating-system files
+# Data storage and local database files (all data remains private on local machine)
+/data/
+data/
+
+# Local editor settings
+.vscode/
+
+# Local operating-system files
 .DS_Store
 *.swp
