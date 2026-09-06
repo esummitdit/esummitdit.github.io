@@ -21,8 +21,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
-  <script src="config.js" defer></script>
-  <script src="auth.js" defer></script>
+  <script src="config.js"></script>
+  <script src="auth.js"></script>
+  <script>
+    // Redirect before the login UI is painted when this tab already has a
+    // valid session. This avoids briefly showing a form the user cannot use.
+    if (Auth.getSession()) window.location.replace("dashboard.html");
+  </script>
 </head>
 <body class="login-body">
   <div class="site-grain" aria-hidden="true"></div>
@@ -98,7 +103,7 @@
           <div class="login-card-header">
             <span class="step-num">01</span>
             <div>
-              <h2 class="login-card-title">Team Member Access</h2>
+              <h2 class="login-card-title">Team access</h2>
               <p class="section-hint">Enter your official Group ID and Team Password to access your portal.</p>
             </div>
           </div>
@@ -205,7 +210,7 @@
           <div class="login-card-header">
             <span class="step-num">01</span>
             <div>
-              <h2 class="login-card-title">Administrator Access</h2>
+              <h2 class="login-card-title">Admin access</h2>
               <p class="section-hint">Enter your admin credentials to access the event management panel.</p>
             </div>
           </div>
@@ -260,6 +265,12 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      // A valid session belongs in the dashboard, never back at a login form.
+      if (Auth.getSession()) {
+        window.location.replace("dashboard.html");
+        return;
+      }
+
       const roleTeam = document.getElementById("roleTeam");
       const roleAdmin = document.getElementById("roleAdmin");
       const teamForm = document.getElementById("teamLoginForm");
@@ -537,7 +548,7 @@
       // Do this after the controls are active. A slow API check must never
       // make the Admin/Team selector feel unclickable.
       void Auth.validateSession().then((session) => {
-        if (session) window.location.replace("index.html");
+        if (session) window.location.replace("dashboard.html");
       });
     });
   </script>

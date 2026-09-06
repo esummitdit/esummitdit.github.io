@@ -10,6 +10,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const opening = document.getElementById("dashboardOpening");
   const liveStatus = document.getElementById("dashLiveStatus");
   const openingNote = document.getElementById("dashboardOpeningNote");
+  const escapeHTML = (value) => String(value ?? "").replace(/[&<>'"]/g, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+  })[character]);
 
   const dismissOpening = () => {
     if (!opening) return;
@@ -67,24 +70,24 @@ document.addEventListener("DOMContentLoaded", async () => {
   //  MANDATORY PASSWORD CHANGE (FIRST LOGIN)
   // ═══════════════════════════════════════
   function showMandatoryPasswordChangeModal() {
+    main.setAttribute("aria-busy", "false");
     main.innerHTML = `
-      <div class="dash-container" style="max-width: 520px; margin-top: 3rem;">
-        <div class="registration-success-card" style="border-left: 4px solid var(--accent); padding: 2rem;">
-          <h2 style="margin:0 0 0.5rem; font-size: 1.4rem;">Password Change Required</h2>
-          <p style="margin:0 0 1.5rem; font-size: 0.9rem; color: var(--muted-ink);">
-            You are logged in with a temporary password. Please set your new permanent password below.
-          </p>
+      <div class="dash-container dash-auth-gate">
+        <section class="dash-auth-gate-card" aria-labelledby="password-change-title">
+          <p class="dash-eyebrow">First sign-in security step</p>
+          <h1 id="password-change-title">Set your new password</h1>
+          <p>You signed in with a temporary password. Create a permanent password before opening the dashboard.</p>
           <form id="changePasswordForm">
-            <div class="field-group" style="margin-bottom: 1rem;">
+            <div class="field-group">
               <label for="oldPw">Current Temporary Password</label>
-              <input id="oldPw" type="password" required placeholder="••••••••" style="width:100%;">
+              <input id="oldPw" type="password" required autocomplete="current-password" placeholder="••••••••">
             </div>
-            <div class="field-group" style="margin-bottom: 1.5rem;">
+            <div class="field-group">
               <label for="newPw">New Secure Password</label>
-              <input id="newPw" type="password" required minlength="6" placeholder="At least 6 characters" style="width:100%;">
+              <input id="newPw" type="password" required minlength="6" autocomplete="new-password" placeholder="At least 6 characters">
             </div>
-            <div id="changePwError" class="login-error" style="margin-bottom:1rem;" role="alert"></div>
-            <button class="button button--ink" type="submit" style="width:100%; justify-content:center;">
+            <div id="changePwError" class="login-error" role="alert"></div>
+            <button class="button button--ink" type="submit">
               Save New Password <span aria-hidden="true">→</span>
             </button>
           </form>
@@ -93,10 +96,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             <div>
               <h3>Password updated successfully.</h3>
               <p>Your administrator password is now active. You are not logged in automatically.</p>
-              <button type="button" class="button button--ink" id="adminReturnToLogin" style="width:100%; justify-content:center;">Return to Login <span aria-hidden="true">→</span></button>
+              <button type="button" class="button button--ink" id="adminReturnToLogin">Return to Login <span aria-hidden="true">→</span></button>
             </div>
           </div>
-        </div>
+        </section>
       </div>
     `;
 
@@ -139,54 +142,44 @@ document.addEventListener("DOMContentLoaded", async () => {
       const team = await res.json();
 
       main.setAttribute("aria-busy", "false");
+      const members = Array.isArray(team.members) ? team.members : [];
       main.innerHTML = `
-        <div class="dash-container">
-          <section class="dash-team-overview" aria-labelledby="team-overview-title">
-            <div class="dash-overview-header">
-              <div class="dash-group-id-display">
-                <span class="mono-label">E-SUMMIT 2026 / TEAM PORTAL</span>
-                <h1 id="team-overview-title" class="dash-team-name">${team.team_name}</h1>
-                <span class="dash-group-id">${team.group_id}</span>
-              </div>
-              <div class="dash-status-pill">
-                <span class="pulse-dot"></span>
-                <span>Registration confirmed</span>
-              </div>
+        <div class="dash-container dash-team-portal">
+          <section class="dash-portal-intro" aria-labelledby="team-overview-title">
+            <div class="dash-portal-intro-copy">
+              <p class="dash-eyebrow">E-SUMMIT 2026 / TEAM DESK</p>
+              <h1 id="team-overview-title">${escapeHTML(team.team_name || "Your team")}</h1>
+              <p>Everything your team needs for a smooth check-in is here.</p>
             </div>
-            <div class="dash-overview-details">
-              <div class="dash-detail">
-                <span class="mono-label">EVENT TRACK</span>
-                <span class="dash-detail-value">${team.track}</span>
-              </div>
-              <div class="dash-detail">
-                <span class="mono-label">INSTITUTION</span>
-                <span class="dash-detail-value">${team.college}</span>
-              </div>
-            </div>
-            <div class="dash-arrival-note">
-              <span aria-hidden="true">01</span>
-              <p><strong>Before you arrive:</strong> download each attendee pass and keep the verification code ready for the check-in desk.</p>
-            </div>
+            <div class="dash-status-pill"><span class="pulse-dot" aria-hidden="true"></span><span>Registration confirmed</span></div>
           </section>
 
-          <section aria-labelledby="passes-title">
-          <div class="dash-section-head dash-section-head--passes">
-            <span class="step-num">${String(team.members.length).padStart(2, "0")}</span>
-            <div>
-              <h2 id="passes-title" class="dash-section-title">Your attendee passes</h2>
-              <p class="section-hint">Each pass belongs to one person. Download it before arrival; staff will verify the code at check-in.</p>
-            </div>
-          </div>
+          <section class="dash-team-summary" aria-label="Team summary">
+            <div class="dash-summary-item dash-summary-item--id"><span>Group ID</span><strong>${escapeHTML(team.group_id || "—")}</strong></div>
+            <div class="dash-summary-item"><span>Event track</span><strong>${escapeHTML(team.track || "Not assigned")}</strong></div>
+            <div class="dash-summary-item"><span>Institution</span><strong>${escapeHTML(team.college || "Not provided")}</strong></div>
+            <div class="dash-summary-item"><span>Attendees</span><strong>${members.length}</strong></div>
+          </section>
 
-          <div class="dash-roster-grid">
-            ${team.members.map((m, i) => renderDigitalIdCardHTML(team, m, i)).join('')}
-          </div>
+          <section class="dash-content-section" aria-labelledby="passes-title">
+            <div class="dash-section-head dash-section-head--passes">
+              <span class="step-num" aria-hidden="true">${String(members.length).padStart(2, "0")}</span>
+              <div>
+                <p class="dash-eyebrow">Digital entry passes</p>
+                <h2 id="passes-title" class="dash-section-title">Your attendee passes</h2>
+                <p class="section-hint">Download a pass for each attendee before arrival. Event staff will use its verification code at check-in.</p>
+              </div>
+            </div>
+            <p class="dash-arrival-note"><span aria-hidden="true">↳</span><span>Keep the downloaded pass ready on the attendee’s phone. It works even without a signal once saved.</span></p>
+            <div class="dash-roster-grid">
+              ${members.map((member, index) => renderDigitalIdCardHTML(team, member, index)).join("") || '<p class="dash-empty-state">No attendees are attached to this team yet.</p>'}
+            </div>
           </section>
         </div>
       `;
 
       // Attach Canvas Download Listeners to Digital ID Pass Cards
-      team.members.forEach((m, i) => {
+      members.forEach((m, i) => {
         const downloadBtn = document.getElementById(`downloadIdCardBtn_${i}`);
         if (downloadBtn) {
           downloadBtn.addEventListener("click", () => downloadDigitalIdCardPNG(team, m, i));
@@ -194,11 +187,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
 
     } catch (err) {
+      main.setAttribute("aria-busy", "false");
       main.innerHTML = `
         <div class="dash-container">
-          <div class="dash-error-card">
+          <div class="dash-error-card" role="alert">
             <h2>Unable to Load Dashboard</h2>
-            <p>${err.message}</p>
+            <p>${escapeHTML(err.message || "Please try again.")}</p>
             <a class="button button--ink" href="login.html">Back to Login <span aria-hidden="true">→</span></a>
           </div>
         </div>
@@ -216,34 +210,34 @@ document.addEventListener("DOMContentLoaded", async () => {
         <div class="dash-pass-header">
           <div>
             <span class="dash-pass-kicker">${isLeader ? 'TEAM LEAD / OFFICIAL PASS' : 'E-SUMMIT 2026 / OFFICIAL PASS'}</span>
-            <h3>${member.name || 'Team Member'}</h3>
-            <span class="dash-pass-role">${member.role || 'Participant'}</span>
+            <h3>${escapeHTML(member.name || "Team member")}</h3>
+            <span class="dash-pass-role">${escapeHTML(member.role || "Participant")}</span>
           </div>
-          <img class="dash-pass-photo" src="${photo}" alt="Portrait of ${member.name || 'team member'}" onerror="this.src='https://ui-avatars.com/api/?name=User&background=1a1814&color=e9e1d2'">
+          <img class="dash-pass-photo" src="${escapeHTML(photo)}" alt="Portrait of ${escapeHTML(member.name || "team member")}" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=User&background=1a1814&color=e9e1d2'">
         </div>
 
         <dl class="dash-pass-facts">
           <div>
-            <dt>Group ID</dt><dd>${team.group_id}</dd>
+            <dt>Group ID</dt><dd>${escapeHTML(team.group_id || "—")}</dd>
           </div>
           <div>
-            <dt>Event track</dt><dd>${team.track}</dd>
+            <dt>Event track</dt><dd>${escapeHTML(team.track || "Not assigned")}</dd>
           </div>
         </dl>
 
         <div class="dash-pass-contact">
-          <div>✉ <strong>Inst Email:</strong> ${member.email || 'N/A'}</div>
-          <div>✉ <strong>Personal:</strong> ${member.personal_email || 'N/A'}</div>
-          <div>📞 <strong>Phone:</strong> ${member.phone || 'N/A'}</div>
-          ${member.college_id ? `<div>🪪 <strong>College ID:</strong> ${member.college_id}</div>` : ''}
+          <div><span aria-hidden="true">✉</span><strong>Institutional email</strong><span>${escapeHTML(member.email || "Not provided")}</span></div>
+          <div><span aria-hidden="true">✉</span><strong>Personal email</strong><span>${escapeHTML(member.personal_email || "Not provided")}</span></div>
+          <div><span aria-hidden="true">☎</span><strong>Phone</strong><span>${escapeHTML(member.phone || "Not provided")}</span></div>
+          ${member.college_id ? `<div><span aria-hidden="true">#</span><strong>College ID</strong><span>${escapeHTML(member.college_id)}</span></div>` : ""}
         </div>
 
         <!-- 12-Digit Verification Security Code -->
-        <div class="dash-verification-code" aria-label="Staff verification code ${code}">
-          <span>Staff verification code</span><strong>${code}</strong>
+        <div class="dash-verification-code" aria-label="Staff verification code ${escapeHTML(code)}">
+          <span>Staff verification code</span><strong>${escapeHTML(code)}</strong>
         </div>
 
-        <button type="button" class="button button--secondary dash-download-pass" id="downloadIdCardBtn_${index}" aria-label="Download ${member.name || 'team member'}'s ID pass as PNG">
+        <button type="button" class="button button--secondary dash-download-pass" id="downloadIdCardBtn_${index}" aria-label="Download ${escapeHTML(member.name || "team member")} ID pass as PNG">
           Download pass <span aria-hidden="true">↓</span>
         </button>
       </article>
@@ -375,163 +369,108 @@ document.addEventListener("DOMContentLoaded", async () => {
       const canExportTeams = isTechOrMaster || session.role === "event_head";
       main.setAttribute("aria-busy", "false");
 
+      const accessMode = session.role === "master_admin"
+        ? "Master controls"
+        : isTechOrMaster
+          ? "Team operations"
+          : "Read-only inspection";
       main.innerHTML = `
-        <div class="dash-container">
-          <!-- Department Access Notice Bar -->
-          <div style="background: var(--paper); border: 2px solid var(--ink); border-radius: 8px; padding: 0.85rem 1.25rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <span class="mono-label" style="color: var(--accent);">LOGGED IN DEPARTMENT</span>
-              <strong style="display: block; font-size: 1.05rem;">${userDept.toUpperCase()}</strong>
-            </div>
-            <div class="mono-label" style="padding: 0.25rem 0.6rem; border-radius: 4px; background: ${isTechOrMaster ? '#d32f2f' : '#1a1814'}; color: #fff;">
-              ${isTechOrMaster ? 'FULL CONTROLS ACTIVE' : 'READ-ONLY INSPECTION VIEW'}
-            </div>
-          </div>
-
-          <!-- Stats Row -->
-          <div class="dash-stats-row">
-            <div class="dash-stat-card">
-              <span class="dash-stat-value">${stats.total_teams}</span>
-              <span class="mono-label">TEAMS</span>
-            </div>
-            <div class="dash-stat-card">
-              <span class="dash-stat-value">${stats.total_participants}</span>
-              <span class="mono-label">PARTICIPANTS</span>
-            </div>
-            <div class="dash-stat-card">
-              <span class="dash-stat-value">${stats.total_tracks}</span>
-              <span class="mono-label">EVENT TRACKS</span>
-            </div>
-          </div>
-
-          ${session.role === 'master_admin' ? `
-          <section class="dash-admin-workspace" aria-labelledby="admin-workspace-title">
-            <div class="dash-section-head">
-              <span class="step-num">⚙</span>
-              <div><h2 id="admin-workspace-title" class="dash-section-title">Admin workspace</h2><p class="section-hint">Invite staff with a precise role, department, and controlled first-login password.</p></div>
-            </div>
-            <div class="dash-admin-invite-grid">
-              <form class="dash-admin-invite-form" id="adminInviteForm">
-                <div class="dash-invite-form-head"><span class="mono-label">STAFF INVITE / MASTER CONTROL</span><span class="dash-invite-lock">PRIVATE</span></div>
-                <div class="dash-invite-fields">
-                  <div class="field-group"><label for="inviteName">Full name</label><input id="inviteName" required placeholder="e.g. Ananya Rao"></div>
-                  <div class="field-group"><label for="inviteEmail">Institution email</label><input id="inviteEmail" type="email" required placeholder="name@dit.edu.in"></div>
-                  <div class="field-group"><label for="inviteDepartment">Department</label><select id="inviteDepartment" required><option value="Technical Team">Technical Team</option><option value="Event Operations">Event Operations</option><option value="Academic & Faculty Council">Academic & Faculty Council</option><option value="Design Team">Design Team</option><option value="PR & Sponsorship Team">PR & Sponsorship Team</option><option value="Content & Anchoring Team">Content & Anchoring Team</option></select></div>
-                  <div class="field-group"><label for="inviteRole">Access role</label><select id="inviteRole" required><option value="admin">Department Admin</option><option value="event_coordinator">Event Coordinator</option><option value="team_manager">Team Manager</option><option value="event_head">Event Head / Faculty Read-only</option></select></div>
-                  <div class="field-group"><label for="invitePassword">Temporary password <span>optional</span></label><input id="invitePassword" type="password" minlength="6" placeholder="Auto-generate if empty" autocomplete="new-password"></div>
-                </div>
-                <p id="adminInviteStatus" class="dash-inline-status" role="status"></p>
-                <button class="button button--ink" type="submit">Create secure invite <span aria-hidden="true">→</span></button>
-              </form>
-              <div class="dash-admin-list-panel"><div class="dash-admin-list-head"><span class="mono-label">ACTIVE STAFF</span><span id="adminCountBadge" class="dash-count-badge">0</span></div><div id="adminAccountsList" class="dash-admin-list"></div></div>
-            </div>
+        <div class="dash-container dash-admin-portal">
+          <section class="dash-admin-context" aria-labelledby="admin-desk-title">
+            <div><p class="dash-eyebrow">Event operations</p><h1 id="admin-desk-title">Dashboard</h1></div>
+            <p class="dash-admin-context-meta"><strong>${escapeHTML(userDept)}</strong><span>${escapeHTML(accessMode)}</span></p>
           </section>
-          ` : ''}
 
-          <!-- Teams Section -->
-          <div class="dash-section-head">
-            <span class="step-num">★</span>
-            <div>
-              <h2 class="dash-section-title">All Registered Teams & Staff 12-Digit Pass Verification</h2>
-              <p class="section-hint">Inspect team details and verify 12-digit security codes against attendee ID cards.</p>
+          <div class="dash-data-tabs" role="tablist" aria-label="Dashboard data views" data-active="teams">
+            <button id="teamDataTab" class="dash-data-tab" type="button" role="tab" aria-selected="true" aria-controls="teamDataPanel" data-dash-tab="teams"><span aria-hidden="true">01</span> Team data</button>
+            <button id="adminDataTab" class="dash-data-tab" type="button" role="tab" aria-selected="false" aria-controls="adminDataPanel" data-dash-tab="admin" tabindex="-1"><span aria-hidden="true">02</span> Admin data</button>
+          </div>
+
+          <section id="teamDataPanel" class="dash-data-panel" role="tabpanel" aria-labelledby="teamDataTab" tabindex="-1">
+            <div class="dash-panel-heading">
+              <div>
+                <p class="dash-eyebrow">Live registration directory</p>
+                <h2>Team data</h2>
+                <p>Search every team, inspect attendee details, and confirm the code shown on a pass.</p>
+              </div>
+              <span class="dash-result-count" id="teamResultCount" aria-live="polite">${teams.length} ${teams.length === 1 ? "team" : "teams"}</span>
             </div>
-          </div>
 
-          <div class="dash-search-bar">
-            <label class="sr-only" for="teamSearchInput">Search registered teams</label>
-            <input type="search" id="teamSearchInput" placeholder="Search by team name, group ID, or member verification code…" class="dash-search-input">
-          </div>
-
-          ${canExportTeams ? `
-          <div class="dash-csv-tools" aria-label="Team CSV tools">
-            <div>
-              <strong>Team data CSV</strong>
-              <p>Export every team and member field, edit it directly, then import the CSV to update the vault.</p>
+            <div class="dash-stats-row" aria-label="Registration summary">
+              <div class="dash-stat-card"><span class="dash-stat-value">${escapeHTML(stats.total_teams)}</span><span>Registered teams</span></div>
+              <div class="dash-stat-card"><span class="dash-stat-value">${escapeHTML(stats.total_participants)}</span><span>Participants</span></div>
+              <div class="dash-stat-card"><span class="dash-stat-value">${escapeHTML(stats.total_tracks)}</span><span>Event tracks</span></div>
             </div>
-            <div class="dash-csv-actions">
-              <button type="button" class="button button--secondary" id="exportTeamsCsvBtn">Export CSV ↓</button>
-              ${session.role === 'master_admin' ? `
-                <label class="button button--ink" for="importTeamsCsvInput">Import edited CSV ↑</label>
-                <input id="importTeamsCsvInput" class="sr-only" type="file" accept=".csv,text/csv">
-              ` : ''}
+
+            <div class="dash-search-bar">
+              <label for="teamSearchInput">Find a team or attendee</label>
+              <div class="dash-search-control"><span aria-hidden="true">⌕</span><input type="search" id="teamSearchInput" autocomplete="off" placeholder="Search teams, IDs or pass codes"><button id="clearTeamSearch" class="dash-search-clear" type="button" aria-label="Clear team search" hidden>Clear</button></div>
             </div>
-          </div>
-          ` : ''}
 
-          ${session.role === 'master_admin' ? `
-          <div class="dash-danger-tools" aria-label="Master admin team deletion tools">
-            <button type="button" class="button button--secondary" id="selectAllTeamsBtn">Select all teams</button>
-            <button type="button" class="button button--secondary" id="deleteSelectedTeamsBtn">Delete selected</button>
-            <button type="button" class="button button--ink" id="deleteAllTeamsBtn">Delete every team</button>
-          </div>
-          ` : ''}
+            ${canExportTeams ? `
+            <div class="dash-csv-tools" aria-label="Team CSV tools">
+              <div><strong>Data export</strong><p>Download the live team directory, or import an edited CSV if you are the master admin.</p></div>
+              <div class="dash-csv-actions">
+                <button type="button" class="button button--secondary" id="exportTeamsCsvBtn">Export CSV <span aria-hidden="true">↓</span></button>
+                ${session.role === "master_admin" ? `<label class="button button--accent" for="importTeamsCsvInput">Import CSV <span aria-hidden="true">↑</span></label><input id="importTeamsCsvInput" class="sr-only" type="file" accept=".csv,text/csv">` : ""}
+              </div>
+            </div>` : ""}
 
-          <div class="dash-teams-list" id="teamsListContainer">
-            ${teams.length ? teams.map(t => renderTeamRow(t, session.role === 'master_admin', session.role === 'master_admin')).join('') : '<p style="padding: 2rem; text-align: center; color: var(--muted-ink); font-family: var(--mono);">No teams registered yet.</p>'}
-          </div>
+            ${session.role === "master_admin" ? `
+            <section class="dash-team-bulk-actions" aria-labelledby="bulk-team-actions-title">
+              <div><p id="bulk-team-actions-title">Bulk team actions</p><span id="selectedTeamsCount" aria-live="polite">0 selected</span></div>
+              <div class="dash-bulk-action-buttons">
+                <button type="button" class="button button--secondary" id="selectAllTeamsBtn">Select all</button>
+                <button type="button" class="button button--secondary" id="clearSelectedTeamsBtn" disabled>Clear</button>
+                <button type="button" class="button button--danger" id="deleteSelectedTeamsBtn" disabled>Delete selected</button>
+              </div>
+              <details class="dash-delete-all-disclosure">
+                <summary>More deletion options <span aria-hidden="true">⌄</span></summary>
+                <div><p>This permanently removes every team and its uploaded member photos.</p><button type="button" class="dash-delete-all-btn" id="deleteAllTeamsBtn">Delete every team</button></div>
+              </details>
+            </section>` : ""}
 
+            <div class="dash-teams-list" id="teamsListContainer">
+              ${teams.length ? teams.map((team) => renderTeamRow(team, session.role === "master_admin", session.role === "master_admin")).join("") : '<p class="dash-empty-state">No teams are registered yet.</p>'}
+            </div>
+            <p class="dash-empty-state" id="teamSearchEmpty" role="status" hidden>No teams match that search.</p>
+          </section>
+
+          <section id="adminDataPanel" class="dash-data-panel" role="tabpanel" aria-labelledby="adminDataTab" tabindex="-1" hidden>
+            <div class="dash-panel-heading dash-panel-heading--compact"><div><p class="dash-eyebrow">Account</p><h2>Admin data</h2></div></div>
+            <dl class="dash-admin-account">
+              <div><dt>Signed in as</dt><dd>${escapeHTML(userDept)}<span>${escapeHTML(session.role.replace(/_/g, " "))}</span></dd></div>
+              <div><dt>Access</dt><dd>${escapeHTML(accessMode)}</dd></div>
+            </dl>
+
+            ${session.role === "master_admin" ? `
+            <section class="dash-staff-directory" aria-labelledby="active-staff-title">
+              <div class="dash-staff-directory-head"><div><p class="dash-eyebrow">Directory</p><h3 id="active-staff-title">Active staff</h3></div><span id="adminCountBadge" class="dash-count-badge" aria-label="0 active staff">0</span></div>
+              <div id="adminAccountsList" class="dash-staff-list"></div>
+            </section>
+
+            <details class="dash-staff-access-disclosure">
+              <summary><span><small>Staff access</small><strong>Invite a staff member</strong></span><span class="dash-disclosure-icon" aria-hidden="true">⌄</span></summary>
+              <div class="dash-staff-access-body">
+                <form class="dash-admin-invite-form" id="adminInviteForm">
+                  <div class="dash-invite-form-head"><span>New staff invite</span><span class="dash-invite-lock">Private</span></div>
+                  <div class="dash-invite-fields">
+                    <div class="field-group"><label for="inviteName">Full name</label><input id="inviteName" required autocomplete="name" placeholder="e.g. Ananya Rao"></div>
+                    <div class="field-group"><label for="inviteEmail">Institution email</label><input id="inviteEmail" type="email" required autocomplete="email" placeholder="name@dit.edu.in"></div>
+                    <div class="field-group"><label for="inviteDepartment">Department</label><select id="inviteDepartment" required><option value="Technical Team">Technical Team</option><option value="Event Operations">Event Operations</option><option value="Academic & Faculty Council">Academic & Faculty Council</option><option value="Design Team">Design Team</option><option value="PR & Sponsorship Team">PR & Sponsorship Team</option><option value="Content & Anchoring Team">Content & Anchoring Team</option></select></div>
+                    <div class="field-group"><label for="inviteRole">Access role</label><select id="inviteRole" required><option value="admin">Department admin</option><option value="event_coordinator">Event coordinator</option><option value="team_manager">Team manager</option><option value="event_head">Event head / faculty read-only</option></select></div>
+                    <div class="field-group"><label for="invitePassword">Temporary password <span>optional</span></label><input id="invitePassword" type="password" minlength="6" placeholder="Generated if empty" autocomplete="new-password"></div>
+                  </div>
+                  <p id="adminInviteStatus" class="dash-inline-status" role="status"></p>
+                  <button class="button button--ink" type="submit">Create secure invite <span aria-hidden="true">→</span></button>
+                </form>
+              </div>
+            </details>` : ""}
+          </section>
         </div>
       `;
 
-      document.querySelectorAll("#adminInviteForm select").forEach((select) => {
-        const wrapper = document.createElement("div");
-        wrapper.className = "custom-select-wrapper dashboard-custom-select";
-        const trigger = document.createElement("button");
-        trigger.type = "button";
-        trigger.className = "custom-select-trigger";
-        trigger.setAttribute("aria-haspopup", "listbox");
-        trigger.setAttribute("aria-expanded", "false");
-        const label = document.createElement("span");
-        label.className = "select-label";
-        const chevron = document.createElement("span");
-        chevron.className = "select-chevron";
-        chevron.textContent = "⌄";
-        const options = document.createElement("div");
-        options.className = "custom-select-options";
-        options.setAttribute("role", "listbox");
-        const syncLabel = () => {
-          label.textContent = select.options[select.selectedIndex]?.textContent || "Choose an option";
-          options.querySelectorAll("[role='option']").forEach((option) => option.classList.toggle("is-selected", option.dataset.value === select.value));
-        };
-        [...select.options].forEach((option) => {
-          const item = document.createElement("div");
-          item.className = "custom-option";
-          item.dataset.value = option.value;
-          item.setAttribute("role", "option");
-          item.tabIndex = 0;
-          item.textContent = option.textContent;
-          item.addEventListener("click", () => {
-            select.value = option.value;
-            select.dispatchEvent(new Event("change", { bubbles: true }));
-            syncLabel();
-            wrapper.classList.remove("is-open");
-            trigger.setAttribute("aria-expanded", "false");
-          });
-          item.addEventListener("keydown", (event) => {
-            if (event.key === "Enter" || event.key === " ") { event.preventDefault(); item.click(); }
-          });
-          options.appendChild(item);
-        });
-        trigger.append(label, chevron);
-        wrapper.append(trigger, options);
-        select.hidden = true;
-        select.parentNode.insertBefore(wrapper, select);
-        syncLabel();
-        trigger.addEventListener("click", () => {
-          const isOpen = wrapper.classList.toggle("is-open");
-          trigger.setAttribute("aria-expanded", String(isOpen));
-          if (isOpen) options.querySelector(".is-selected")?.focus();
-        });
-        trigger.addEventListener("keydown", (event) => {
-          if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") { event.preventDefault(); trigger.click(); }
-        });
-        document.addEventListener("click", (event) => {
-          if (!wrapper.contains(event.target)) { wrapper.classList.remove("is-open"); trigger.setAttribute("aria-expanded", "false"); }
-        });
-        document.addEventListener("keydown", (event) => {
-          if (event.key === "Escape") { wrapper.classList.remove("is-open"); trigger.setAttribute("aria-expanded", "false"); }
-        });
-      });
+      setupDashboardTabs();
 
       document.getElementById("exportTeamsCsvBtn")?.addEventListener("click", async () => {
         const response = await Auth.apiFetch("/teams/admin/csv");
@@ -566,13 +505,26 @@ document.addEventListener("DOMContentLoaded", async () => {
       // ── Search ──
       const searchInput = document.getElementById("teamSearchInput");
       if (searchInput) {
-        searchInput.addEventListener("input", () => {
+        const clearSearchButton = document.getElementById("clearTeamSearch");
+        const filterTeams = () => {
           const query = searchInput.value.toLowerCase();
           const container = document.getElementById("teamsListContainer");
+          let visibleRows = 0;
           container.querySelectorAll(".dash-team-row").forEach(row => {
             const text = row.dataset.searchable || "";
-            row.style.display = text.includes(query) ? "" : "none";
+            const isMatch = text.includes(query);
+            row.hidden = !isMatch;
+            if (isMatch) visibleRows += 1;
           });
+          document.getElementById("teamResultCount").textContent = `${visibleRows} ${visibleRows === 1 ? "team" : "teams"}`;
+          document.getElementById("teamSearchEmpty").hidden = visibleRows !== 0;
+          clearSearchButton.hidden = !query;
+        };
+        searchInput.addEventListener("input", filterTeams);
+        clearSearchButton?.addEventListener("click", () => {
+          searchInput.value = "";
+          filterTeams();
+          searchInput.focus();
         });
       }
 
@@ -609,6 +561,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (session.role === "master_admin") {
         const teamsContainer = document.getElementById("teamsListContainer");
         const selectedTeamIds = () => [...teamsContainer.querySelectorAll(".dash-team-select:checked")].map(input => input.value);
+        const selectedTeamsCount = document.getElementById("selectedTeamsCount");
+        const deleteSelectedButton = document.getElementById("deleteSelectedTeamsBtn");
+        const clearSelectedButton = document.getElementById("clearSelectedTeamsBtn");
+        const updateBulkActions = () => {
+          const selectedCount = selectedTeamIds().length;
+          selectedTeamsCount.textContent = `${selectedCount} selected`;
+          deleteSelectedButton.disabled = selectedCount === 0;
+          clearSelectedButton.disabled = selectedCount === 0;
+        };
         const deleteSelectedTeams = async (ids) => {
           if (!ids.length) {
             alert("Select at least one team first.");
@@ -632,11 +593,18 @@ document.addEventListener("DOMContentLoaded", async () => {
           window.location.reload();
         };
 
-        document.getElementById("deleteSelectedTeamsBtn")?.addEventListener("click", () => deleteSelectedTeams(selectedTeamIds()));
+        deleteSelectedButton?.addEventListener("click", () => deleteSelectedTeams(selectedTeamIds()));
         document.getElementById("deleteAllTeamsBtn")?.addEventListener("click", () => deleteSelectedTeams(teams.map(team => team.group_id)));
         document.getElementById("selectAllTeamsBtn")?.addEventListener("click", () => {
           teamsContainer.querySelectorAll(".dash-team-select").forEach(input => { input.checked = true; });
+          updateBulkActions();
         });
+        clearSelectedButton?.addEventListener("click", () => {
+          teamsContainer.querySelectorAll(".dash-team-select").forEach(input => { input.checked = false; });
+          updateBulkActions();
+        });
+        teamsContainer.querySelectorAll(".dash-team-select").forEach((input) => input.addEventListener("change", updateBulkActions));
+        updateBulkActions();
       }
 
       // ── Master Admin: Structured staff invite ──
@@ -647,23 +615,51 @@ document.addEventListener("DOMContentLoaded", async () => {
           if (!res.ok) return;
           const admins = await res.json();
           const list = document.getElementById("adminAccountsList");
-          document.getElementById("adminCountBadge").textContent = admins.length;
-          list.innerHTML = admins.map(a => `
-            <div class="dash-admin-row">
-              <div>
-                <strong>${a.name || 'Admin Member'}</strong><span class="dash-admin-email">${a.email}</span>
-                <span class="dash-admin-role-tag">${a.role || 'admin'} / ${a.department || 'Technical Team'}</span>
-                <span class="dash-admin-state ${a.must_change_password ? 'is-pending' : 'is-active'}">${a.must_change_password ? 'TEMP PASSWORD ACTIVE' : 'ACTIVE'}</span>
-              </div>
-              ${a.role !== 'master_admin' ? `<button class="dash-remove-admin" data-email="${a.email}">Remove</button>` : '<span class="mono-label">MASTER</span>'}
-            </div>
-          `).join('');
+          const countBadge = document.getElementById("adminCountBadge");
+          countBadge.textContent = admins.length;
+          countBadge.setAttribute("aria-label", `${admins.length} active staff`);
+          const humanize = (value) => String(value || "Not assigned")
+            .replace(/_/g, " ")
+            .replace(/\b\w/g, (character) => character.toUpperCase());
+          const staffName = (value) => String(value || "Admin member")
+            .replace(/\s*\((?:master\s*)?admin\)\s*$/i, "")
+            .trim() || "Admin member";
+          const initials = (value) => staffName(value).split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
+
+          list.innerHTML = admins.length ? admins.map((admin) => {
+            const name = staffName(admin.name);
+            const email = String(admin.email || "");
+            const role = humanize(admin.role || "admin");
+            const department = humanize(admin.department || "Technical Team");
+            const isMaster = admin.role === "master_admin";
+            const state = admin.must_change_password ? "Invite pending" : "Active";
+            return `
+              <article class="dash-staff-card">
+                <div class="dash-staff-avatar" aria-hidden="true">${escapeHTML(initials(admin.name))}</div>
+                <div class="dash-staff-card-main">
+                  <h4>${escapeHTML(name)}</h4>
+                  <p>${escapeHTML(role)} <span aria-hidden="true">·</span> ${escapeHTML(department)}</p>
+                  ${email ? `<a class="dash-staff-email" href="mailto:${escapeHTML(email)}" title="${escapeHTML(email)}">${escapeHTML(email)}</a>` : '<span class="dash-staff-email">No email assigned</span>'}
+                </div>
+                <div class="dash-staff-card-side">
+                  <span class="dash-staff-presence ${admin.must_change_password ? "is-pending" : "is-active"}">${state}</span>
+                  ${isMaster ? '<span class="dash-staff-protected">Protected</span>' : `<button class="dash-remove-admin" data-email="${escapeHTML(email)}" type="button">Remove</button>`}
+                </div>
+              </article>
+            `;
+          }).join("") : '<p class="dash-empty-state">No staff accounts are active.</p>';
 
           list.querySelectorAll(".dash-remove-admin").forEach(btn => {
             btn.addEventListener("click", async () => {
               if (!confirm(`Remove admin ${btn.dataset.email}?`)) return;
               const res = await Auth.apiFetch(`/admin/accounts/${encodeURIComponent(btn.dataset.email)}`, { method: "DELETE" });
-              if (res.ok) btn.closest(".dash-admin-row").remove();
+              if (res.ok) {
+                btn.closest(".dash-staff-card").remove();
+                const remaining = list.querySelectorAll(".dash-staff-card").length;
+                countBadge.textContent = remaining;
+                countBadge.setAttribute("aria-label", `${remaining} active staff`);
+                if (!remaining) list.innerHTML = '<p class="dash-empty-state">No staff accounts are active.</p>';
+              }
             });
           });
         };
@@ -695,11 +691,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
     } catch (err) {
+      main.setAttribute("aria-busy", "false");
       main.innerHTML = `
         <div class="dash-container">
-          <div class="dash-error-card">
+          <div class="dash-error-card" role="alert">
             <h2>Unable to Load Admin Panel</h2>
-            <p>${err.message}</p>
+            <p>${escapeHTML(err.message || "Please try again.")}</p>
             <a class="button button--ink" href="login.html">Back to Login <span aria-hidden="true">→</span></a>
           </div>
         </div>
@@ -707,68 +704,122 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  function setupDashboardTabs() {
+    const tabList = main.querySelector(".dash-data-tabs");
+    if (!tabList) return;
+
+    const tabs = [...tabList.querySelectorAll('[role="tab"]')];
+    const panels = {
+      teams: main.querySelector("#teamDataPanel"),
+      admin: main.querySelector("#adminDataPanel")
+    };
+
+    const activate = (view) => {
+      const selectedTab = tabs.find((tab) => tab.dataset.dashTab === view);
+      const selectedPanel = panels[view];
+      if (!selectedTab || !selectedPanel) return;
+
+      tabList.dataset.active = view;
+      tabs.forEach((tab) => {
+        const selected = tab === selectedTab;
+        tab.setAttribute("aria-selected", String(selected));
+        tab.tabIndex = selected ? 0 : -1;
+      });
+      Object.entries(panels).forEach(([key, panel]) => {
+        if (!panel) return;
+        const selected = key === view;
+        panel.hidden = !selected;
+        panel.classList.toggle("is-active", selected);
+      });
+    };
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activate(tab.dataset.dashTab));
+      tab.addEventListener("keydown", (event) => {
+        let nextIndex = index;
+        if (event.key === "ArrowRight" || event.key === "ArrowDown") nextIndex = (index + 1) % tabs.length;
+        else if (event.key === "ArrowLeft" || event.key === "ArrowUp") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        else if (event.key === "Home") nextIndex = 0;
+        else if (event.key === "End") nextIndex = tabs.length - 1;
+        else return;
+        event.preventDefault();
+        const nextTab = tabs[nextIndex];
+        activate(nextTab.dataset.dashTab);
+        nextTab.focus();
+      });
+    });
+    activate("teams");
+  }
+
   function renderTeamRow(team, canDelete, isMasterAdmin) {
     const memberCount = team.members ? team.members.length : 0;
     const allCodes = (team.members || []).map(m => m.verification_code || '').join(' ');
     const searchable = `${team.group_id} ${team.team_name} ${team.track} ${team.college} ${allCodes}`.toLowerCase();
+    const groupId = String(team.group_id || "Not assigned");
+    const panelId = `team-${groupId.replace(/[^a-zA-Z0-9_-]/g, "") || "record"}`;
 
     return `
-      <div class="dash-team-row" data-searchable="${searchable}">
-        <button class="dash-team-row-header" type="button" aria-expanded="false" aria-controls="team-${team.group_id}">
-          <span class="dash-team-id mono-label">${team.group_id}</span>
-          <span class="dash-team-name">${team.team_name}</span>
-          <span class="dash-team-track">${team.track}</span>
-          <span class="dash-team-count">${memberCount} ${memberCount === 1 ? 'member' : 'members'}</span>
-          <span class="dash-team-chevron">▾</span>
-        </button>
-        <div class="dash-team-row-body" id="team-${team.group_id}">
+      <article class="dash-team-row" data-searchable="${escapeHTML(searchable)}">
+        <div class="dash-team-row-top">
+          ${isMasterAdmin ? `<label class="dash-team-selector"><input class="dash-team-select" type="checkbox" value="${escapeHTML(groupId)}" aria-label="Select ${escapeHTML(team.team_name || "team")}"><span aria-hidden="true">✓</span></label>` : ""}
+          <button class="dash-team-row-header" type="button" aria-expanded="false" aria-controls="${escapeHTML(panelId)}">
+            <span class="dash-team-id mono-label">${escapeHTML(groupId)}</span>
+            <span class="dash-team-name">${escapeHTML(team.team_name || "Untitled team")}</span>
+            <span class="dash-team-track">${escapeHTML(team.track || "Track pending")}</span>
+            <span class="dash-team-count">${memberCount} ${memberCount === 1 ? 'member' : 'members'}</span>
+            <span class="dash-team-chevron" aria-hidden="true">▾</span>
+          </button>
+        </div>
+        <div class="dash-team-row-body" id="${escapeHTML(panelId)}">
           <div class="dash-team-toolbar">
-            ${isMasterAdmin ? `<label class="dash-team-select-label"><input class="dash-team-select" type="checkbox" value="${team.group_id}"> Select for bulk actions</label>` : '<span class="dash-team-readonly">STAFF INSPECTION VIEW</span>'}
+            <span class="dash-team-readonly">${isMasterAdmin ? "Selected records can be deleted from the bulk toolbar." : "Staff inspection view"}</span>
             <span class="dash-team-toolbar-note">${memberCount} ${memberCount === 1 ? 'registered participant' : 'registered participants'}</span>
           </div>
           <div class="dash-team-facts">
-            <div><span class="dash-fact-label">Institution</span><strong>${team.college || 'Not provided'}</strong></div>
-            <div><span class="dash-fact-label">Event track</span><strong>${team.track || 'Not provided'}</strong></div>
+            <div><span class="dash-fact-label">Institution</span><strong>${escapeHTML(team.college || "Not provided")}</strong></div>
+            <div><span class="dash-fact-label">Event track</span><strong>${escapeHTML(team.track || "Not provided")}</strong></div>
             <div><span class="dash-fact-label">Group access</span><strong>Portal credentials active</strong></div>
           </div>
-          <div class="dash-team-roster-heading"><span>ATTENDEE ROSTER</span><span>SECRET IDs / CHECK-IN</span></div>
+          <div class="dash-team-roster-heading"><span>Attendee roster</span><span>Pass IDs / check-in</span></div>
           <div class="dash-roster-grid dash-roster-grid--compact">
-            ${(team.members || []).map((m, i) => `
-              <article class="dash-member-card-sm ${i === 0 ? 'dash-member-card-sm--leader' : ''}">
+            ${(team.members || []).map((member, index) => {
+              const photo = getApiAssetUrl(member.photo_url) || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name || "Member")}&background=1a1814&color=e9e1d2&bold=true`;
+              return `
+              <article class="dash-member-card-sm ${index === 0 ? 'dash-member-card-sm--leader' : ''}">
                 <div class="dash-member-card-sm-top">
-                  <span class="dash-member-index">${i === 0 ? '★ TEAM LEAD' : `MEMBER ${String(i + 1).padStart(2, '0')}`}</span>
-                  <span class="dash-member-status">VERIFIED</span>
+                  <span class="dash-member-index">${index === 0 ? "★ Team lead" : `Member ${String(index + 1).padStart(2, "0")}`}</span>
+                  <span class="dash-member-status">Registered</span>
                 </div>
                 <div class="dash-member-profile">
                   <div class="dash-member-photo-frame">
-                    <img src="${getApiAssetUrl(m.photo_url) || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.name || 'Member')}&background=1a1814&color=e9e1d2&bold=true`}" alt="${m.name || 'Member'} portrait" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=Member&background=1a1814&color=e9e1d2&bold=true';">
+                    <img src="${escapeHTML(photo)}" alt="Portrait of ${escapeHTML(member.name || "team member")}" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=Member&background=1a1814&color=e9e1d2&bold=true';">
                   </div>
                   <div class="dash-member-identity">
-                    <h3>${m.name || 'N/A'}</h3>
-                    <p>${m.role || 'Participant'}</p>
-                    <span>${m.college_id ? `College ID ${m.college_id}` : 'College ID not provided'}</span>
+                    <h3>${escapeHTML(member.name || "Not provided")}</h3>
+                    <p>${escapeHTML(member.role || "Participant")}</p>
+                    <span>${member.college_id ? `College ID ${escapeHTML(member.college_id)}` : "College ID not provided"}</span>
                   </div>
                 </div>
                 <div class="dash-member-contact">
-                  <div><span>Institutional email</span><strong>${m.email || 'Not provided'}</strong></div>
-                  <div><span>Personal email</span><strong>${m.personal_email || 'Not provided'}</strong></div>
-                  <div><span>Phone / WhatsApp</span><strong>${m.phone || 'Not provided'}</strong></div>
+                  <div><span>Institutional email</span><strong>${escapeHTML(member.email || "Not provided")}</strong></div>
+                  <div><span>Personal email</span><strong>${escapeHTML(member.personal_email || "Not provided")}</strong></div>
+                  <div><span>Phone / WhatsApp</span><strong>${escapeHTML(member.phone || "Not provided")}</strong></div>
                 </div>
                 <div class="dash-secret-id">
-                  <span>STAFF SECRET ID</span>
-                  <strong>${m.verification_code || 'Not assigned'}</strong>
+                  <span>Staff verification code</span>
+                  <strong>${escapeHTML(member.verification_code || "Not assigned")}</strong>
                 </div>
-                ${m.note ? `<p class="dash-member-note"><span>Member note</span>${m.note}</p>` : ''}
+                ${member.note ? `<p class="dash-member-note"><span>Member note</span>${escapeHTML(member.note)}</p>` : ""}
               </article>
-            `).join('')}
+            `; }).join("") || '<p class="dash-empty-state">No attendees added to this team.</p>'}
           </div>
           ${canDelete ? `
           <div class="dash-team-actions">
-            <button class="dash-delete-team" data-group-id="${team.group_id}">Delete Team</button>
+            <button class="dash-delete-team" data-group-id="${escapeHTML(groupId)}">Delete team</button>
           </div>
-          ` : ''}
+          ` : ""}
         </div>
-      </div>
+      </article>
     `;
   }
 });

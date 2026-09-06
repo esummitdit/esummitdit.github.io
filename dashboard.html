@@ -15,6 +15,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body class="dash-body">
+  <a class="skip-link" href="#dashMain">Skip to dashboard content</a>
   <div class="site-grain" aria-hidden="true"></div>
 
   
@@ -31,14 +32,14 @@
   <!-- ═══ Dashboard Header ═══ -->
   <header class="dash-header">
     <div class="dash-header-inner">
-      <a class="wordmark" href="index.html" aria-label="E-Summit 2026 home">
+      <a class="wordmark dash-wordmark" href="index.html" aria-label="E-Summit 2026 home">
         <span aria-hidden="true">E—</span><span>SUMMIT</span><sup>26</sup>
       </a>
       <div class="dash-header-meta">
-        <span class="dash-live-status" id="dashLiveStatus"><i></i><span>Checking server</span></span>
+        <span class="dash-live-status" id="dashLiveStatus" aria-live="polite"><i aria-hidden="true"></i><span>Checking server</span></span>
         <span class="dash-role-badge" id="dashRoleBadge">LOADING</span>
-        <button class="dash-logout-btn" id="logoutBtn" type="button">
-          Logout <span aria-hidden="true">↗</span>
+        <button class="dash-logout-btn" id="logoutBtn" type="button" aria-label="Log out">
+          <span>Log out</span><span aria-hidden="true">↗</span>
         </button>
       </div>
     </div>
