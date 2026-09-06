@@ -9,6 +9,12 @@
   <title>Login — E-Summit 2026</title>
   <script>
     (() => {
+      // Seamlessly strip '.html' from URL bar immediately
+      if (window.location.pathname.endsWith(".html")) {
+        let cleanPath = window.location.pathname.replace(/\.html$/, "");
+        if (cleanPath.endsWith("/index")) cleanPath = cleanPath.slice(0, -5) || "/";
+        window.history.replaceState(null, "", cleanPath + window.location.search + window.location.hash);
+      }
       const params = new URLSearchParams(window.location.search);
       const hasCredentialParams = ["password", "pass", "pwd", "groupId", "group_id"].some((key) => params.has(key));
       if (!hasCredentialParams) return;
@@ -27,7 +33,7 @@
   <script>
     // Redirect before the login UI is painted when this tab already has a
     // valid session. This avoids briefly showing a form the user cannot use.
-    if (Auth.getSession()) window.location.replace("dashboard.html");
+    if (Auth.getSession()) window.location.replace("dashboard");
   </script>
 </head>
 <body class="login-body">
@@ -37,7 +43,7 @@
     <!-- ═══ Left Branding Panel ═══ -->
     <div class="login-branding">
       <div class="login-branding-inner">
-        <a class="wordmark wordmark--light" href="index.html" aria-label="E-Summit 2026 home">
+        <a class="wordmark wordmark--light" href="./" aria-label="E-Summit 2026 home">
           <span aria-hidden="true">E—</span><span>SUMMIT</span><sup>26</sup>
         </a>
 
@@ -255,7 +261,7 @@
               <p class="lost-bar-sub">Haven't registered your team yet? Head back and sign up.</p>
             </div>
           </div>
-          <a class="button button--accent lost-bar-btn" href="index.html#registration">
+          <a class="button button--accent lost-bar-btn" href="./#registration">
             Take me to register <span aria-hidden="true">→</span>
           </a>
         </div>
@@ -268,7 +274,7 @@
     document.addEventListener("DOMContentLoaded", () => {
       // A valid session belongs in the dashboard, never back at a login form.
       if (Auth.getSession()) {
-        window.location.replace("dashboard.html");
+        window.location.replace("dashboard");
         return;
       }
 
@@ -477,7 +483,7 @@
         const result = await Auth.login("team", { group_id: groupId, password });
 
         if (result.success) {
-          window.location.href = "dashboard.html";
+          window.location.href = "dashboard";
         } else {
           teamError.textContent = result.error;
           btn.disabled = false;
@@ -506,7 +512,7 @@
         const result = await Auth.login("admin", { email, password });
 
         if (result.success) {
-          window.location.href = "dashboard.html";
+          window.location.href = "dashboard";
         } else {
           adminError.textContent = result.error;
           btn.disabled = false;
@@ -549,7 +555,7 @@
       // Do this after the controls are active. A slow API check must never
       // make the Admin/Team selector feel unclickable.
       void Auth.validateSession().then((session) => {
-        if (session) window.location.replace("dashboard.html");
+        if (session) window.location.replace("dashboard");
       });
     });
   </script>

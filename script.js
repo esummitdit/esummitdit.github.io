@@ -92,7 +92,7 @@ async function setUpSessionAwareHomepage() {
 function applySessionAwareHomepage(session) {
 
   const isTeam = session.role === "team";
-  const dashboardHref = "dashboard.html";
+  const dashboardHref = "dashboard";
   const sessionLink = document.getElementById("sessionLink");
   const primaryAction = document.getElementById("primaryHeaderAction");
   const lockedNotice = document.getElementById("registrationLockedNotice");
@@ -163,8 +163,9 @@ function applySessionAwareHomepage(session) {
 
 window.addEventListener("esummit:logout", () => {
   // Each open page returns to its signed-out state without retaining a token.
-  if (window.location.pathname.endsWith("dashboard.html") || window.location.pathname.endsWith("login.html")) {
-    window.location.replace("index.html");
+  const path = window.location.pathname;
+  if (path.endsWith("dashboard") || path.endsWith("dashboard.html") || path.endsWith("login") || path.endsWith("login.html")) {
+    window.location.replace("./");
   } else {
     window.location.reload();
   }
@@ -1498,7 +1499,7 @@ function setUpRegistrationForm() {
           <p class="success-save-note">Registration saved. Keep your Group ID safe for portal login.</p>
           <div style="display:flex;gap:1rem;justify-content:center;">
             <button type="button" class="button button--ink" id="downloadAllIdCardsBtn" style="flex:1;justify-content:center;">Download virtual ID cards ↓</button>
-            <a class="button button--ink" href="login.html" style="flex:1;justify-content:center;text-decoration:none;">Login Now →</a>
+            <a class="button button--ink" href="login" style="flex:1;justify-content:center;text-decoration:none;">Login Now →</a>
           </div>
         </div>
       </div>

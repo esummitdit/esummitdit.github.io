@@ -1,5 +1,17 @@
 "use strict";
 
+// Clean any '.html' extension from URL bar across all pages immediately
+if (typeof window !== "undefined" && window.location) {
+  const pathname = window.location.pathname;
+  if (pathname.endsWith(".html")) {
+    let cleanPath = pathname.replace(/\.html$/, "");
+    if (cleanPath.endsWith("/index")) {
+      cleanPath = cleanPath.slice(0, -5) || "/";
+    }
+    window.history.replaceState(null, "", cleanPath + window.location.search + window.location.hash);
+  }
+}
+
 // Keep large desktop layouts at a predictable visual scale while leaving
 // tablet and phone breakpoints entirely under their responsive CSS.
 (() => {

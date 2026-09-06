@@ -11,6 +11,12 @@
   </style>
   <script>
     (() => {
+      // Seamlessly strip '.html' from URL bar for clean, modern aesthetic
+      if (window.location.pathname.endsWith(".html")) {
+        let cleanPath = window.location.pathname.replace(/\.html$/, "");
+        if (cleanPath.endsWith("/index")) cleanPath = cleanPath.slice(0, -5) || "/";
+        window.history.replaceState(null, "", cleanPath + window.location.search + window.location.hash);
+      }
       try {
         const navigation = performance.getEntriesByType("navigation")[0];
         const isReturnLoad = navigation?.type === "reload" || navigation?.type === "back_forward";
@@ -68,7 +74,7 @@
         <a href="#contact">Contact</a>
       </nav>
       <div class="header-actions">
-        <a id="sessionLink" class="header-login" href="login.html">Login <span aria-hidden="true">↗</span></a>
+        <a id="sessionLink" class="header-login" href="login">Login <span aria-hidden="true">↗</span></a>
         <a id="primaryHeaderAction" class="header-action" href="#registration">Register now <span aria-hidden="true">↘</span></a>
       </div>
     </div>

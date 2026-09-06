@@ -6,6 +6,16 @@
   <meta name="description" content="E-Summit 2026 Dashboard — Team Portal & Admin Panel.">
   <meta name="theme-color" content="#e9e1d2">
   <title>Dashboard — E-Summit 2026</title>
+  <script>
+    (() => {
+      // Seamlessly strip '.html' from URL bar immediately
+      if (window.location.pathname.endsWith(".html")) {
+        let cleanPath = window.location.pathname.replace(/\.html$/, "");
+        if (cleanPath.endsWith("/index")) cleanPath = cleanPath.slice(0, -5) || "/";
+        window.history.replaceState(null, "", cleanPath + window.location.search + window.location.hash);
+      }
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -33,7 +43,7 @@
   <!-- ═══ Dashboard Header ═══ -->
   <header class="dash-header">
     <div class="dash-header-inner">
-      <a class="wordmark dash-wordmark" href="index.html" aria-label="E-Summit 2026 home">
+      <a class="wordmark dash-wordmark" href="./" aria-label="E-Summit 2026 home">
         <span aria-hidden="true">E—</span><span>SUMMIT</span><sup>26</sup>
       </a>
       <div class="dash-header-meta">

@@ -52,8 +52,8 @@ const Auth = (() => {
   });
 
   window.addEventListener("esummit:logout", () => {
-    if (!window.location.pathname.endsWith("index.html") && window.location.pathname !== "/") {
-      window.location.replace("index.html");
+    if (!window.location.pathname.endsWith("index.html") && window.location.pathname !== "/" && !window.location.pathname.endsWith("/")) {
+      window.location.replace("./");
     }
   });
 
@@ -80,7 +80,7 @@ const Auth = (() => {
         try { sessionStorage.setItem("esummit_lock_reason", "Session auto-locked due to inactivity to protect your account."); } catch {}
         _setToken(null);
         _notifyOtherPagesOfLogout();
-        window.location.replace("login.html?reason=inactivity");
+        window.location.replace("login?reason=inactivity");
       }
     }, INACTIVITY_TIMEOUT_MS);
   }
@@ -101,7 +101,7 @@ const Auth = (() => {
           try { sessionStorage.setItem("esummit_lock_reason", "Session locked after being away from this window."); } catch {}
           _setToken(null);
           _notifyOtherPagesOfLogout();
-          window.location.replace("login.html?reason=away");
+          window.location.replace("login?reason=away");
           return;
         }
       }
@@ -163,7 +163,7 @@ const Auth = (() => {
     },
 
     /** Clear this session, notify open E-Summit tabs, then return home. */
-    logout(destination = "index.html") {
+    logout(destination = "./") {
       _setToken(null);
       _notifyOtherPagesOfLogout();
       window.location.href = destination;
@@ -230,15 +230,15 @@ const Auth = (() => {
     requireAuth(requiredRole) {
       const session = this.getSession();
       if (!session) {
-        window.location.href = "login.html";
+        window.location.href = "login";
         return false;
       }
       if (requiredRole === "admin" && session.role !== "admin" && session.role !== "master_admin") {
-        window.location.href = "login.html";
+        window.location.href = "login";
         return false;
       }
       if (requiredRole === "master_admin" && session.role !== "master_admin") {
-        window.location.href = "login.html";
+        window.location.href = "login";
         return false;
       }
       return true;

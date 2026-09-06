@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ── Auth Guard ──
   const session = await Auth.validateSession();
   if (!session) {
-    window.location.replace("login.html");
+    window.location.replace("login");
     return;
   }
   window.setTimeout(dismissOpening, 850);
@@ -180,7 +180,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           document.getElementById("changePasswordForm").hidden = true;
           document.getElementById("adminPasswordSuccess").hidden = false;
           document.getElementById("adminReturnToLogin").addEventListener("click", () => {
-            Auth.logout("login.html");
+            Auth.logout("login");
           }, { once: true });
         } else {
           errEl.textContent = data.detail || "Failed to update password.";
@@ -255,7 +255,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <div class="dash-error-card" role="alert">
             <h2>Unable to Load Dashboard</h2>
             <p>${escapeHTML(err.message || "Please try again.")}</p>
-            <a class="button button--ink" href="login.html">Back to Login <span aria-hidden="true">→</span></a>
+            <a class="button button--ink" href="login">Back to Login <span aria-hidden="true">→</span></a>
           </div>
         </div>
       `;
@@ -760,7 +760,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <div class="dash-error-card" role="alert">
             <h2>Unable to Load Admin Panel</h2>
             <p>${escapeHTML(err.message || "Please try again.")}</p>
-            <a class="button button--ink" href="login.html">Back to Login <span aria-hidden="true">→</span></a>
+            <a class="button button--ink" href="login">Back to Login <span aria-hidden="true">→</span></a>
           </div>
         </div>
       `;
