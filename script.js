@@ -1450,13 +1450,11 @@ function setUpRegistrationForm() {
     const track = payload.track;
     const college = payload.college;
 
-    // The server renames temporary uploads to their official Group ID path.
-    // Keep the local crop visible immediately, then point future loads at the
-    // official path returned by the registration response.
+    // Use the secure, signed photo URL returned by the server
     rosterData.forEach((member, index) => {
-      if (!member.photo_url) return;
-      const extension = member.photo_url.split(".").pop();
-      member.photo_url = `/api/teams/photos/${assignedGroupId}_member_${index + 1}.${extension}`;
+      if (resData.members?.[index]?.photo_url) {
+        member.photo_url = resData.members[index].photo_url;
+      }
     });
 
     let membersListHtml = "";

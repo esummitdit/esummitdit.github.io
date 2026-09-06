@@ -41,6 +41,65 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+  // ── Anti-Snooping & DevTools Hardening ──
+  document.addEventListener("contextmenu", (e) => e.preventDefault());
+
+  document.addEventListener("keydown", (e) => {
+    // Block F12 Developer Tools
+    if (e.key === "F12") {
+      e.preventDefault();
+      return false;
+    }
+    // Block Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C (Inspect Element)
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && ["I", "i", "J", "j", "C", "c"].includes(e.key)) {
+      e.preventDefault();
+      return false;
+    }
+    // Block Ctrl+U (View Source)
+    if ((e.ctrlKey || e.metaKey) && ["U", "u"].includes(e.key)) {
+      e.preventDefault();
+      return false;
+    }
+  });
+
+  // Periodically sanitize developer console
+  setInterval(() => {
+    try {
+      console.clear();
+      console.log(
+        "%cE-Summit 2026 Active Defense%c\nAll administrative sessions, API requests, and asset queries are cryptographically signed, IP-bound, and monitored against unauthorized inspection.",
+        "color: #d84b2d; font-family: monospace; font-size: 15px; font-weight: bold;",
+        "color: #999; font-family: monospace; font-size: 12px;"
+      );
+    } catch {}
+  }, 4000);
+
+  // Authenticated In-Memory Photo Blob Loader
+  const _photoBlobMap = new Map();
+  async function hydrateSecurePhotos(container = document) {
+    const photoImgs = container.querySelectorAll("img[data-asset-url]");
+    for (const img of photoImgs) {
+      const assetUrl = img.getAttribute("data-asset-url");
+      if (!assetUrl) continue;
+      if (_photoBlobMap.has(assetUrl)) {
+        img.src = _photoBlobMap.get(assetUrl);
+        continue;
+      }
+      try {
+        const fullUrl = getApiAssetUrl(assetUrl);
+        const res = await fetch(fullUrl, {
+          headers: { Authorization: `Bearer ${Auth.getToken()}` }
+        });
+        if (res.ok) {
+          const blob = await res.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          _photoBlobMap.set(assetUrl, blobUrl);
+          img.src = blobUrl;
+        }
+      } catch {}
+    }
+  }
+
   // Check if first-time admin needs to change temporary password
   if (session.must_change_password) {
     showMandatoryPasswordChangeModal();
@@ -186,6 +245,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       });
 
+      // Hydrate photos with in-memory secure blobs
+      hydrateSecurePhotos(main);
+
     } catch (err) {
       main.setAttribute("aria-busy", "false");
       main.innerHTML = `
@@ -213,7 +275,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             <h3>${escapeHTML(member.name || "Team member")}</h3>
             <span class="dash-pass-role">${escapeHTML(member.role || "Participant")}</span>
           </div>
-          <img class="dash-pass-photo" src="${escapeHTML(photo)}" alt="Portrait of ${escapeHTML(member.name || "team member")}" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=User&background=1a1814&color=e9e1d2'">
+          <img class="dash-pass-photo" src="${escapeHTML(photo)}" data-asset-url="${escapeHTML(member.photo_url || '')}" alt="Portrait of ${escapeHTML(member.name || "team member")}" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=User&background=1a1814&color=e9e1d2'">
         </div>
 
         <dl class="dash-pass-facts">
@@ -471,6 +533,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       `;
 
       setupDashboardTabs();
+      hydrateSecurePhotos(main);
 
       document.getElementById("exportTeamsCsvBtn")?.addEventListener("click", async () => {
         const response = await Auth.apiFetch("/teams/admin/csv");
@@ -792,7 +855,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 </div>
                 <div class="dash-member-profile">
                   <div class="dash-member-photo-frame">
-                    <img src="${escapeHTML(photo)}" alt="Portrait of ${escapeHTML(member.name || "team member")}" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=Member&background=1a1814&color=e9e1d2&bold=true';">
+                    <img src="${escapeHTML(photo)}" data-asset-url="${escapeHTML(member.photo_url || '')}" alt="Portrait of ${escapeHTML(member.name || "team member")}" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=Member&background=1a1814&color=e9e1d2&bold=true';">
                   </div>
                   <div class="dash-member-identity">
                     <h3>${escapeHTML(member.name || "Not provided")}</h3>

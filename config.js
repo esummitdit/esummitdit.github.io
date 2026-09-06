@@ -34,22 +34,40 @@ function setupServerStatus(element) {
 
   let stream;
   let reconnectTimer;
+  let backoffDelay = 5000;
+  let isConnecting = false;
+
   const connect = () => {
+    if (isConnecting || (stream && stream.readyState === EventSource.OPEN)) return;
     if (!navigator.onLine) { paint("offline", "No network"); return; }
     paint("checking", "Connecting…");
+    isConnecting = true;
     stream?.close();
-    stream = new EventSource(`${API_BASE}/health/stream`);
-    stream.onopen = () => paint("online", "Live");
-    stream.onmessage = () => paint("online", "Live");
-    stream.onerror = () => {
-      paint("offline", "Unavailable");
-      stream.close();
-      window.clearTimeout(reconnectTimer);
-      reconnectTimer = window.setTimeout(connect, 5000);
-    };
+    try {
+      stream = new EventSource(`${API_BASE}/health/stream`);
+      stream.onopen = () => {
+        isConnecting = false;
+        backoffDelay = 5000;
+        paint("online", "Live");
+      };
+      stream.onmessage = () => {
+        isConnecting = false;
+        paint("online", "Live");
+      };
+      stream.onerror = () => {
+        isConnecting = false;
+        paint("offline", "Unavailable");
+        stream?.close();
+        window.clearTimeout(reconnectTimer);
+        reconnectTimer = window.setTimeout(connect, backoffDelay);
+        backoffDelay = Math.min(backoffDelay * 1.5, 30000);
+      };
+    } catch {
+      isConnecting = false;
+    }
   };
 
-  const instantOnline = () => { paint("checking", "Reconnecting…"); connect(); };
+  const instantOnline = () => { backoffDelay = 5000; paint("checking", "Reconnecting…"); connect(); };
   const instantOffline = () => paint("offline", "No network");
   window.addEventListener("online", instantOnline, { passive: true });
   window.addEventListener("offline", instantOffline, { passive: true });
