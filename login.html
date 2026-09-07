@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="referrer" content="no-referrer">
   <meta name="description" content="Login to your E-Summit 2026 Team Portal or Admin Panel — CIIES × DIT University.">
-  <meta name="theme-color" content="#1a1814">
+  <meta name="theme-color" content="#12100d">
   <title>Login — E-Summit 2026</title>
   <script>
     (() => {
@@ -25,9 +25,8 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..900&family=DM+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
-  <script src="viewport.js"></script>
   <script src="config.js"></script>
   <script src="auth.js"></script>
   <script>
@@ -39,39 +38,72 @@
 <body class="login-body">
   <div class="site-grain" aria-hidden="true"></div>
 
-  <div class="login-page">
-    <!-- ═══ Left Branding Panel ═══ -->
-    <div class="login-branding">
-      <div class="login-branding-inner">
-        <a class="wordmark wordmark--light" href="./" aria-label="E-Summit 2026 home">
-          <span aria-hidden="true">E—</span><span>SUMMIT</span><sup>26</sup>
-        </a>
+  <!-- Mobile Top Bar (Only visible on screens <= 850px) -->
+  <header class="login-mobile-bar" aria-label="Mobile Navigation">
+    <a class="wordmark wordmark--light" href="./" aria-label="E-Summit 2026 home">
+      <span aria-hidden="true">E—</span><span>SUMMIT</span><sup>26</sup>
+    </a>
+  </header>
 
+  <div class="login-page">
+    <!-- ═══ Left Branding Panel (Desktop) ═══ -->
+    <aside class="login-branding" aria-label="Brand Overview">
+      <div class="login-branding-bg-glow login-branding-bg-glow--1" aria-hidden="true"></div>
+      <div class="login-branding-bg-glow login-branding-bg-glow--2" aria-hidden="true"></div>
+      <div class="login-branding-grid" aria-hidden="true"></div>
+
+      <div class="login-branding-inner">
+        <!-- Top Row -->
+        <div class="login-branding-top">
+          <a class="wordmark wordmark--light" href="./" aria-label="E-Summit 2026 home">
+            <span aria-hidden="true">E—</span><span>SUMMIT</span><sup>26</sup>
+          </a>
+        </div>
+
+        <!-- Center Editorial Stage -->
         <div class="login-branding-text">
-          <p class="mono-label login-brand-label">CIIES × DIT UNIVERSITY</p>
-          <h1 class="login-brand-title">Portal<br>Access.</h1>
+          <div class="login-brand-badge mono-label">
+            <span class="pulse-dot" aria-hidden="true"></span>
+            <span>CIIES × DIT UNIVERSITY</span>
+          </div>
+
+          <h1 class="login-brand-title">Portal<br><span class="brand-title-accent">Access.</span></h1>
           <p class="login-brand-sub">Authenticate to access your team dashboard or the event administration panel.</p>
         </div>
 
+        <!-- Animated Gyroscope Visual Motif -->
+        <div class="login-visual-container" aria-hidden="true">
+          <div class="login-orbit-ring login-orbit-ring--1"></div>
+          <div class="login-orbit-ring login-orbit-ring--2"></div>
+          <div class="login-orbit-ring login-orbit-ring--3"></div>
+          <div class="login-orbit-core">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Bottom Metadata Footer with Live Browser Clock -->
         <div class="login-branding-footer mono-label">
-          <span>SECURE GATEWAY</span>
-          <span>AES-256 · JWT</span>
+          <div class="footer-sec-tag">
+            <span class="sec-dot" aria-hidden="true"></span>
+            <span>SECURE GATEWAY · AES-256</span>
+          </div>
+          <span class="footer-edition-tag" id="liveLocalTime" aria-live="off">--:--:--</span>
         </div>
       </div>
-
-      <!-- Decorative circle -->
-      <div class="login-circle" aria-hidden="true"></div>
-    </div>
+    </aside>
 
     <!-- ═══ Right Form Panel ═══ -->
-    <div class="login-form-area">
+    <main class="login-form-area">
       <div class="login-form-container">
 
-        <!-- Role Selector -->
-        <div class="role-selector" id="roleSelector">
-          <button type="button" class="role-card is-active" data-role="team" id="roleTeam">
-            <div class="role-card-icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Role Selector Switcher -->
+        <div class="role-selector" id="roleSelector" data-role="team" role="tablist" aria-label="Choose Login Role">
+          <button type="button" class="role-card is-active" data-role="team" id="roleTeam" role="tab" aria-selected="true" aria-controls="teamLoginForm">
+            <div class="role-card-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                 <circle cx="9" cy="7" r="4"/>
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
@@ -80,13 +112,13 @@
             </div>
             <div class="role-card-text">
               <span class="role-card-title">Team Portal</span>
-              <span class="role-card-desc">Access your team dashboard, roster, and event details.</span>
+              <span class="role-card-desc">Access team dashboard, roster & submissions</span>
             </div>
           </button>
 
-          <button type="button" class="role-card" data-role="admin" id="roleAdmin">
-            <div class="role-card-icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <button type="button" class="role-card" data-role="admin" id="roleAdmin" role="tab" aria-selected="false" aria-controls="adminLoginForm">
+            <div class="role-card-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                 <circle cx="12" cy="16" r="1"/>
@@ -94,21 +126,22 @@
             </div>
             <div class="role-card-text">
               <span class="role-card-title">Admin Panel</span>
-              <span class="role-card-desc">Manage teams, registrations, and event operations.</span>
+              <span class="role-card-desc">Manage teams, registrations & operations</span>
             </div>
           </button>
         </div>
 
+        <!-- Live Server Gateway Status -->
         <div class="login-server-status" id="loginServerStatus" role="status" aria-live="polite">
           <span class="login-server-dot" aria-hidden="true"></span>
           <span class="login-server-label">Checking secure gateway</span>
           <span class="login-server-time">Connecting…</span>
         </div>
 
-        <!-- Team Login Form -->
-        <form class="login-card" id="teamLoginForm" autocomplete="off" novalidate>
+        <!-- ═══ Team Login Form ═══ -->
+        <form class="login-card" id="teamLoginForm" role="tabpanel" aria-labelledby="roleTeam" autocomplete="off" novalidate>
           <div class="login-card-header">
-            <span class="step-num">01</span>
+            <span class="step-num" aria-hidden="true">01</span>
             <div>
               <h2 class="login-card-title">Team access</h2>
               <p class="section-hint">Enter your official Group ID and Team Password to access your portal.</p>
@@ -116,16 +149,44 @@
           </div>
 
           <div class="field-group">
-            <label for="teamGroupId">Group ID</label>
+            <div class="field-label-row">
+              <label for="teamGroupId">Group ID</label>
+              <span class="field-label-hint">4-digit code</span>
+            </div>
             <div class="group-id-input-wrapper">
-              <span class="group-id-prefix">ES2026_</span>
+              <div class="group-id-prefix-badge">
+                <svg class="group-id-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                <span>ES2026_</span>
+              </div>
               <input id="teamGroupId" name="team_group_code" type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="0001" required autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-form-type="other">
             </div>
           </div>
 
           <div class="field-group">
-            <label for="teamPasswordInput">Team Password</label>
-            <input id="teamPasswordInput" name="team_secret" type="password" placeholder="••••••••" required maxlength="128" autocomplete="new-password" spellcheck="false">
+            <div class="field-label-row">
+              <label for="teamPasswordInput">Team Password</label>
+              <span class="caps-warning" id="teamCapsWarning" aria-live="polite" hidden>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3l8 8h-5v9h-6v-9H4l8-8z"/></svg>
+                Caps Lock On
+              </span>
+            </div>
+            <div class="password-input-wrapper">
+              <input id="teamPasswordInput" name="team_secret" type="password" placeholder="••••••••" required maxlength="128" autocomplete="new-password" spellcheck="false">
+              <button type="button" class="password-toggle" data-target="teamPasswordInput" aria-label="Toggle team password visibility">
+                <svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <svg class="eye-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                  <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+              </button>
+            </div>
           </div>
 
           <div id="teamLoginError" class="login-error" role="alert"></div>
@@ -133,39 +194,62 @@
           <button class="button button--ink login-submit" type="submit" id="teamLoginBtn">
             Access Team Portal <span aria-hidden="true">→</span>
           </button>
+
           <div class="login-recovery-help">
             <span>Can't get in?</span>
-            <button type="button" id="openForgotPwBtn">Forgot password</button>
+            <button type="button" id="openForgotPwBtn">Forgot team password</button>
           </div>
         </form>
 
-        <!-- Team account recovery -->
+        <!-- ═══ Team Account Recovery Card ═══ -->
         <form class="login-card login-card--hidden recovery-card" id="forgotPwCard" novalidate aria-labelledby="recovery-title">
-          <div class="recovery-topline"><span>TEAM ACCOUNT RECOVERY</span><span id="recoveryStep" aria-live="polite">STEP 1 OF 2</span></div>
+          <div class="recovery-topline">
+            <span class="recovery-badge">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+              TEAM ACCOUNT RECOVERY
+            </span>
+            <span id="recoveryStep" class="recovery-step-indicator" aria-live="polite">STEP 1 OF 2</span>
+          </div>
+
+          <div class="recovery-progress-track">
+            <div class="recovery-progress-bar" id="recoveryProgressBar"></div>
+          </div>
+
           <div class="login-card-header">
-            <span class="step-num">02</span>
+            <span class="step-num" aria-hidden="true">02</span>
             <div>
-              <h2 id="recovery-title" class="login-card-title">Reset your team password</h2>
-              <p class="section-hint">First find the recovery question saved for your team. Then set new credentials.</p>
+              <h2 id="recovery-title" class="login-card-title">Reset team password</h2>
+              <p class="section-hint">First locate the recovery question saved for your team, then set new credentials.</p>
             </div>
           </div>
 
+          <!-- Step 1: Lookup Group ID -->
           <div id="recoveryLookupStep">
             <div class="field-group">
-              <label for="forgotGroupId">Group ID</label>
+              <div class="field-label-row">
+                <label for="forgotGroupId">Group ID</label>
+                <span class="field-label-hint">4-digit code</span>
+              </div>
               <div class="group-id-input-wrapper">
-                <span class="group-id-prefix">ES2026_</span>
+                <div class="group-id-prefix-badge">
+                  <svg class="group-id-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                  <span>ES2026_</span>
+                </div>
                 <input id="forgotGroupId" name="recovery_group_code" type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="0001" required autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-form-type="other">
               </div>
             </div>
 
-            <button type="button" class="button button--secondary" id="fetchSecQBtn" style="width:100%; justify-content:center; margin-bottom:1rem;">
+            <button type="button" class="button button--secondary login-submit" id="fetchSecQBtn" style="margin-top:0.4rem; margin-bottom:0.5rem;">
               Continue to recovery question <span aria-hidden="true">→</span>
             </button>
           </div>
 
+          <!-- Step 2: Answer & Reset Credentials -->
           <fieldset id="secQStep" class="recovery-credentials" hidden>
-            <legend>Confirm your team</legend>
+            <legend>Confirm your team identity</legend>
             <div class="field-group">
               <p id="secQuestionLabel" class="recovery-question"></p>
               <label for="forgotSecAnswer">Your saved answer</label>
@@ -193,7 +277,7 @@
               <label for="forgotNewSecurityAnswer">New Security Answer</label>
               <input id="forgotNewSecurityAnswer" placeholder="Enter a new security answer" required maxlength="256">
             </div>
-            <button class="button button--ink" type="submit" id="submitForgotBtn" style="width:100%; justify-content:center; margin-top:0.5rem;">
+            <button class="button button--ink login-submit" type="submit" id="submitForgotBtn">
               Save new credentials <span aria-hidden="true">→</span>
             </button>
           </fieldset>
@@ -212,13 +296,13 @@
           <button type="button" id="closeForgotBtn" class="recovery-cancel">← Back to team sign in</button>
         </form>
 
-        <!-- Admin Login Form -->
-        <form class="login-card login-card--hidden" id="adminLoginForm" novalidate>
+        <!-- ═══ Admin Login Form ═══ -->
+        <form class="login-card login-card--hidden" id="adminLoginForm" role="tabpanel" aria-labelledby="roleAdmin" novalidate>
           <div class="login-card-header">
-            <span class="step-num">01</span>
+            <span class="step-num" aria-hidden="true">01</span>
             <div>
               <h2 class="login-card-title">Admin access</h2>
-              <p class="section-hint">Enter your admin credentials to access the event management panel.</p>
+              <p class="section-hint">Enter your administrative credentials to access the event management panel.</p>
             </div>
           </div>
 
@@ -228,15 +312,21 @@
           </div>
 
           <div class="field-group">
-            <label for="adminPassword">Password</label>
+            <div class="field-label-row">
+              <label for="adminPassword">Password</label>
+              <span class="caps-warning" id="adminCapsWarning" aria-live="polite" hidden>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3l8 8h-5v9h-6v-9H4l8-8z"/></svg>
+                Caps Lock On
+              </span>
+            </div>
             <div class="password-input-wrapper">
-            <input id="adminPassword" name="admin_secret" type="password" placeholder="••••••••••" required maxlength="128" autocomplete="new-password" spellcheck="false">
-              <button type="button" class="password-toggle" id="passwordToggle" aria-label="Toggle password visibility">
-                <svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <input id="adminPassword" name="admin_secret" type="password" placeholder="••••••••••" required maxlength="128" autocomplete="new-password" spellcheck="false">
+              <button type="button" class="password-toggle" id="passwordToggle" data-target="adminPassword" aria-label="Toggle admin password visibility">
+                <svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                   <circle cx="12" cy="12" r="3"/>
                 </svg>
-                <svg class="eye-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                <svg class="eye-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
                   <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
                   <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
                   <line x1="1" y1="1" x2="23" y2="23"/>
@@ -252,22 +342,22 @@
           </button>
         </form>
 
-        <!-- Lost? Bar -->
+        <!-- ═══ Lost / Registration Bar ═══ -->
         <div class="login-lost-bar">
           <div class="lost-bar-text">
-            <span class="lost-bar-icon">◎</span>
+            <span class="lost-bar-icon" aria-hidden="true">◎</span>
             <div>
               <p class="lost-bar-title">Looking for the E-Summit?</p>
-              <p class="lost-bar-sub">Haven't registered your team yet? Head back and sign up.</p>
+              <p class="lost-bar-sub">Haven't registered your team yet? Sign up to secure your spot.</p>
             </div>
           </div>
           <a class="button button--accent lost-bar-btn" href="./#registration">
-            Take me to register <span aria-hidden="true">→</span>
+            Register now <span aria-hidden="true">→</span>
           </a>
         </div>
 
       </div>
-    </div>
+    </main>
   </div>
 
   <script>
@@ -284,36 +374,83 @@
       const adminForm = document.getElementById("adminLoginForm");
       const teamError = document.getElementById("teamLoginError");
       const adminError = document.getElementById("adminLoginError");
-      const passwordToggle = document.getElementById("passwordToggle");
-      const passwordInput = document.getElementById("adminPassword");
       const loginServerStatus = document.getElementById("loginServerStatus");
+      const loginFormContainer = document.querySelector(".login-form-container");
+      const recoveryProgressBar = document.getElementById("recoveryProgressBar");
+
       setupServerStatus(loginServerStatus);
 
       // ── Role Selector ──
       function setRole(role) {
-        document.querySelectorAll(".role-card").forEach(c => c.classList.remove("is-active"));
+        document.querySelectorAll(".role-card").forEach(c => {
+          c.classList.remove("is-active");
+          c.setAttribute("aria-selected", "false");
+        });
         [teamForm, adminForm, forgotCard].forEach(form => form?.classList.add("login-card--hidden"));
         loginFormContainer?.classList.remove("is-recovering");
         document.getElementById("roleSelector")?.setAttribute("data-role", role);
+
         if (role === "team") {
           roleTeam.classList.add("is-active");
+          roleTeam.setAttribute("aria-selected", "true");
           teamForm.classList.remove("login-card--hidden");
+          document.getElementById("teamGroupId")?.focus();
         } else {
           roleAdmin.classList.add("is-active");
+          roleAdmin.setAttribute("aria-selected", "true");
           adminForm.classList.remove("login-card--hidden");
+          document.getElementById("adminEmail")?.focus();
         }
       }
 
       roleTeam.addEventListener("click", () => setRole("team"));
       roleAdmin.addEventListener("click", () => setRole("admin"));
 
-      // ── Password Toggle ──
-      passwordToggle.addEventListener("click", () => {
-        const isPassword = passwordInput.type === "password";
-        passwordInput.type = isPassword ? "text" : "password";
-        passwordToggle.querySelector(".eye-open").style.display = isPassword ? "none" : "block";
-        passwordToggle.querySelector(".eye-closed").style.display = isPassword ? "block" : "none";
+      // ── Password Visibility Toggles ──
+      document.querySelectorAll(".password-toggle").forEach((toggleBtn) => {
+        toggleBtn.addEventListener("click", () => {
+          const targetId = toggleBtn.getAttribute("data-target") || (toggleBtn.id === "passwordToggle" ? "adminPassword" : "teamPasswordInput");
+          const targetInput = document.getElementById(targetId);
+          if (!targetInput) return;
+
+          const isPassword = targetInput.type === "password";
+          targetInput.type = isPassword ? "text" : "password";
+
+          const eyeOpen = toggleBtn.querySelector(".eye-open");
+          const eyeClosed = toggleBtn.querySelector(".eye-closed");
+          if (eyeOpen && eyeClosed) {
+            eyeOpen.style.display = isPassword ? "none" : "block";
+            eyeClosed.style.display = isPassword ? "block" : "none";
+          }
+          targetInput.focus();
+        });
       });
+
+      // ── Caps Lock Active Detection ──
+      const checkCapsLock = (event, warningElement) => {
+        if (!warningElement) return;
+        if (event.getModifierState && event.getModifierState("CapsLock")) {
+          warningElement.hidden = false;
+        } else {
+          warningElement.hidden = true;
+        }
+      };
+
+      const teamPwInput = document.getElementById("teamPasswordInput");
+      const teamCapsWarning = document.getElementById("teamCapsWarning");
+      if (teamPwInput) {
+        teamPwInput.addEventListener("keydown", (e) => checkCapsLock(e, teamCapsWarning));
+        teamPwInput.addEventListener("keyup", (e) => checkCapsLock(e, teamCapsWarning));
+        teamPwInput.addEventListener("blur", () => { if (teamCapsWarning) teamCapsWarning.hidden = true; });
+      }
+
+      const adminPwInput = document.getElementById("adminPassword");
+      const adminCapsWarning = document.getElementById("adminCapsWarning");
+      if (adminPwInput) {
+        adminPwInput.addEventListener("keydown", (e) => checkCapsLock(e, adminCapsWarning));
+        adminPwInput.addEventListener("keyup", (e) => checkCapsLock(e, adminCapsWarning));
+        adminPwInput.addEventListener("blur", () => { if (adminCapsWarning) adminCapsWarning.hidden = true; });
+      }
 
       // ── Forgot Password Modal Handlers ──
       const openForgotBtn = document.getElementById("openForgotPwBtn");
@@ -326,9 +463,8 @@
       const forgotSuccess = document.getElementById("forgotSuccess");
       const forgotSuccessGroupId = document.getElementById("forgotSuccessGroupId");
       const returnToTeamLogin = document.getElementById("returnToTeamLogin");
-      const loginFormContainer = document.querySelector(".login-form-container");
 
-      // Initialize only after every form reference used by setRole exists.
+      // Initialize default active role
       setRole("team");
 
       if (openForgotBtn) {
@@ -337,6 +473,7 @@
           forgotCard.classList.remove("login-card--hidden");
           loginFormContainer?.classList.add("is-recovering");
           resetRecovery();
+          document.getElementById("forgotGroupId")?.focus();
         });
       }
 
@@ -357,7 +494,7 @@
           const groupId = normalizeGroupId(forgotGroupInput.value);
           const apiBase = (typeof API_BASE !== "undefined") ? API_BASE : "/api";
           fetchSecQBtn.disabled = true;
-          fetchSecQBtn.innerHTML = 'Finding your recovery question… <span aria-hidden="true">⟳</span>';
+          fetchSecQBtn.innerHTML = 'Finding recovery question… <span aria-hidden="true">⟳</span>';
           try {
             const res = await fetch(`${apiBase}/teams/security-question/${groupId}`);
             const data = await res.json();
@@ -366,9 +503,10 @@
               secQStep.hidden = false;
               document.getElementById("recoveryLookupStep").hidden = true;
               document.getElementById("recoveryStep").textContent = "STEP 2 OF 2";
+              recoveryProgressBar?.classList.add("is-step-2");
               document.getElementById("forgotSecAnswer").focus();
             } else {
-              forgotError.textContent = "We couldn’t find that Group ID. Check the four digits and try again.";
+              forgotError.textContent = "We couldn't find that Group ID. Check the four digits and try again.";
             }
           } catch {
             forgotError.textContent = "We couldn't retrieve the security question right now. Please try again later or contact the technical team.";
@@ -453,6 +591,7 @@
         secQStep.hidden = true;
         document.getElementById("recoveryLookupStep").hidden = false;
         document.getElementById("recoveryStep").textContent = "STEP 1 OF 2";
+        recoveryProgressBar?.classList.remove("is-step-2");
         closeForgotBtn.hidden = false;
         fetchSecQBtn.disabled = false;
         fetchSecQBtn.innerHTML = 'Continue to recovery question <span aria-hidden="true">→</span>';
@@ -532,7 +671,7 @@
         }
       });
 
-      // ── Zero Password Retention on Window Blur / Unattended Laptop ──
+      // ── Zero Password Retention on Window Blur / Unattended Screen ──
       window.addEventListener("blur", () => {
         const adminPw = document.getElementById("adminPassword");
         const teamPw = document.getElementById("teamPasswordInput");
@@ -546,26 +685,40 @@
         if (lockReason) {
           sessionStorage.removeItem("esummit_lock_reason");
           const notice = document.createElement("div");
-          notice.style.cssText = "background: rgba(229, 75, 60, 0.14); border-left: 3px solid #e54b3c; padding: 0.75rem 1rem; margin-bottom: 1.2rem; border-radius: 4px; font-size: 0.78rem;";
+          notice.style.cssText = "background: rgba(229, 75, 60, 0.14); border-left: 3.5px solid #e54b3c; padding: 0.75rem 1rem; margin-bottom: 0.85rem; border-radius: 8px; font-size: 0.78rem; color: var(--ink); line-height: 1.4;";
           notice.innerHTML = `<strong style="color:#e54b3c; letter-spacing:0.04em;">SECURITY NOTICE:</strong> ${lockReason}`;
           document.querySelector(".login-form-container")?.prepend(notice);
         }
       } catch {}
 
-      // ── Group ID inputs: numeric entry, four-digit display ──
+      // ── Group ID inputs: numeric entry, four-digit display & auto-advance ──
       ["teamGroupId", "forgotGroupId"].forEach((inputId) => {
         const input = document.getElementById(inputId);
+        if (!input) return;
         input.addEventListener("input", (event) => {
-          const digits = event.target.value.replace(/[^0-9]/g, "").slice(-4);
+          const digits = event.target.value.replace(/[^0-9]/g, "").slice(0, 4);
           event.target.value = digits;
+          if (digits.length === 4 && inputId === "teamGroupId") {
+            const nextPw = document.getElementById("teamPasswordInput");
+            if (nextPw && !nextPw.value) nextPw.focus();
+          }
         });
         input.addEventListener("blur", (event) => {
           if (event.target.value) event.target.value = event.target.value.padStart(4, "0");
         });
       });
 
-      // Do this after the controls are active. A slow API check must never
-      // make the Admin/Team selector feel unclickable.
+      // ── Live Browser Time Display ──
+      const liveTimeEl = document.getElementById("liveLocalTime");
+      function updateClock() {
+        if (!liveTimeEl) return;
+        const now = new Date();
+        liveTimeEl.textContent = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
+      }
+      updateClock();
+      setInterval(updateClock, 1000);
+
+      // Confirm session in background without blocking user interactions
       void Auth.validateSession().then((session) => {
         if (session) window.location.replace("dashboard");
       });

@@ -30,6 +30,13 @@ if (typeof window !== "undefined" && window.location) {
   }
 
   function applyScaling() {
+    // Only index.html with the complex absolute stage animation uses custom viewport scaling;
+    // application pages (login, dashboard) must remain 100% under standard responsive CSS.
+    if (window.location.pathname.includes("login") || window.location.pathname.includes("dashboard") || document.body?.classList.contains("login-body") || document.body?.classList.contains("dash-body")) {
+      root.style.zoom = "";
+      return;
+    }
+
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     const browserZoomed = isBrowserZoomed();
