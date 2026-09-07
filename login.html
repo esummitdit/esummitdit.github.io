@@ -685,8 +685,11 @@
         if (lockReason) {
           sessionStorage.removeItem("esummit_lock_reason");
           const notice = document.createElement("div");
-          notice.style.cssText = "background: rgba(229, 75, 60, 0.14); border-left: 3.5px solid #e54b3c; padding: 0.75rem 1rem; margin-bottom: 0.85rem; border-radius: 8px; font-size: 0.78rem; color: var(--ink); line-height: 1.4;";
-          notice.innerHTML = `<strong style="color:#e54b3c; letter-spacing:0.04em;">SECURITY NOTICE:</strong> ${lockReason}`;
+          const strong = document.createElement("strong");
+          strong.style.cssText = "color:#e54b3c; letter-spacing:0.04em;";
+          strong.textContent = "SECURITY NOTICE: ";
+          notice.appendChild(strong);
+          notice.appendChild(document.createTextNode(String(lockReason)));
           document.querySelector(".login-form-container")?.prepend(notice);
         }
       } catch {}

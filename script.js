@@ -1228,31 +1228,31 @@ function setUpRegistrationForm() {
         <div class="field-group field-group--split">
           <div>
             <label for="member_${member.id}_name">${isLeader ? "Leader Full Name (Mandatory)" : "Participant Name (Mandatory)"}</label>
-            <input id="member_${member.id}_name" name="member_${member.id}_name" autocomplete="name" placeholder="Full name" value="${member.name || ''}" required minlength="2" maxlength="100">
+            <input id="member_${member.id}_name" name="member_${member.id}_name" autocomplete="name" placeholder="Full name" value="${escapeHTML(member.name || '')}" required minlength="2" maxlength="100">
           </div>
           <div>
             <label for="member_${member.id}_college_id">College Roll No / Student ID (Mandatory)</label>
-            <input id="member_${member.id}_college_id" name="member_${member.id}_college_id" placeholder="e.g. 2001010045" value="${member.college_id || ''}" required minlength="2" maxlength="64">
+            <input id="member_${member.id}_college_id" name="member_${member.id}_college_id" placeholder="e.g. 2001010045" value="${escapeHTML(member.college_id || '')}" required minlength="2" maxlength="64">
           </div>
         </div>
         <div class="field-group field-group--split">
           <div>
             <label for="member_${member.id}_email">College / Institutional Email (Mandatory)</label>
-            <input id="member_${member.id}_email" type="email" name="member_${member.id}_email" autocomplete="email" placeholder="10000xxxxx@dit.edu.in" value="${member.email || ''}" required maxlength="254">
+            <input id="member_${member.id}_email" type="email" name="member_${member.id}_email" autocomplete="email" placeholder="10000xxxxx@dit.edu.in" value="${escapeHTML(member.email || '')}" required maxlength="254">
           </div>
           <div>
             <label for="member_${member.id}_personal_email">Personal Email ID (Mandatory)</label>
-            <input id="member_${member.id}_personal_email" type="email" name="member_${member.id}_personal_email" autocomplete="email" placeholder="name@gmail.com" value="${member.personal_email || ''}" required maxlength="254">
+            <input id="member_${member.id}_personal_email" type="email" name="member_${member.id}_personal_email" autocomplete="email" placeholder="name@gmail.com" value="${escapeHTML(member.personal_email || '')}" required maxlength="254">
           </div>
         </div>
         <div class="field-group field-group--split">
           <div>
             <label for="member_${member.id}_phone">Phone / WhatsApp (Mandatory)</label>
-            <input id="member_${member.id}_phone" type="tel" name="member_${member.id}_phone" inputmode="tel" autocomplete="tel" placeholder="+91 98765 43210" value="${member.phone || ''}" required maxlength="20" title="Use a 10-digit Indian mobile number, optionally prefixed with +91.">
+            <input id="member_${member.id}_phone" type="tel" name="member_${member.id}_phone" inputmode="tel" autocomplete="tel" placeholder="+91 98765 43210" value="${escapeHTML(member.phone || '')}" required maxlength="20" title="Use a 10-digit Indian mobile number, optionally prefixed with +91.">
           </div>
           <div>
             <label for="member_${member.id}_role">Team Role / Specialty (Mandatory)</label>
-            <input id="member_${member.id}_role" name="member_${member.id}_role" placeholder="${isLeader ? 'e.g. Lead Developer' : 'e.g. Designer / Pitcher'}" value="${member.role || ''}" required minlength="2" maxlength="80">
+            <input id="member_${member.id}_role" name="member_${member.id}_role" placeholder="${isLeader ? 'e.g. Lead Developer' : 'e.g. Designer / Pitcher'}" value="${escapeHTML(member.role || '')}" required minlength="2" maxlength="80">
           </div>
         </div>
         <div class="field-group">
