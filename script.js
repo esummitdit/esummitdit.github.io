@@ -2,6 +2,17 @@
 
 document.documentElement.classList.add("js");
 
+function getViewportZoom() {
+  const zoomStyle = document.documentElement.style.zoom;
+  if (zoomStyle) {
+    const parsed = parseFloat(zoomStyle);
+    if (!Number.isNaN(parsed) && parsed > 0) return parsed;
+  }
+  const computed = parseFloat(window.getComputedStyle(document.documentElement).zoom);
+  if (!Number.isNaN(computed) && computed > 0) return computed;
+  return 1;
+}
+
 function getApiBase() {
   if (typeof API_BASE !== "undefined" && API_BASE) return API_BASE;
   if (window.location.origin.includes(":3000")) return "/api";
@@ -93,10 +104,11 @@ function setUpBackToTopControl() {
   const syncMergePosition = () => {
     mergeFrame = null;
     if (!isMerged || control.hidden || !footerControl) return;
+    const zoom = getViewportZoom();
     const target = footerControl.getBoundingClientRect();
     const source = control.getBoundingClientRect();
-    const x = target.left + (target.width - source.width) / 2 - source.left;
-    const y = target.top + (target.height - source.height) / 2 - source.top;
+    const x = (target.left + (target.width - source.width) / 2 - source.left) / zoom;
+    const y = (target.top + (target.height - source.height) / 2 - source.top) / zoom;
     control.style.setProperty("--merge-x", `${Math.round(x)}px`);
     control.style.setProperty("--merge-y", `${Math.round(y)}px`);
   };
@@ -531,7 +543,8 @@ function initSculpture(container, reduceMotion) {
     pointer.x = event.clientX / window.innerWidth - 0.5;
     pointer.y = event.clientY / window.innerHeight - 0.5;
     if (ambientGlowEl) {
-      ambientGlowEl.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0)`;
+      const zoom = getViewportZoom();
+      ambientGlowEl.style.transform = `translate3d(${event.clientX / zoom}px, ${event.clientY / zoom}px, 0)`;
     }
   }, { passive: true });
 
@@ -541,6 +554,7 @@ function initSculpture(container, reduceMotion) {
     if (!width || !height) return;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(width, height, false);
   }
 
@@ -765,11 +779,12 @@ function setUpSculptureControl(sceneState, reduceMotion, autoPlay = false) {
 
 function runOpeningSequence(sceneState, loadingContainer, heroContainer, overlay, loadingBranding, reduceMotion) {
   const canvas = sceneState.renderer.domElement;
-  const transitionDuration = 1500;
+  const transitionDuration = 1300;
   let isLaunching = false;
   let launch = null;
 
   function measureLaunch() {
+    const zoom = getViewportZoom();
     const target = heroContainer.getBoundingClientRect();
     const heroHeadline = document.getElementById("hero-title");
     const finalHeadline = heroHeadline ? heroHeadline.getBoundingClientRect() : { left: 40, top: 120, width: 400, height: 200 };
@@ -779,10 +794,10 @@ function runOpeningSequence(sceneState, loadingContainer, heroContainer, overlay
     if (loadingBranding) {
       const labelHeight = 28;
       Object.assign(loadingBranding.style, {
-        left: `${finalHeadline.left}px`,
-        top: `${Math.max(24, finalHeadline.top - labelHeight)}px`,
+        left: `${finalHeadline.left / zoom}px`,
+        top: `${Math.max(24, (finalHeadline.top - labelHeight) / zoom)}px`,
         width: isNarrowLayout
-          ? `${Math.min(finalHeadline.width, window.innerWidth - 32)}px`
+          ? `${Math.min(finalHeadline.width, window.innerWidth - 32) / zoom}px`
           : "fit-content"
       });
     }
@@ -834,10 +849,10 @@ function runOpeningSequence(sceneState, loadingContainer, heroContainer, overlay
         : window.innerHeight * 0.52;
 
     Object.assign(loadingContainer.style, {
-      left: `${centerX - width / 2}px`,
-      top: `${centerY - height / 2}px`,
-      width: `${width}px`,
-      height: `${height}px`,
+      left: `${(centerX - width / 2) / zoom}px`,
+      top: `${(centerY - height / 2) / zoom}px`,
+      width: `${width / zoom}px`,
+      height: `${height / zoom}px`,
       transform: "translate3d(0, 0, 0) scale(1)",
       transition: "none"
     });
@@ -922,14 +937,15 @@ function runOpeningSequence(sceneState, loadingContainer, heroContainer, overlay
       const animateLaunch = (now) => {
         const elapsed = now - startedAt;
         const progress = Math.min(1, elapsed / transitionDuration);
-        const eased = 1 - Math.pow(1 - progress, 4);
+        const eased = 1 - Math.pow(1 - progress, 3);
 
         const currentTarget = heroContainer.getBoundingClientRect();
         const targetCenterX = currentTarget.left + currentTarget.width / 2;
         const targetCenterY = currentTarget.top + currentTarget.height / 2;
 
-        const translateX = (targetCenterX - initialCenterX) * eased;
-        const translateY = (targetCenterY - initialCenterY) * eased;
+        const currentZoom = getViewportZoom();
+        const translateX = ((targetCenterX - initialCenterX) * eased) / currentZoom;
+        const translateY = ((targetCenterY - initialCenterY) * eased) / currentZoom;
         const targetScale = currentTarget.width / initialWidth;
         const scale = 1 + (targetScale - 1) * eased;
 
