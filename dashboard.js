@@ -98,6 +98,29 @@ document.addEventListener("DOMContentLoaded", async () => {
         return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
       case "alert-triangle":
         return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+      case "cross":
+        return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+      case "cpu":
+        return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>`;
+      case "wifi":
+        return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>`;
+      case "maximize":
+        return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>`;
+      case "mapPin":
+      case "map-pin":
+        return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`;
+      case "device":
+      case "smartphone":
+        return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>`;
+      case "fingerprint":
+        return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12C2 6.5 6.5 2 12 2a10 10 0 0 1 8 4"></path><path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 12 0c0 3 .5 6 1 7.5"></path><path d="M9 21c.5-1.5 1-3.5 1-6a2 2 0 0 1 4 0c0 2.5.5 4.5 1 6"></path><path d="M12 12v3"></path></svg>`;
+      case "browser":
+        return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>`;
+      case "arrowRight":
+      case "arrow-right":
+        return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`;
+      case "radar":
+        return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"></path><path d="M4 6h.01"></path><path d="M2.29 9.62A10 10 0 0 0 12 22a10 10 0 0 0 8.4-4.57"></path><path d="M12 6a6 6 0 0 1 6 6 6 6 0 0 1-1.28 3.71"></path><path d="M12 2v4"></path><path d="M12 12l4.24-4.24"></path><circle cx="12" cy="12" r="2"></circle></svg>`;
       default:
         return "";
     }
@@ -1493,39 +1516,133 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           <!-- Subview 2: Admin Activity & Audit -->
           <div id="subviewAdminActivity" class="dash-analytics-subview-panel" style="display:none;" hidden>
-            <div style="display:flex; flex-direction:column; gap:0.75rem;">
-              <div style="display:flex; align-items:center; justify-content:space-between;">
-                <h3 style="margin:0; font-size:1.1rem; color:#fff;">Active Administrators Roster</h3>
-                <span class="mono-label" id="activeAdminCountLabel" style="color:var(--acid);">0 ACTIVE NOW</span>
+            <div class="dash-admin-activity-section">
+              <div class="dash-section-header-row">
+                <h3 class="dash-analytics-section-title">
+                  ${getIcon("users", "dash-icon--sm")} Active Administrators Roster
+                </h3>
+                <span class="dash-presence-status-pill" id="activeAdminCountLabel">0 ACTIVE NOW</span>
               </div>
               <div class="dash-presence-grid" id="analyticsPresenceGrid"></div>
             </div>
 
-            <div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:1.5rem;">
-              <h3 style="margin:0; font-size:1.1rem; color:#ff7e67;">Suspicious Authentication & Defense Alerts</h3>
+            <div class="dash-admin-activity-section">
+              <div class="dash-section-header-row">
+                <h3 class="dash-analytics-section-title dash-analytics-section-title--danger">
+                  ${getIcon("alert-triangle", "dash-icon--sm")} Suspicious Authentication & Defense Alerts
+                </h3>
+              </div>
               <div class="dash-security-alerts" id="analyticsSecurityAlerts"></div>
             </div>
 
-            <div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:1.5rem;">
-              <h3 style="margin:0; font-size:1.1rem; color:#fff;">Administrative Audit Log</h3>
+            <div class="dash-admin-activity-section">
+              <div class="dash-section-header-row">
+                <h3 class="dash-analytics-section-title">
+                  ${getIcon("shield", "dash-icon--sm")} Administrative Audit Log
+                </h3>
+              </div>
               <div class="dash-filter-toolbar">
-                <input type="text" id="adminFilterEmail" class="dash-filter-input" placeholder="Search Admin / Email…" style="flex:1; min-width:180px;">
-                <select id="adminFilterAction" class="dash-filter-select">
-                  <option value="">All Actions</option>
-                  <option value="LOGIN">LOGIN</option>
-                  <option value="LOGIN_FAILED">LOGIN_FAILED</option>
-                  <option value="DELETE_TEAM">DELETE_TEAM</option>
-                  <option value="BULK_DELETE_TEAMS">BULK_DELETE_TEAMS</option>
-                  <option value="VERIFY_PASS">VERIFY_PASS</option>
-                  <option value="CREATE_ADMIN">CREATE_ADMIN</option>
-                  <option value="DELETE_ADMIN">DELETE_ADMIN</option>
-                  <option value="EXPORT_CSV">EXPORT_CSV</option>
-                  <option value="IMPORT_CSV">IMPORT_CSV</option>
-                  <option value="CHANGE_PASSWORD">CHANGE_PASSWORD</option>
-                  <option value="RETENTION_PURGE">RETENTION_PURGE</option>
-                </select>
-                <input type="text" id="adminFilterIp" class="dash-filter-input" placeholder="Filter by IP…" style="width:140px;">
-                <button type="button" id="adminFilterResetBtn" class="dash-btn-telemetry">Reset</button>
+                <div class="dash-filter-field dash-filter-field--search">
+                  <span class="dash-filter-icon">${getIcon("search", "dash-icon--xs")}</span>
+                  <input type="text" id="adminFilterEmail" class="dash-filter-input" placeholder="Search Admin / Email…">
+                </div>
+                <div class="dash-filter-field dash-filter-field--select">
+                  <div class="dash-custom-select" id="adminActionDropdown">
+                    <button type="button" class="dash-custom-select-trigger" id="adminActionTrigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Filter by administrative action">
+                      <span class="dash-custom-select-badge dash-action-tag--default" id="adminActionTriggerBadge">ALL</span>
+                      <span class="dash-custom-select-label" id="adminActionTriggerLabel">All Actions</span>
+                      <span class="dash-custom-select-arrow" aria-hidden="true">${getIcon("chevron", "dash-icon--xs")}</span>
+                    </button>
+                    <div class="dash-custom-select-menu" id="adminActionMenu" role="listbox" aria-label="Action filter options" hidden>
+                      <div class="dash-custom-select-scroll">
+                        <div class="dash-custom-opt is-selected" data-value="" role="option" aria-selected="true">
+                          <span class="dash-custom-opt-badge dash-action-tag--default">ALL</span>
+                          <span class="dash-custom-opt-name">All Actions</span>
+                          <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                        </div>
+                        <div class="dash-custom-opt" data-value="LOGIN" role="option">
+                          <span class="dash-custom-opt-badge dash-action-tag--login">LOGIN</span>
+                          <span class="dash-custom-opt-name">Admin Login</span>
+                          <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                        </div>
+                        <div class="dash-custom-opt" data-value="LOGIN_FAILED" role="option">
+                          <span class="dash-custom-opt-badge dash-action-tag--delete">FAILED</span>
+                          <span class="dash-custom-opt-name">Failed Login Alert</span>
+                          <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                        </div>
+                        <div class="dash-custom-opt" data-value="DELETE_TEAM" role="option">
+                          <span class="dash-custom-opt-badge dash-action-tag--delete">DELETE</span>
+                          <span class="dash-custom-opt-name">Delete Squad</span>
+                          <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                        </div>
+                        <div class="dash-custom-opt" data-value="BULK_DELETE_TEAMS" role="option">
+                          <span class="dash-custom-opt-badge dash-action-tag--delete">PURGE</span>
+                          <span class="dash-custom-opt-name">Bulk Delete Squads</span>
+                          <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                        </div>
+                        <div class="dash-custom-opt" data-value="VERIFY_PASS" role="option">
+                          <span class="dash-custom-opt-badge dash-action-tag--verify">VERIFY</span>
+                          <span class="dash-custom-opt-name">Verify Attendee Pass</span>
+                          <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                        </div>
+                        <div class="dash-custom-opt" data-value="CREATE_ADMIN" role="option">
+                          <span class="dash-custom-opt-badge dash-action-tag--create">PROVISION</span>
+                          <span class="dash-custom-opt-name">Create Staff Officer</span>
+                          <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                        </div>
+                        <div class="dash-custom-opt" data-value="DELETE_ADMIN" role="option">
+                          <span class="dash-custom-opt-badge dash-action-tag--delete">REVOKE</span>
+                          <span class="dash-custom-opt-name">Delete Staff Account</span>
+                          <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                        </div>
+                        <div class="dash-custom-opt" data-value="EXPORT_CSV" role="option">
+                          <span class="dash-custom-opt-badge dash-action-tag--default">CSV</span>
+                          <span class="dash-custom-opt-name">Export CSV Vault</span>
+                          <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                        </div>
+                        <div class="dash-custom-opt" data-value="IMPORT_CSV" role="option">
+                          <span class="dash-custom-opt-badge dash-action-tag--default">IMPORT</span>
+                          <span class="dash-custom-opt-name">Import CSV Records</span>
+                          <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                        </div>
+                        <div class="dash-custom-opt" data-value="CHANGE_PASSWORD" role="option">
+                          <span class="dash-custom-opt-badge dash-action-tag--verify">KEY</span>
+                          <span class="dash-custom-opt-name">Change Password</span>
+                          <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                        </div>
+                        <div class="dash-custom-opt" data-value="RETENTION_PURGE" role="option">
+                          <span class="dash-custom-opt-badge dash-action-tag--delete">RETENTION</span>
+                          <span class="dash-custom-opt-name">Vault Retention Purge</span>
+                          <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <select id="adminFilterAction" class="sr-only" tabindex="-1" aria-hidden="true">
+                      <option value="">All Actions</option>
+                      <option value="LOGIN">LOGIN</option>
+                      <option value="LOGIN_FAILED">LOGIN_FAILED</option>
+                      <option value="DELETE_TEAM">DELETE_TEAM</option>
+                      <option value="BULK_DELETE_TEAMS">BULK_DELETE_TEAMS</option>
+                      <option value="VERIFY_PASS">VERIFY_PASS</option>
+                      <option value="CREATE_ADMIN">CREATE_ADMIN</option>
+                      <option value="DELETE_ADMIN">DELETE_ADMIN</option>
+                      <option value="EXPORT_CSV">EXPORT_CSV</option>
+                      <option value="IMPORT_CSV">IMPORT_CSV</option>
+                      <option value="CHANGE_PASSWORD">CHANGE_PASSWORD</option>
+                      <option value="RETENTION_PURGE">RETENTION_PURGE</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="dash-filter-field dash-filter-field--ip">
+                  <span class="dash-filter-icon">${getIcon("globe", "dash-icon--xs")}</span>
+                  <input type="text" id="adminFilterIp" class="dash-filter-input" placeholder="Filter by IP…">
+                </div>
+                <button type="button" id="adminFilterResetBtn" class="dash-btn-telemetry dash-filter-reset-btn">
+                  ${getIcon("refresh", "dash-icon--xs")} <span>Reset</span>
+                </button>
+              </div>
+              <div class="dash-table-scroll-hint">
+                ${getIcon("chevron", "dash-icon--xs")} <span>Swipe horizontally to inspect full audit log</span>
               </div>
               <div class="dash-analytics-table-wrap">
                 <table class="dash-analytics-table" id="adminActivityTable">
@@ -1659,20 +1776,91 @@ document.addEventListener("DOMContentLoaded", async () => {
           <!-- Subview 6: Session Explorer -->
           <div id="subviewSessions" class="dash-analytics-subview-panel" style="display:none;" hidden>
             <div class="dash-filter-toolbar">
-              <input type="text" id="sessionSearchInput" class="dash-filter-input" placeholder="Search Session ID / Visitor ID…" style="flex:1; min-width:200px;">
-              <select id="sessionFilterType" class="dash-filter-select">
-                <option value="">All Session Types</option>
-                <option value="anonymous_visitor">Anonymous Visitor</option>
-                <option value="registered_user">Registered User</option>
-                <option value="admin">Administrator</option>
-              </select>
-              <select id="sessionFilterDevice" class="dash-filter-select">
-                <option value="">All Devices</option>
-                <option value="Desktop">Desktop</option>
-                <option value="Mobile">Mobile</option>
-                <option value="Tablet">Tablet</option>
-              </select>
-              <button type="button" id="sessionFilterResetBtn" class="dash-btn-telemetry">Reset Filters</button>
+              <div class="dash-filter-field dash-filter-field--search">
+                <span class="dash-filter-icon">${getIcon("search", "dash-icon--xs")}</span>
+                <input type="text" id="sessionSearchInput" class="dash-filter-input" placeholder="Search Session ID / Visitor ID…">
+              </div>
+              <div class="dash-filter-field dash-filter-field--select">
+                <div class="dash-custom-select" id="sessionTypeDropdown">
+                  <button type="button" class="dash-custom-select-trigger" id="sessionTypeTrigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Filter by session type">
+                    <span class="dash-custom-select-badge dash-action-tag--default" id="sessionTypeTriggerBadge">ALL</span>
+                    <span class="dash-custom-select-label" id="sessionTypeTriggerLabel">All Session Types</span>
+                    <span class="dash-custom-select-arrow" aria-hidden="true">${getIcon("chevron", "dash-icon--xs")}</span>
+                  </button>
+                  <div class="dash-custom-select-menu" id="sessionTypeMenu" role="listbox" aria-label="Session type filter options" hidden>
+                    <div class="dash-custom-select-scroll">
+                      <div class="dash-custom-opt is-selected" data-value="" role="option" aria-selected="true">
+                        <span class="dash-custom-opt-badge dash-action-tag--default">ALL</span>
+                        <span class="dash-custom-opt-name">All Session Types</span>
+                        <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                      </div>
+                      <div class="dash-custom-opt" data-value="anonymous_visitor" role="option">
+                        <span class="dash-custom-opt-badge dash-action-tag--login">ANON</span>
+                        <span class="dash-custom-opt-name">Anonymous Visitor</span>
+                        <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                      </div>
+                      <div class="dash-custom-opt" data-value="registered_user" role="option">
+                        <span class="dash-custom-opt-badge dash-action-tag--create">USER</span>
+                        <span class="dash-custom-opt-name">Registered Squad User</span>
+                        <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                      </div>
+                      <div class="dash-custom-opt" data-value="admin" role="option">
+                        <span class="dash-custom-opt-badge dash-action-tag--verify">ADMIN</span>
+                        <span class="dash-custom-opt-name">Admin Officer</span>
+                        <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <select id="sessionFilterType" class="sr-only" tabindex="-1" aria-hidden="true">
+                    <option value="">All Session Types</option>
+                    <option value="anonymous_visitor">Anonymous Visitor</option>
+                    <option value="registered_user">Registered User</option>
+                    <option value="admin">Administrator</option>
+                  </select>
+                </div>
+              </div>
+              <div class="dash-filter-field dash-filter-field--select">
+                <div class="dash-custom-select" id="sessionDeviceDropdown">
+                  <button type="button" class="dash-custom-select-trigger" id="sessionDeviceTrigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Filter by device category">
+                    <span class="dash-custom-select-badge dash-action-tag--default" id="sessionDeviceTriggerBadge">ALL</span>
+                    <span class="dash-custom-select-label" id="sessionDeviceTriggerLabel">All Devices</span>
+                    <span class="dash-custom-select-arrow" aria-hidden="true">${getIcon("chevron", "dash-icon--xs")}</span>
+                  </button>
+                  <div class="dash-custom-select-menu" id="sessionDeviceMenu" role="listbox" aria-label="Device category filter options" hidden>
+                    <div class="dash-custom-select-scroll">
+                      <div class="dash-custom-opt is-selected" data-value="" role="option" aria-selected="true">
+                        <span class="dash-custom-opt-badge dash-action-tag--default">ALL</span>
+                        <span class="dash-custom-opt-name">All Devices</span>
+                        <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                      </div>
+                      <div class="dash-custom-opt" data-value="Desktop" role="option">
+                        <span class="dash-custom-opt-badge dash-action-tag--create">DESK</span>
+                        <span class="dash-custom-opt-name">Desktop Viewport</span>
+                        <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                      </div>
+                      <div class="dash-custom-opt" data-value="Mobile" role="option">
+                        <span class="dash-custom-opt-badge dash-action-tag--verify">MOBI</span>
+                        <span class="dash-custom-opt-name">Mobile Device</span>
+                        <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                      </div>
+                      <div class="dash-custom-opt" data-value="Tablet" role="option">
+                        <span class="dash-custom-opt-badge dash-action-tag--delete">TAB</span>
+                        <span class="dash-custom-opt-name">Tablet Viewport</span>
+                        <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <select id="sessionFilterDevice" class="sr-only" tabindex="-1" aria-hidden="true">
+                    <option value="">All Devices</option>
+                    <option value="Desktop">Desktop</option>
+                    <option value="Mobile">Mobile</option>
+                    <option value="Tablet">Tablet</option>
+                  </select>
+                </div>
+              </div>
+              <button type="button" id="sessionFilterResetBtn" class="dash-btn-telemetry dash-filter-reset-btn">
+                ${getIcon("refresh", "dash-icon--xs")} <span>Reset</span>
+              </button>
             </div>
             <div class="dash-analytics-table-wrap" style="margin-top:1rem;">
               <table class="dash-analytics-table" id="sessionsExplorerTable">
@@ -1704,41 +1892,114 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         <!-- Retention Purge Dialog (Master Admin Only) -->
         <div id="analyticsRetentionModal" class="dash-modal" style="display:none;" hidden>
-          <div class="dash-modal-backdrop" id="analyticsRetentionBackdrop" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99998;"></div>
-          <div class="dash-modal-dialog" style="max-width:480px; width:90%; background:#191714; border:1px solid rgba(255,255,255,0.15); border-radius:1.25rem; padding:1.75rem; color:#fffdf9; box-shadow:0 20px 50px rgba(0,0,0,0.6); position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:99999;">
-            <h3 style="margin:0 0 0.5rem 0; font-size:1.2rem; color:var(--acid);">Data Retention & Privacy Policy</h3>
-            <p style="font-size:0.8rem; color:rgba(255,253,249,0.7); line-height:1.5;">
-              In compliance with privacy and data protection standards, telemetry records and anonymous session trails older than the retention threshold can be securely purged from the AES-256 vault.
-            </p>
-            <div style="margin:1.25rem 0;">
-              <label for="retentionDaysSelect" style="display:block; font:700 0.72rem var(--mono); color:rgba(255,253,249,0.6); margin-bottom:0.4rem; text-transform:uppercase;">Purge Records Older Than:</label>
-              <select id="retentionDaysSelect" class="dash-filter-select" style="width:100%; padding:0.65rem;">
-                <option value="7">7 Days</option>
-                <option value="14">14 Days</option>
-                <option value="30" selected>30 Days (Standard Retention)</option>
-                <option value="60">60 Days</option>
-                <option value="90">90 Days</option>
-              </select>
+          <div class="dash-modal-backdrop" id="analyticsRetentionBackdrop"></div>
+          <div class="dash-modal-dialog dash-retention-dialog">
+            <div class="dash-modal-header">
+              <div class="dash-modal-header-title">
+                <span class="dash-modal-shield">${getIcon("shield", "dash-icon--sm")}</span>
+                <h3 class="dash-modal-title">Data Retention & Privacy Policy</h3>
+              </div>
+              <button type="button" class="dash-modal-close-btn" id="retentionCloseTopBtn" aria-label="Close retention modal">✕</button>
             </div>
-            <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
-              <button type="button" class="dash-btn-telemetry" id="retentionCancelBtn">Cancel</button>
-              <button type="button" class="dash-btn-telemetry dash-btn-telemetry--danger" id="retentionConfirmBtn">Execute Secure Purge</button>
+            
+            <div class="dash-modal-body">
+              <div class="dash-retention-notice-card">
+                <div class="dash-retention-notice-icon">${getIcon("trash", "dash-icon--sm")}</div>
+                <div class="dash-retention-notice-text">
+                  <p class="dash-retention-desc">
+                    In compliance with privacy and data protection standards, telemetry records and anonymous session trails older than the configured threshold can be permanently purged from the encrypted AES-256 database vault.
+                  </p>
+                  <span class="dash-retention-badge">AES-256 GCM ENCRYPTED PURGE</span>
+                </div>
+              </div>
+
+              <div class="dash-retention-control-group">
+                <label for="retentionDaysTrigger" class="dash-retention-label">Purge Records Older Than:</label>
+                <div class="dash-retention-select-wrap">
+                  <div class="dash-custom-select" id="retentionDaysDropdown">
+                    <button type="button" class="dash-custom-select-trigger" id="retentionDaysTrigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Select data retention window">
+                      <span class="dash-custom-select-badge dash-action-tag--verify" id="retentionDaysTriggerBadge">30D</span>
+                      <span class="dash-custom-select-label" id="retentionDaysTriggerLabel">30 Days (Standard Retention)</span>
+                      <span class="dash-custom-select-arrow" aria-hidden="true">${getIcon("chevron", "dash-icon--xs")}</span>
+                    </button>
+                    <div class="dash-custom-select-menu" id="retentionDaysMenu" role="listbox" aria-label="Retention duration options" hidden>
+                      <div class="dash-custom-select-scroll">
+                        <div class="dash-custom-opt" data-value="7" role="option">
+                          <span class="dash-custom-opt-badge dash-action-tag--delete">7D</span>
+                          <span class="dash-custom-opt-name">7 Days (Aggressive Privacy Cycle)</span>
+                          <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                        </div>
+                        <div class="dash-custom-opt" data-value="14" role="option">
+                          <span class="dash-custom-opt-badge dash-action-tag--create">14D</span>
+                          <span class="dash-custom-opt-name">14 Days (Bi-weekly Scrub)</span>
+                          <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                        </div>
+                        <div class="dash-custom-opt is-selected" data-value="30" role="option" aria-selected="true">
+                          <span class="dash-custom-opt-badge dash-action-tag--verify">30D</span>
+                          <span class="dash-custom-opt-name">30 Days (Standard Retention)</span>
+                          <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                        </div>
+                        <div class="dash-custom-opt" data-value="60" role="option">
+                          <span class="dash-custom-opt-badge dash-action-tag--default">60D</span>
+                          <span class="dash-custom-opt-name">60 Days (Extended Audit Trail)</span>
+                          <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                        </div>
+                        <div class="dash-custom-opt" data-value="90" role="option">
+                          <span class="dash-custom-opt-badge dash-action-tag--default">90D</span>
+                          <span class="dash-custom-opt-name">90 Days (Quarterly Maximum)</span>
+                          <span class="dash-custom-opt-check" aria-hidden="true">${getIcon("check", "dash-icon--xs")}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <select id="retentionDaysSelect" class="sr-only" tabindex="-1" aria-hidden="true">
+                      <option value="7">7</option>
+                      <option value="14">14</option>
+                      <option value="30" selected>30</option>
+                      <option value="60">60</option>
+                      <option value="90">90</option>
+                    </select>
+                  </div>
+                </div>
+                <p class="dash-retention-helper">
+                  Telemetry and visitor logs older than this interval will be permanently wiped. Active registered teams remain unaffected.
+                </p>
+              </div>
+            </div>
+
+            <div class="dash-modal-footer">
+              <button type="button" class="dash-btn-telemetry dash-modal-cancel-btn" id="retentionCancelBtn">Cancel</button>
+              <button type="button" class="dash-btn-telemetry dash-btn-telemetry--danger dash-modal-confirm-btn" id="retentionConfirmBtn">
+                ${getIcon("trash", "dash-icon--xs")}
+                <span>Execute Secure Purge</span>
+              </button>
             </div>
           </div>
         </div>
 
         <!-- Session Detail Modal -->
         <div id="analyticsSessionDetailModal" class="dash-modal" style="display:none;" hidden>
-          <div class="dash-modal-backdrop" id="sessionDetailBackdrop" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99998;"></div>
-          <div class="dash-modal-dialog" style="max-width:640px; width:90%; max-height:85vh; overflow-y:auto; background:#191714; border:1px solid rgba(255,255,255,0.15); border-radius:1.25rem; padding:1.75rem; color:#fffdf9; box-shadow:0 20px 50px rgba(0,0,0,0.6); position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:99999;">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem;">
-              <div>
-                <h3 style="margin:0; font-size:1.2rem; color:var(--acid);" id="sessionDetailTitle">Session Dossier</h3>
-                <span class="mono-label" id="sessionDetailSub" style="color:rgba(255,253,249,0.6);"></span>
+          <div class="dash-modal-backdrop" id="sessionDetailBackdrop"></div>
+          <div class="dash-modal-dialog dash-session-dialog">
+            <div class="dash-modal-header">
+              <div class="dash-modal-header-title">
+                <span class="dash-modal-shield">${getIcon("eye", "dash-icon--sm")}</span>
+                <div>
+                  <h3 class="dash-modal-title" id="sessionDetailTitle">Session Dossier</h3>
+                  <span class="mono-label" id="sessionDetailSub" style="color:rgba(255,253,249,0.6); font-size:0.65rem;"></span>
+                </div>
               </div>
-              <button type="button" class="dash-btn-telemetry" id="sessionDetailCloseBtn">✕ Close</button>
+              <button type="button" class="dash-modal-close-btn" id="sessionDetailCloseBtn" aria-label="Close session detail">✕</button>
             </div>
-            <div id="sessionDetailContent" style="display:flex; flex-direction:column; gap:1rem;"></div>
+            <div id="sessionDetailContent" class="dash-modal-body"></div>
+            <div class="dash-modal-footer dash-dossier-footer">
+              <div class="dash-dossier-footer-note">
+                ${getIcon("shield", "dash-icon--xs")}
+                <span>CONFIDENTIAL DOSSIER · E-SUMMIT TELEMETRY</span>
+              </div>
+              <button type="button" class="dash-btn-telemetry dash-modal-cancel-btn" id="sessionDetailFooterCloseBtn">
+                ${getIcon("cross", "dash-icon--xs")} <span>Close Dossier</span> <span class="dash-kbd-hint">ESC</span>
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -1786,7 +2047,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     function switchSubview(targetView) {
       activeSubview = targetView;
       subnavButtons.forEach(btn => {
-        btn.classList.toggle("is-active", btn.getAttribute("data-subview") === targetView);
+        const isTarget = btn.getAttribute("data-subview") === targetView;
+        btn.classList.toggle("is-active", isTarget);
+        if (isTarget && typeof btn.scrollIntoView === "function") {
+          btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+        }
       });
       Object.entries(subviewPanels).forEach(([name, el]) => {
         if (!el) return;
@@ -2076,14 +2341,23 @@ document.addEventListener("DOMContentLoaded", async () => {
                 </span>
                 <span class="dash-pill-tag">${escapeHTML(admin.department || "Technical Team")}</span>
               </div>
-              <div>
+              <div class="dash-presence-identity">
                 <h4 class="dash-presence-name">${escapeHTML(admin.name || "Administrator")}</h4>
                 <div class="dash-presence-email">${escapeHTML(admin.email)}</div>
               </div>
               <div class="dash-presence-meta">
-                <div><strong>Current Feature:</strong> ${escapeHTML(admin.current_page || "dashboard")}</div>
-                <div><strong>Last Active:</strong> ${escapeHTML(formatRegistrationDateTime(admin.last_active))}</div>
-                <div><strong>Client IP:</strong> ${escapeHTML(admin.ip || "unknown")}</div>
+                <div class="dash-presence-meta-item">
+                  <span class="dash-presence-meta-label">Current Feature:</span>
+                  <span class="dash-presence-meta-val">${escapeHTML(admin.current_page || "dashboard")}</span>
+                </div>
+                <div class="dash-presence-meta-item">
+                  <span class="dash-presence-meta-label">Last Active:</span>
+                  <span class="dash-presence-meta-val">${escapeHTML(formatRegistrationDateTime(admin.last_active))}</span>
+                </div>
+                <div class="dash-presence-meta-item">
+                  <span class="dash-presence-meta-label">Client IP:</span>
+                  <span class="dash-presence-meta-val dash-presence-ip">${escapeHTML(admin.ip || "unknown")}</span>
+                </div>
               </div>
             </div>
           `;
@@ -2095,11 +2369,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (alertsWrap) {
         alertsWrap.innerHTML = (data.security_alerts && data.security_alerts.length) ? data.security_alerts.map(a => `
           <div class="dash-alert-item">
-            <div class="dash-alert-msg">
-              ${getIcon("alert-triangle", "dash-icon--sm")}
-              <span><strong>[${escapeHTML(a.action)}]</strong> ${escapeHTML(a.details || "Security event")}</span>
+            <div class="dash-alert-main">
+              <span class="dash-alert-icon">${getIcon("alert-triangle", "dash-icon--sm")}</span>
+              <div class="dash-alert-text">
+                <span class="dash-alert-tag">[${escapeHTML(a.action)}]</span>
+                <span class="dash-alert-desc">${escapeHTML(a.details || "Security defense triggered")}</span>
+              </div>
             </div>
-            <span class="mono-label" style="color:rgba(255,253,249,0.7);">${escapeHTML(a.ip)} · ${escapeHTML(formatRegistrationDateTime(a.timestamp))}</span>
+            <div class="dash-alert-meta">
+              <span>${escapeHTML(a.ip)}</span>
+              <span>•</span>
+              <span>${escapeHTML(formatRegistrationDateTime(a.timestamp))}</span>
+            </div>
           </div>
         `).join("") : '<p class="dash-empty-state" style="padding:1rem;">No suspicious security triggers detected.</p>';
       }
@@ -2116,14 +2397,27 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           return `
             <tr>
-              <td style="white-space:nowrap;">${escapeHTML(formatRegistrationDateTime(a.timestamp))}</td>
-              <td><strong>${escapeHTML(a.admin_name || a.admin_email)}</strong><br><span style="color:rgba(255,253,249,0.5);">${escapeHTML(a.admin_email)}</span></td>
-              <td><span class="dash-pill-tag">${escapeHTML(a.role)}</span><br><span style="color:rgba(255,253,249,0.5);">${escapeHTML(a.department)}</span></td>
+              <td class="dash-cell-nowrap">${escapeHTML(formatRegistrationDateTime(a.timestamp))}</td>
+              <td>
+                <div class="dash-table-admin-name">${escapeHTML(a.admin_name || a.admin_email)}</div>
+                <div class="dash-table-subtext">${escapeHTML(a.admin_email)}</div>
+              </td>
+              <td>
+                <span class="dash-pill-tag">${escapeHTML(a.role)}</span>
+                <div class="dash-table-subtext">${escapeHTML(a.department)}</div>
+              </td>
               <td><span class="dash-action-tag ${tagClass}">${escapeHTML(a.action)}</span></td>
-              <td><code style="color:var(--acid);">${escapeHTML(a.entity_id || a.entity_type || "—")}</code></td>
-              <td>${escapeHTML(a.page || "dashboard")}</td>
-              <td>${escapeHTML(a.ip)}<br><span style="color:rgba(255,253,249,0.5);">${escapeHTML(a.country || "Network")}</span></td>
-              <td><strong style="color:${a.status === 'SUCCESS' ? '#4ade80' : '#ff7e67'};">${escapeHTML(a.status)}</strong></td>
+              <td><code class="dash-table-code">${escapeHTML(a.entity_id || a.entity_type || "—")}</code></td>
+              <td><span class="dash-table-page-pill">${escapeHTML(a.page || "dashboard")}</span></td>
+              <td>
+                <div class="dash-table-ip">${escapeHTML(a.ip)}</div>
+                <div class="dash-table-subtext">${escapeHTML(a.country || "Network")}</div>
+              </td>
+              <td>
+                <span class="dash-status-pill dash-status-pill--${a.status === 'SUCCESS' ? 'success' : 'danger'}">
+                  ${escapeHTML(a.status)}
+                </span>
+              </td>
             </tr>
           `;
         }).join("") : '<tr><td colspan="8" class="dash-empty-state" style="padding:2rem;">No matching admin activities recorded.</td></tr>';
@@ -2261,90 +2555,529 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
+    // Relocate modal containers to document.body so they escape parent transforms & backdrop-filters
+    const sessionModalElem = panel.querySelector("#analyticsSessionDetailModal");
+    if (sessionModalElem && sessionModalElem.parentElement !== document.body) {
+      document.getElementById("analyticsSessionDetailModal")?.remove();
+      document.body.appendChild(sessionModalElem);
+    }
+    const retentionModalElem = panel.querySelector("#analyticsRetentionModal");
+    if (retentionModalElem && retentionModalElem.parentElement !== document.body) {
+      document.getElementById("analyticsRetentionModal")?.remove();
+      document.body.appendChild(retentionModalElem);
+    }
+
     function showSessionModal(sess) {
-      const modal = panel.querySelector("#analyticsSessionDetailModal");
-      const title = panel.querySelector("#sessionDetailTitle");
-      const sub = panel.querySelector("#sessionDetailSub");
-      const content = panel.querySelector("#sessionDetailContent");
+      let modal = document.getElementById("analyticsSessionDetailModal");
+      const title = document.getElementById("sessionDetailTitle");
+      const sub = document.getElementById("sessionDetailSub");
+      const content = document.getElementById("sessionDetailContent");
       if (!modal || !content) return;
 
-      if (title) title.textContent = `Session: ${sess.session_id}`;
-      if (sub) sub.textContent = `Type: ${sess.session_type} · Duration: ${formatSeconds(sess.duration_seconds)}`;
+      if (modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+      }
+
+      const sid = sess.session_id || "UNKNOWN_SESSION";
+      const shortSid = sid.toUpperCase();
+      if (title) title.textContent = `SESSION: ${shortSid}`;
+
+      const durationStr = formatSeconds(sess.duration_seconds || 0);
+      const sessType = sess.session_type || "anonymous_visitor";
+      let typeBadgeClass = "dash-action-tag--login";
+      let typeBadgeText = "ANON VISITOR";
+      let avatarIcon = "radar";
+
+      if (sessType === "admin") {
+        typeBadgeClass = "dash-action-tag--verify";
+        typeBadgeText = "ADMIN OFFICER";
+        avatarIcon = "shield";
+      } else if (sessType === "registered_user") {
+        typeBadgeClass = "dash-action-tag--create";
+        typeBadgeText = "REGISTERED SQUAD";
+        avatarIcon = "users";
+      }
+
+      if (sub) sub.textContent = `TYPE: ${typeBadgeText} · DURATION: ${durationStr}`;
+
+      const navPaths = sess.navigation_path || [];
+      const navPipelineHTML = navPaths.length > 0
+        ? navPaths.map((p, idx) => {
+            const isLast = idx === navPaths.length - 1;
+            return `
+              <div class="dash-journey-node ${isLast ? "is-destination" : ""}">
+                <span class="dash-journey-step">${String(idx + 1).padStart(2, "0")}</span>
+                <div class="dash-journey-route">
+                  <span class="dash-journey-path">${escapeHTML(p)}</span>
+                  ${isLast ? `<span class="dash-journey-badge">LIVE NODE</span>` : ""}
+                </div>
+              </div>
+              ${!isLast ? `<div class="dash-journey-connector">${getIcon("arrowRight", "dash-icon--xs")}</div>` : ""}
+            `;
+          }).join("")
+        : `
+          <div class="dash-journey-node is-destination">
+            <span class="dash-journey-step">01</span>
+            <div class="dash-journey-route">
+              <span class="dash-journey-path">/ (Direct Gateway Entry)</span>
+              <span class="dash-journey-badge">LIVE NODE</span>
+            </div>
+          </div>
+        `;
+
+      const screenW = sess.device?.browser_supplied?.screen?.width || "—";
+      const screenH = sess.device?.browser_supplied?.screen?.height || "—";
+      const dpr = sess.device?.browser_supplied?.screen?.pixel_ratio || 1;
+      const vpW = sess.device?.browser_supplied?.viewport?.width || "—";
+      const vpH = sess.device?.browser_supplied?.viewport?.height || "—";
+      const tz = sess.device?.browser_supplied?.navigator?.timezone || "UTC";
+      const lang = sess.device?.browser_supplied?.navigator?.language || "en-US";
+      const cores = sess.device?.browser_supplied?.navigator?.hardware_concurrency || "Standard";
+      const netType = (sess.device?.browser_supplied?.network_connection_api?.effective_type || "Standard Link").toUpperCase();
+      const ipAddr = sess.network?.ip || "127.0.0.1";
+      const geoCountry = sess.network?.country || "Local Network";
+      const geoCity = sess.network?.city || "Local Node";
+      const geoCode = sess.network?.country_code || "LAN";
+      const deviceCat = sess.device?.server_derived?.parsed_device_category || "Desktop";
+      const osName = sess.device?.server_derived?.parsed_os_name || "Client OS";
+      const browserName = sess.device?.server_derived?.parsed_browser_name || "Browser";
 
       content.innerHTML = `
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:0.75rem; background:rgba(0,0,0,0.3); padding:1rem; border-radius:0.75rem;">
-          <div><strong>Visitor ID:</strong> <code style="color:var(--acid);">${escapeHTML(sess.visitor_id)}</code></div>
-          <div><strong>User ID:</strong> <code>${escapeHTML(sess.user_id || "Unregistered")}</code></div>
-          <div><strong>IP Address:</strong> ${escapeHTML(sess.network?.ip || "unknown")}</div>
-          <div><strong>Country / City:</strong> ${escapeHTML(sess.network?.country || "unknown")} / ${escapeHTML(sess.network?.city || "unknown")}</div>
-          <div><strong>Device:</strong> ${escapeHTML(sess.device?.server_derived?.parsed_device_category || "Desktop")}</div>
-          <div><strong>Browser:</strong> ${escapeHTML(sess.device?.server_derived?.parsed_browser_name || "Unknown")}</div>
-        </div>
-
-        <div>
-          <h4 style="margin:0.75rem 0 0.5rem 0; font-size:0.9rem; color:#fff;">Navigation Path Sequence</h4>
-          <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
-            ${(sess.navigation_path || []).map((p, idx) => `
-              <span class="dash-pill-tag" style="padding:0.4rem 0.65rem;">${idx + 1}. ${escapeHTML(p)}</span>
-            `).join("")}
+        <div class="dash-dossier-wrap">
+          <!-- 1. Identity Hero Header Card -->
+          <div class="dash-dossier-hero">
+            <div class="dash-dossier-hero-main">
+              <div class="dash-dossier-avatar">
+                ${getIcon(avatarIcon, "dash-icon--md")}
+              </div>
+              <div class="dash-dossier-id-block">
+                <div class="dash-dossier-title-row">
+                  <span class="dash-dossier-type-badge ${typeBadgeClass}">${typeBadgeText}</span>
+                  <span class="dash-dossier-status-pill">
+                    <span class="pulse-dot"></span> Active Session
+                  </span>
+                </div>
+                <div class="dash-dossier-key-val">
+                  <span class="dash-dossier-code" title="${escapeHTML(sid)}">${escapeHTML(sid)}</span>
+                  <button type="button" class="dash-dossier-copy-btn" data-copy="${escapeHTML(sid)}" title="Copy Session ID" aria-label="Copy Session ID">
+                    ${getIcon("copy", "dash-icon--xs")}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="dash-dossier-stats-chips">
+              <div class="dash-dossier-chip">
+                <span class="chip-lbl">TOTAL TIME</span>
+                <span class="chip-val">${durationStr}</span>
+              </div>
+              <div class="dash-dossier-chip">
+                <span class="chip-lbl">NAVIGATION</span>
+                <span class="chip-val">${navPaths.length} Route${navPaths.length === 1 ? "" : "s"}</span>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div>
-          <h4 style="margin:0.75rem 0 0.5rem 0; font-size:0.9rem; color:#fff;">Browser Telemetry Snapshot</h4>
-          <div class="dash-analytics-table-wrap">
-            <table class="dash-analytics-table">
-              <tr><td>Screen Resolution</td><td>${escapeHTML(sess.device?.browser_supplied?.screen?.width || "—")} × ${escapeHTML(sess.device?.browser_supplied?.screen?.height || "—")}</td></tr>
-              <tr><td>Viewport</td><td>${escapeHTML(sess.device?.browser_supplied?.viewport?.width || "—")} × ${escapeHTML(sess.device?.browser_supplied?.viewport?.height || "—")}</td></tr>
-              <tr><td>Device Pixel Ratio</td><td>${escapeHTML(sess.device?.browser_supplied?.screen?.pixel_ratio || 1)}x</td></tr>
-              <tr><td>Timezone / Language</td><td>${escapeHTML(sess.device?.browser_supplied?.navigator?.timezone || "UTC")} / ${escapeHTML(sess.device?.browser_supplied?.navigator?.language || "en")}</td></tr>
-              <tr><td>Hardware Concurrency</td><td>${escapeHTML(sess.device?.browser_supplied?.navigator?.hardware_concurrency || "Standard")} cores</td></tr>
-              <tr><td>Network Connection</td><td>${escapeHTML(sess.device?.browser_supplied?.network_connection_api?.effective_type || "Standard")}</td></tr>
-            </table>
+          <!-- 2. Client & Origin HUD Matrix -->
+          <div class="dash-dossier-section">
+            <div class="dash-dossier-section-head">
+              <span class="dash-dossier-section-tag">HUD MATRIX</span>
+              <h4 class="dash-dossier-section-title">Client Identity & Origin Node</h4>
+            </div>
+            <div class="dash-dossier-grid">
+              <!-- Visitor Fingerprint -->
+              <div class="dash-hud-card">
+                <div class="dash-hud-card-header">
+                  <span class="dash-hud-card-icon">${getIcon("fingerprint", "dash-icon--xs")}</span>
+                  <span class="dash-hud-card-label">Visitor ID Fingerprint</span>
+                </div>
+                <div class="dash-hud-card-body">
+                  <span class="dash-hud-val dash-hud-val--acid" title="${escapeHTML(sess.visitor_id || '')}">${escapeHTML(sess.visitor_id || "Unknown")}</span>
+                  ${sess.visitor_id ? `
+                    <button type="button" class="dash-dossier-copy-btn" data-copy="${escapeHTML(sess.visitor_id)}" title="Copy Visitor ID" aria-label="Copy Visitor ID">
+                      ${getIcon("copy", "dash-icon--xs")}
+                    </button>
+                  ` : ""}
+                </div>
+              </div>
+
+              <!-- Authenticated User -->
+              <div class="dash-hud-card">
+                <div class="dash-hud-card-header">
+                  <span class="dash-hud-card-icon">${getIcon("user", "dash-icon--xs")}</span>
+                  <span class="dash-hud-card-label">Authenticated Account</span>
+                </div>
+                <div class="dash-hud-card-body">
+                  <span class="dash-hud-val" title="${escapeHTML(sess.user_id || 'Unregistered Visitor')}">${escapeHTML(sess.user_id || "Unregistered Visitor")}</span>
+                  ${sess.user_id ? `
+                    <button type="button" class="dash-dossier-copy-btn" data-copy="${escapeHTML(sess.user_id)}" title="Copy User ID" aria-label="Copy User ID">
+                      ${getIcon("copy", "dash-icon--xs")}
+                    </button>
+                  ` : `<span class="dash-hud-subpill">ANON</span>`}
+                </div>
+              </div>
+
+              <!-- Remote IP Node -->
+              <div class="dash-hud-card">
+                <div class="dash-hud-card-header">
+                  <span class="dash-hud-card-icon">${getIcon("globe", "dash-icon--xs")}</span>
+                  <span class="dash-hud-card-label">Remote IP Address</span>
+                </div>
+                <div class="dash-hud-card-body">
+                  <span class="dash-hud-val" title="${escapeHTML(ipAddr)}">${escapeHTML(ipAddr)}</span>
+                  <button type="button" class="dash-dossier-copy-btn" data-copy="${escapeHTML(ipAddr)}" title="Copy IP" aria-label="Copy IP">
+                    ${getIcon("copy", "dash-icon--xs")}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Geolocation -->
+              <div class="dash-hud-card">
+                <div class="dash-hud-card-header">
+                  <span class="dash-hud-card-icon">${getIcon("mapPin", "dash-icon--xs")}</span>
+                  <span class="dash-hud-card-label">Geographic Location</span>
+                </div>
+                <div class="dash-hud-card-body">
+                  <span class="dash-hud-val" title="${escapeHTML(geoCountry)} / ${escapeHTML(geoCity)}">${escapeHTML(geoCountry)} / ${escapeHTML(geoCity)}</span>
+                  <span class="dash-hud-subpill">${escapeHTML(geoCode)}</span>
+                </div>
+              </div>
+
+              <!-- Device Factor & OS -->
+              <div class="dash-hud-card">
+                <div class="dash-hud-card-header">
+                  <span class="dash-hud-card-icon">${getIcon("device", "dash-icon--xs")}</span>
+                  <span class="dash-hud-card-label">Device & Operating System</span>
+                </div>
+                <div class="dash-hud-card-body">
+                  <span class="dash-hud-val">${escapeHTML(deviceCat)}</span>
+                  <span class="dash-hud-subpill">${escapeHTML(osName)}</span>
+                </div>
+              </div>
+
+              <!-- Browser Client -->
+              <div class="dash-hud-card">
+                <div class="dash-hud-card-header">
+                  <span class="dash-hud-card-icon">${getIcon("browser", "dash-icon--xs")}</span>
+                  <span class="dash-hud-card-label">Browser Client Engine</span>
+                </div>
+                <div class="dash-hud-card-body">
+                  <span class="dash-hud-val" title="${escapeHTML(browserName)}">${escapeHTML(browserName)}</span>
+                  <span class="dash-hud-subpill">ENGINE</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Navigation Path Pipeline Flow -->
+          <div class="dash-dossier-section">
+            <div class="dash-dossier-section-head">
+              <span class="dash-dossier-section-tag">PIPELINE</span>
+              <h4 class="dash-dossier-section-title">Navigation Path Sequence</h4>
+            </div>
+            <div class="dash-journey-pipeline">
+              ${navPipelineHTML}
+            </div>
+          </div>
+
+          <!-- 4. Browser Telemetry & Spec Matrix (Zero Horizontal Overflow) -->
+          <div class="dash-dossier-section">
+            <div class="dash-dossier-section-head">
+              <span class="dash-dossier-section-tag">TELEMETRY</span>
+              <h4 class="dash-dossier-section-title">Browser & Hardware Telemetry</h4>
+            </div>
+            <div class="dash-telemetry-spec-grid">
+              <!-- Screen Resolution -->
+              <div class="dash-spec-card">
+                <div class="dash-spec-icon">${getIcon("monitor", "dash-icon--sm")}</div>
+                <div class="dash-spec-info">
+                  <span class="dash-spec-label">Screen Resolution</span>
+                  <span class="dash-spec-value">${escapeHTML(screenW)} × ${escapeHTML(screenH)}</span>
+                  <span class="dash-spec-hint">${escapeHTML(dpr)}x Pixel Density</span>
+                </div>
+              </div>
+
+              <!-- Viewport Bounds -->
+              <div class="dash-spec-card">
+                <div class="dash-spec-icon">${getIcon("maximize", "dash-icon--sm")}</div>
+                <div class="dash-spec-info">
+                  <span class="dash-spec-label">Active Viewport</span>
+                  <span class="dash-spec-value">${escapeHTML(vpW)} × ${escapeHTML(vpH)}</span>
+                  <span class="dash-spec-hint">Render Surface</span>
+                </div>
+              </div>
+
+              <!-- Logical CPU Cores -->
+              <div class="dash-spec-card">
+                <div class="dash-spec-icon">${getIcon("cpu", "dash-icon--sm")}</div>
+                <div class="dash-spec-info">
+                  <span class="dash-spec-label">Hardware Cores</span>
+                  <span class="dash-spec-value">${escapeHTML(cores)}</span>
+                  <span class="dash-spec-hint">Logical Processors</span>
+                </div>
+              </div>
+
+              <!-- Network Connection Link -->
+              <div class="dash-spec-card">
+                <div class="dash-spec-icon">${getIcon("wifi", "dash-icon--sm")}</div>
+                <div class="dash-spec-info">
+                  <span class="dash-spec-label">Network Link</span>
+                  <span class="dash-spec-value">${escapeHTML(netType)}</span>
+                  <span class="dash-spec-hint">Effective Speed</span>
+                </div>
+              </div>
+
+              <!-- Client Timezone -->
+              <div class="dash-spec-card">
+                <div class="dash-spec-icon">${getIcon("clock", "dash-icon--sm")}</div>
+                <div class="dash-spec-info">
+                  <span class="dash-spec-label">Timezone</span>
+                  <span class="dash-spec-value" title="${escapeHTML(tz)}">${escapeHTML(tz)}</span>
+                  <span class="dash-spec-hint">Client Clock</span>
+                </div>
+              </div>
+
+              <!-- Locale / Language -->
+              <div class="dash-spec-card">
+                <div class="dash-spec-icon">${getIcon("globe", "dash-icon--sm")}</div>
+                <div class="dash-spec-info">
+                  <span class="dash-spec-label">Language / Locale</span>
+                  <span class="dash-spec-value">${escapeHTML(lang)}</span>
+                  <span class="dash-spec-hint">RFC 5646 Format</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       `;
 
+      // Attach copy button click handlers
+      content.querySelectorAll(".dash-dossier-copy-btn").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          const toCopy = btn.getAttribute("data-copy");
+          if (!toCopy) return;
+          try {
+            await navigator.clipboard.writeText(toCopy);
+            const orig = btn.innerHTML;
+            btn.innerHTML = getIcon("check", "dash-icon--xs");
+            btn.style.color = "#4ade80";
+            btn.style.borderColor = "#4ade80";
+            showToast(`Copied: ${toCopy.length > 24 ? toCopy.substring(0, 24) + "..." : toCopy}`);
+            setTimeout(() => {
+              btn.innerHTML = orig;
+              btn.style.color = "";
+              btn.style.borderColor = "";
+            }, 1600);
+          } catch {
+            showToast("Copied text: " + toCopy);
+          }
+        });
+      });
+
       modal.hidden = false;
-      modal.style.display = "block";
+      modal.style.display = "flex";
+      document.body.style.overflow = "hidden";
     }
 
     // Modal close handlers
-    panel.querySelector("#sessionDetailCloseBtn")?.addEventListener("click", () => {
-      const modal = panel.querySelector("#analyticsSessionDetailModal");
-      if (modal) { modal.hidden = true; modal.style.display = "none"; }
-    });
-    panel.querySelector("#sessionDetailBackdrop")?.addEventListener("click", () => {
-      const modal = panel.querySelector("#analyticsSessionDetailModal");
-      if (modal) { modal.hidden = true; modal.style.display = "none"; }
-    });
+    const closeSessionModal = () => {
+      const modal = document.getElementById("analyticsSessionDetailModal");
+      if (modal) {
+        modal.hidden = true;
+        modal.style.display = "none";
+        document.body.style.overflow = "";
+      }
+    };
+
+    document.getElementById("sessionDetailCloseBtn")?.addEventListener("click", closeSessionModal);
+    document.getElementById("sessionDetailFooterCloseBtn")?.addEventListener("click", closeSessionModal);
+    document.getElementById("sessionDetailBackdrop")?.addEventListener("click", closeSessionModal);
 
     // ── Retention Purge Modal ──
-    const retentionModal = panel.querySelector("#analyticsRetentionModal");
+    const closeRetentionModal = () => {
+      const modal = document.getElementById("analyticsRetentionModal");
+      if (modal) {
+        modal.hidden = true;
+        modal.style.display = "none";
+        document.body.style.overflow = "";
+      }
+    };
+
     panel.querySelector("#analyticsRetentionBtn")?.addEventListener("click", () => {
-      if (retentionModal) { retentionModal.hidden = false; retentionModal.style.display = "block"; }
+      const modal = document.getElementById("analyticsRetentionModal");
+      if (modal) {
+        if (modal.parentElement !== document.body) document.body.appendChild(modal);
+        modal.hidden = false;
+        modal.style.display = "flex";
+        document.body.style.overflow = "hidden";
+      }
     });
-    panel.querySelector("#retentionCancelBtn")?.addEventListener("click", () => {
-      if (retentionModal) { retentionModal.hidden = true; retentionModal.style.display = "none"; }
-    });
-    panel.querySelector("#analyticsRetentionBackdrop")?.addEventListener("click", () => {
-      if (retentionModal) { retentionModal.hidden = true; retentionModal.style.display = "none"; }
+    document.getElementById("retentionCancelBtn")?.addEventListener("click", closeRetentionModal);
+    document.getElementById("retentionCloseTopBtn")?.addEventListener("click", closeRetentionModal);
+    document.getElementById("analyticsRetentionBackdrop")?.addEventListener("click", closeRetentionModal);
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeSessionModal();
+        closeRetentionModal();
+      }
     });
 
-    panel.querySelector("#retentionConfirmBtn")?.addEventListener("click", async () => {
-      const days = parseInt(panel.querySelector("#retentionDaysSelect")?.value || "30", 10);
+    document.getElementById("retentionConfirmBtn")?.addEventListener("click", async () => {
+      const days = parseInt(document.getElementById("retentionDaysSelect")?.value || "30", 10);
       try {
         const res = await Auth.apiFetch("/analytics/master/retention/purge", {
           method: "POST",
           body: JSON.stringify({ days: days })
         });
         const result = await res.json();
-        if (retentionModal) { retentionModal.hidden = true; retentionModal.style.display = "none"; }
+        closeRetentionModal();
         showToast(`Retention purge complete: removed ${result.purged_sessions || 0} sessions and ${result.purged_events || 0} events.`);
         fetchAllTelemetry();
       } catch {
         showToast("Retention purge failed", "error");
       }
+    });
+
+    // ── Unified Custom Dropdowns Controller ──
+    function initCustomDropdown({ dropdownId, triggerId, menuId, selectId, onChange }) {
+      const dropdown = document.getElementById(dropdownId);
+      const trigger = document.getElementById(triggerId);
+      const menu = document.getElementById(menuId);
+      const hiddenSelect = document.getElementById(selectId);
+      if (!dropdown || !trigger || !menu) {
+        return { setVal: () => {}, toggleMenu: () => {} };
+      }
+
+      const triggerBadge = trigger.querySelector(".dash-custom-select-badge");
+      const triggerLabel = trigger.querySelector(".dash-custom-select-label");
+      const options = dropdown.querySelectorAll(".dash-custom-opt");
+
+      function setVal(val, triggerChange = true) {
+        options.forEach(opt => {
+          const optVal = opt.getAttribute("data-value") || "";
+          if (optVal === String(val)) {
+            opt.classList.add("is-selected");
+            opt.setAttribute("aria-selected", "true");
+            const badge = opt.querySelector(".dash-custom-opt-badge");
+            const name = opt.querySelector(".dash-custom-opt-name");
+            if (triggerBadge && badge) {
+              triggerBadge.textContent = badge.textContent.trim();
+              const tagClass = Array.from(badge.classList).find(c => c.startsWith("dash-action-tag--")) || "dash-action-tag--default";
+              triggerBadge.className = `dash-custom-select-badge ${tagClass}`;
+            }
+            if (triggerLabel && name) {
+              triggerLabel.textContent = name.textContent.trim();
+            }
+          } else {
+            opt.classList.remove("is-selected");
+            opt.removeAttribute("aria-selected");
+          }
+        });
+
+        if (hiddenSelect && hiddenSelect.value !== String(val)) {
+          hiddenSelect.value = String(val);
+          if (triggerChange) {
+            hiddenSelect.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+        }
+
+        if (triggerChange && typeof onChange === "function") {
+          onChange(val);
+        }
+      }
+
+      function toggleMenu(open) {
+        const isOpen = open !== undefined ? open : menu.hasAttribute("hidden");
+        if (isOpen) {
+          // Close other open custom dropdowns first
+          document.querySelectorAll(".dash-custom-select.is-open").forEach(other => {
+            if (other !== dropdown) {
+              other.classList.remove("is-open");
+              other.querySelector(".dash-custom-select-menu")?.setAttribute("hidden", "");
+              other.querySelector(".dash-custom-select-trigger")?.setAttribute("aria-expanded", "false");
+            }
+          });
+
+          dropdown.classList.add("is-open");
+          menu.removeAttribute("hidden");
+          trigger.setAttribute("aria-expanded", "true");
+          const selectedOpt = dropdown.querySelector(".dash-custom-opt.is-selected");
+          if (selectedOpt) {
+            selectedOpt.scrollIntoView({ block: "nearest" });
+          }
+        } else {
+          dropdown.classList.remove("is-open");
+          menu.setAttribute("hidden", "");
+          trigger.setAttribute("aria-expanded", "false");
+        }
+      }
+
+      trigger.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleMenu();
+      });
+
+      options.forEach(opt => {
+        opt.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const val = opt.getAttribute("data-value") || "";
+          setVal(val, true);
+          toggleMenu(false);
+          trigger.focus();
+        });
+      });
+
+      const outsideHandler = (e) => {
+        if (!dropdown || !dropdown.isConnected) {
+          document.removeEventListener("click", outsideHandler);
+          return;
+        }
+        if (!dropdown.contains(e.target)) {
+          toggleMenu(false);
+        }
+      };
+      document.addEventListener("click", outsideHandler);
+
+      dropdown.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          toggleMenu(false);
+          trigger.focus();
+        }
+      });
+
+      return { setVal, toggleMenu };
+    }
+
+    const adminActionCtrl = initCustomDropdown({
+      dropdownId: "adminActionDropdown",
+      triggerId: "adminActionTrigger",
+      menuId: "adminActionMenu",
+      selectId: "adminFilterAction",
+      onChange: () => fetchAdminActivity()
+    });
+
+    const sessionTypeCtrl = initCustomDropdown({
+      dropdownId: "sessionTypeDropdown",
+      triggerId: "sessionTypeTrigger",
+      menuId: "sessionTypeMenu",
+      selectId: "sessionFilterType",
+      onChange: () => fetchSessions(1)
+    });
+
+    const sessionDeviceCtrl = initCustomDropdown({
+      dropdownId: "sessionDeviceDropdown",
+      triggerId: "sessionDeviceTrigger",
+      menuId: "sessionDeviceMenu",
+      selectId: "sessionFilterDevice",
+      onChange: () => fetchSessions(1)
+    });
+
+    const retentionDaysCtrl = initCustomDropdown({
+      dropdownId: "retentionDaysDropdown",
+      triggerId: "retentionDaysTrigger",
+      menuId: "retentionDaysMenu",
+      selectId: "retentionDaysSelect"
     });
 
     // ── Filter Triggers ──
@@ -2353,11 +3086,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     panel.querySelector("#adminFilterIp")?.addEventListener("input", () => fetchAdminActivity());
     panel.querySelector("#adminFilterResetBtn")?.addEventListener("click", () => {
       const e1 = panel.querySelector("#adminFilterEmail");
-      const e2 = panel.querySelector("#adminFilterAction");
       const e3 = panel.querySelector("#adminFilterIp");
       if (e1) e1.value = "";
-      if (e2) e2.value = "";
       if (e3) e3.value = "";
+      adminActionCtrl.setVal("", false);
       fetchAdminActivity();
     });
 
@@ -2366,11 +3098,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     panel.querySelector("#sessionFilterDevice")?.addEventListener("change", () => fetchSessions(1));
     panel.querySelector("#sessionFilterResetBtn")?.addEventListener("click", () => {
       const s1 = panel.querySelector("#sessionSearchInput");
-      const s2 = panel.querySelector("#sessionFilterType");
-      const s3 = panel.querySelector("#sessionFilterDevice");
       if (s1) s1.value = "";
-      if (s2) s2.value = "";
-      if (s3) s3.value = "";
+      sessionTypeCtrl.setVal("", false);
+      sessionDeviceCtrl.setVal("", false);
       fetchSessions(1);
     });
 
@@ -2506,6 +3236,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         tab.setAttribute("aria-selected", String(selected));
         tab.tabIndex = selected ? 0 : -1;
       });
+      if (typeof selectedTab.scrollIntoView === "function") {
+        selectedTab.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      }
       Object.entries(panels).forEach(([key, panel]) => {
         if (!panel) return;
         const selected = key === view;
@@ -2577,10 +3310,12 @@ document.addEventListener("DOMContentLoaded", async () => {
           <button class="dash-team-row-header" type="button" aria-expanded="false" aria-controls="${escapeHTML(panelId)}">
             <!-- Col 1: ID & Status -->
             <div class="dash-team-id-cell">
-              <span class="dash-team-id-badge">${escapeHTML(groupId)}</span>
-              <span class="dash-team-verify-pill"><i class="pulse-dot"></i> Confirmed</span>
+              <div class="dash-team-id-group">
+                <span class="dash-team-id-badge">${escapeHTML(groupId)}</span>
+                <span class="dash-team-verify-pill"><i class="pulse-dot"></i> Confirmed</span>
+              </div>
               <span class="dash-team-reg-stamp" title="Registration Date & Time">
-                ${getIcon("clock", "dash-icon--xs")} ${escapeHTML(formatCompactDateTime(team.created_at))}
+                ${getIcon("clock", "dash-icon--xs")} <span>${escapeHTML(formatCompactDateTime(team.created_at))}</span>
               </span>
             </div>
 
