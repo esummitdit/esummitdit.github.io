@@ -86,6 +86,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`;
       case "calendar":
         return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`;
+      case "refresh":
+        return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>`;
+      case "globe":
+        return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>`;
+      case "monitor":
+        return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`;
+      case "filter":
+        return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>`;
+      case "eye":
+        return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+      case "alert-triangle":
+        return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
       default:
         return "";
     }
@@ -722,6 +734,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                 ${getIcon("shield", "dash-icon--sm")}
                 <span>Admin controls</span>
               </button>
+              ${isMaster ? `
+                <button id="analyticsDataTab" class="dash-data-tab" type="button" role="tab" aria-selected="false" aria-controls="analyticsDataPanel" data-dash-tab="analytics" tabindex="-1">
+                  ${getIcon("activity", "dash-icon--sm")}
+                  <span>Master Analytics</span>
+                  <span class="tab-count-pill pulse-pill">LIVE</span>
+                </button>
+              ` : ""}
             </div>
           </header>
 
@@ -970,11 +989,15 @@ document.addEventListener("DOMContentLoaded", async () => {
               ` : ""}
             </div>
           </section>
+          ${isMaster ? renderAnalyticsPanelMarkup() : ""}
         </div>
       `;
 
       setupDashboardTabs();
       registerLazyPhotos(main);
+      if (isMaster) {
+        setupMasterAnalyticsController(main, session);
+      }
 
       // ── CSV Export Handlers ──
       const handleCsvExport = async () => {
@@ -1369,6 +1392,1097 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  // ════════════════════════════════════════════════════════════════
+  //  MASTER ADMIN ANALYTICS, ACTIVITY & DEVICE INSIGHTS ENGINE
+  // ════════════════════════════════════════════════════════════════
+
+  function renderAnalyticsPanelMarkup() {
+    return `
+      <!-- ═════ TAB 3: MASTER ADMIN ANALYTICS & ACTIVITY HUB (MASTER ADMIN ONLY) ═════ -->
+      <section id="analyticsDataPanel" class="dash-data-panel" role="tabpanel" aria-labelledby="analyticsDataTab" tabindex="-1" hidden>
+        <div class="dash-analytics-hub">
+          <!-- Top bar with title, status, and telemetry actions -->
+          <div class="dash-analytics-topbar">
+            <div class="dash-analytics-title-area">
+              <h2 class="dash-analytics-title">Master Intelligence & Telemetry Hub</h2>
+              <span class="dash-pill-tag pulse-pill">${getIcon("activity", "dash-icon--xs")} VAULT ENCRYPTED</span>
+              <span class="dash-pill-tag" id="analyticsLastSync">Syncing…</span>
+            </div>
+            <div class="dash-analytics-actions">
+              <button type="button" class="dash-btn-telemetry" id="analyticsAutoRefreshBtn" title="Toggle automatic 15s refresh">
+                ${getIcon("refresh", "dash-icon--xs")}
+                <span id="analyticsAutoRefreshLabel">Auto: ON</span>
+              </button>
+              <button type="button" class="dash-btn-telemetry" id="analyticsManualRefreshBtn" title="Refresh all telemetry data">
+                ${getIcon("refresh", "dash-icon--xs")}
+                <span>Refresh</span>
+              </button>
+              <button type="button" class="dash-btn-telemetry dash-btn-telemetry--danger" id="analyticsRetentionBtn" title="Manage data retention & purge">
+                ${getIcon("trash", "dash-icon--xs")}
+                <span>Data Retention</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Offline Alert Banner (Dynamically shown if gateway is unreachable) -->
+          <div id="analyticsOfflineBanner" class="dash-analytics-offline-banner" style="display:none;" hidden>
+            <h3>${getIcon("alert-triangle", "dash-icon--sm")} Secure Gateway Offline</h3>
+            <p>Telemetry intelligence is dynamically served from the encrypted server vault. Real-time metrics and audit logs are unavailable while the backend gateway is disconnected.</p>
+            <div style="margin-top:0.5rem;">
+              <button type="button" class="dash-btn-telemetry" id="analyticsOfflineRetryBtn">Retry Gateway Connection ↻</button>
+            </div>
+          </div>
+
+          <!-- Sub-view Segmented Tabs -->
+          <div class="dash-analytics-subnav" role="tablist" aria-label="Analytics subviews">
+            <button type="button" class="dash-subnav-btn is-active" data-subview="overview">
+              ${getIcon("activity", "dash-icon--xs")} Overview
+            </button>
+            <button type="button" class="dash-subnav-btn" data-subview="admin-activity">
+              ${getIcon("shield", "dash-icon--xs")} Admin Activity & Audit
+            </button>
+            <button type="button" class="dash-subnav-btn" data-subview="visitors">
+              ${getIcon("users", "dash-icon--xs")} Visitors & Squads
+            </button>
+            <button type="button" class="dash-subnav-btn" data-subview="devices">
+              ${getIcon("monitor", "dash-icon--xs")} Device & Browser Intel
+            </button>
+            <button type="button" class="dash-subnav-btn" data-subview="geography">
+              ${getIcon("globe", "dash-icon--xs")} Geography & Networks
+            </button>
+            <button type="button" class="dash-subnav-btn" data-subview="sessions">
+              ${getIcon("eye", "dash-icon--xs")} Session Explorer
+            </button>
+          </div>
+
+          <!-- Subview 1: Overview -->
+          <div id="subviewOverview" class="dash-analytics-subview-panel">
+            <div class="dash-analytics-kpi-grid" id="analyticsKpiGrid">
+              <p class="dash-empty-state">Loading telemetry metrics…</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; margin-top: 1rem;">
+              <div class="dash-chart-card">
+                <div class="dash-chart-header">
+                  <h3 class="dash-chart-title">24-Hour Traffic Curve</h3>
+                  <span class="mono-label" style="color:var(--acid);">Hourly Volume</span>
+                </div>
+                <div class="dash-chart-bars-wrap" id="analyticsHourlyChart"></div>
+              </div>
+
+              <div class="dash-chart-card">
+                <div class="dash-chart-header">
+                  <h3 class="dash-chart-title">Visitor Conversion Funnel</h3>
+                  <span class="mono-label" style="color:var(--acid);" id="funnelConvRate">0% Conv.</span>
+                </div>
+                <div class="dash-funnel-stages" id="analyticsFunnelStages"></div>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem;">
+              <div class="dash-chart-card">
+                <h3 class="dash-chart-title">Most Visited Pages</h3>
+                <div id="analyticsTopPagesList"></div>
+              </div>
+              <div class="dash-chart-card">
+                <h3 class="dash-chart-title">Top Exit Pages</h3>
+                <div id="analyticsTopExitsList"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subview 2: Admin Activity & Audit -->
+          <div id="subviewAdminActivity" class="dash-analytics-subview-panel" style="display:none;" hidden>
+            <div style="display:flex; flex-direction:column; gap:0.75rem;">
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <h3 style="margin:0; font-size:1.1rem; color:#fff;">Active Administrators Roster</h3>
+                <span class="mono-label" id="activeAdminCountLabel" style="color:var(--acid);">0 ACTIVE NOW</span>
+              </div>
+              <div class="dash-presence-grid" id="analyticsPresenceGrid"></div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:1.5rem;">
+              <h3 style="margin:0; font-size:1.1rem; color:#ff7e67;">Suspicious Authentication & Defense Alerts</h3>
+              <div class="dash-security-alerts" id="analyticsSecurityAlerts"></div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:0.75rem; margin-top:1.5rem;">
+              <h3 style="margin:0; font-size:1.1rem; color:#fff;">Administrative Audit Log</h3>
+              <div class="dash-filter-toolbar">
+                <input type="text" id="adminFilterEmail" class="dash-filter-input" placeholder="Search Admin / Email…" style="flex:1; min-width:180px;">
+                <select id="adminFilterAction" class="dash-filter-select">
+                  <option value="">All Actions</option>
+                  <option value="LOGIN">LOGIN</option>
+                  <option value="LOGIN_FAILED">LOGIN_FAILED</option>
+                  <option value="DELETE_TEAM">DELETE_TEAM</option>
+                  <option value="BULK_DELETE_TEAMS">BULK_DELETE_TEAMS</option>
+                  <option value="VERIFY_PASS">VERIFY_PASS</option>
+                  <option value="CREATE_ADMIN">CREATE_ADMIN</option>
+                  <option value="DELETE_ADMIN">DELETE_ADMIN</option>
+                  <option value="EXPORT_CSV">EXPORT_CSV</option>
+                  <option value="IMPORT_CSV">IMPORT_CSV</option>
+                  <option value="CHANGE_PASSWORD">CHANGE_PASSWORD</option>
+                  <option value="RETENTION_PURGE">RETENTION_PURGE</option>
+                </select>
+                <input type="text" id="adminFilterIp" class="dash-filter-input" placeholder="Filter by IP…" style="width:140px;">
+                <button type="button" id="adminFilterResetBtn" class="dash-btn-telemetry">Reset</button>
+              </div>
+              <div class="dash-analytics-table-wrap">
+                <table class="dash-analytics-table" id="adminActivityTable">
+                  <thead>
+                    <tr>
+                      <th>Timestamp</th>
+                      <th>Administrator</th>
+                      <th>Role & Dept</th>
+                      <th>Action</th>
+                      <th>Target Entity</th>
+                      <th>Page</th>
+                      <th>IP / Network</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminActivityTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subview 3: Visitors & Squad Behavior -->
+          <div id="subviewVisitors" class="dash-analytics-subview-panel" style="display:none;" hidden>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:1rem;">
+              <div class="dash-chart-card">
+                <div class="dash-chart-header">
+                  <h3 class="dash-chart-title">Landing / Anonymous Visitors</h3>
+                  <span class="dash-pill-tag" style="background:rgba(255,255,255,0.08);">UNREGISTERED</span>
+                </div>
+                <p style="font-size:0.8rem; color:rgba(255,253,249,0.7); margin:0;">
+                  Anonymous sessions who browse without registration. Maintained in separate records.
+                </p>
+                <div id="anonVisitorsStats" style="margin-top:0.75rem;"></div>
+              </div>
+
+              <div class="dash-chart-card">
+                <div class="dash-chart-header">
+                  <h3 class="dash-chart-title">Registered Squads & Accounts</h3>
+                  <span class="dash-pill-tag dash-pill-tag--acid">AUTHENTICATED</span>
+                </div>
+                <p style="font-size:0.8rem; color:rgba(255,253,249,0.7); margin:0;">
+                  Registered team squads linked to account IDs, preserving privacy-safe audit associations.
+                </p>
+                <div id="registeredUsersStats" style="margin-top:0.75rem;"></div>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:1rem; margin-top:1rem;">
+              <div class="dash-chart-card">
+                <h3 class="dash-chart-title">Common Navigation Sequences</h3>
+                <div id="analyticsNavPaths"></div>
+              </div>
+              <div class="dash-chart-card">
+                <h3 class="dash-chart-title">Session Duration Distribution</h3>
+                <div id="analyticsDurationBuckets"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subview 4: Device & Browser Intel -->
+          <div id="subviewDevices" class="dash-analytics-subview-panel" style="display:none;" hidden>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:1rem;">
+              <div class="dash-chart-card">
+                <h3 class="dash-chart-title">Device Categories</h3>
+                <div id="deviceTypesList"></div>
+              </div>
+              <div class="dash-chart-card">
+                <h3 class="dash-chart-title">Operating Systems</h3>
+                <div id="operatingSystemsList"></div>
+              </div>
+              <div class="dash-chart-card">
+                <h3 class="dash-chart-title">Browser Engines</h3>
+                <div id="browsersList"></div>
+              </div>
+              <div class="dash-chart-card">
+                <h3 class="dash-chart-title">Screen Resolutions</h3>
+                <div id="screenResolutionsList"></div>
+              </div>
+            </div>
+
+            <div class="dash-chart-card" style="margin-top:1rem;">
+              <h3 class="dash-chart-title">Technical Categorization & Privacy Compliance Matrix</h3>
+              <p style="font-size:0.78rem; color:rgba(255,253,249,0.65); margin:0.35rem 0 1rem 0;">
+                Distinguishes browser-reported APIs, server-derived network attributes, explicitly provided user identity, and privacy-restricted hardware boundaries.
+              </p>
+              <div class="dash-analytics-table-wrap">
+                <table class="dash-analytics-table">
+                  <thead>
+                    <tr>
+                      <th>1. Browser-Supplied</th>
+                      <th>2. Server-Derived</th>
+                      <th>3. User-Provided</th>
+                      <th>4. Privacy-Restricted</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Screen Dimensions, Viewport Size, DPR, Display Color Depth, Language & Timezone, Hardware Concurrency, Device Memory (if granted)</td>
+                      <td>True IP Address (IPv4/IPv6), Network Classification, Approx Geo (Country/City from CF Tunnel), Parsed Browser & OS Name</td>
+                      <td>Team Name, Group ID, Registered Tracks, College Affiliation, Member Roster, Credentials</td>
+                      <td>Exact GPS Latitude/Longitude (Not requested), Battery Status (Deprecated), Hardware Serial/MAC (Sandboxed), Canvas Hash (Anti-fingerprinting compliance)</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subview 5: Geography & Networks -->
+          <div id="subviewGeography" class="dash-analytics-subview-panel" style="display:none;" hidden>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:1rem;">
+              <div class="dash-chart-card">
+                <h3 class="dash-chart-title">Top Countries / Territorials</h3>
+                <div id="countriesList"></div>
+              </div>
+              <div class="dash-chart-card">
+                <h3 class="dash-chart-title">Top Regions & Cities</h3>
+                <div id="citiesList"></div>
+              </div>
+              <div class="dash-chart-card">
+                <h3 class="dash-chart-title">Network Providers / ASNs</h3>
+                <div id="providersList"></div>
+              </div>
+              <div class="dash-chart-card">
+                <h3 class="dash-chart-title">IP & Routing Classification</h3>
+                <div id="ipClassList"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subview 6: Session Explorer -->
+          <div id="subviewSessions" class="dash-analytics-subview-panel" style="display:none;" hidden>
+            <div class="dash-filter-toolbar">
+              <input type="text" id="sessionSearchInput" class="dash-filter-input" placeholder="Search Session ID / Visitor ID…" style="flex:1; min-width:200px;">
+              <select id="sessionFilterType" class="dash-filter-select">
+                <option value="">All Session Types</option>
+                <option value="anonymous_visitor">Anonymous Visitor</option>
+                <option value="registered_user">Registered User</option>
+                <option value="admin">Administrator</option>
+              </select>
+              <select id="sessionFilterDevice" class="dash-filter-select">
+                <option value="">All Devices</option>
+                <option value="Desktop">Desktop</option>
+                <option value="Mobile">Mobile</option>
+                <option value="Tablet">Tablet</option>
+              </select>
+              <button type="button" id="sessionFilterResetBtn" class="dash-btn-telemetry">Reset Filters</button>
+            </div>
+            <div class="dash-analytics-table-wrap" style="margin-top:1rem;">
+              <table class="dash-analytics-table" id="sessionsExplorerTable">
+                <thead>
+                  <tr>
+                    <th>Session ID</th>
+                    <th>Type</th>
+                    <th>Visitor ID / User</th>
+                    <th>Device & OS</th>
+                    <th>Country</th>
+                    <th>Pages Visited</th>
+                    <th>Duration</th>
+                    <th>Last Active</th>
+                    <th>Inspect</th>
+                  </tr>
+                </thead>
+                <tbody id="sessionsExplorerTableBody"></tbody>
+              </table>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1rem; font:600 0.72rem var(--mono);">
+              <span id="sessionPaginationInfo" style="color:rgba(255,253,249,0.6);">Showing 0 sessions</span>
+              <div style="display:flex; gap:0.5rem;">
+                <button type="button" id="sessionPrevPageBtn" class="dash-btn-telemetry">← Previous</button>
+                <button type="button" id="sessionNextPageBtn" class="dash-btn-telemetry">Next →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Retention Purge Dialog (Master Admin Only) -->
+        <div id="analyticsRetentionModal" class="dash-modal" style="display:none;" hidden>
+          <div class="dash-modal-backdrop" id="analyticsRetentionBackdrop" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99998;"></div>
+          <div class="dash-modal-dialog" style="max-width:480px; width:90%; background:#191714; border:1px solid rgba(255,255,255,0.15); border-radius:1.25rem; padding:1.75rem; color:#fffdf9; box-shadow:0 20px 50px rgba(0,0,0,0.6); position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:99999;">
+            <h3 style="margin:0 0 0.5rem 0; font-size:1.2rem; color:var(--acid);">Data Retention & Privacy Policy</h3>
+            <p style="font-size:0.8rem; color:rgba(255,253,249,0.7); line-height:1.5;">
+              In compliance with privacy and data protection standards, telemetry records and anonymous session trails older than the retention threshold can be securely purged from the AES-256 vault.
+            </p>
+            <div style="margin:1.25rem 0;">
+              <label for="retentionDaysSelect" style="display:block; font:700 0.72rem var(--mono); color:rgba(255,253,249,0.6); margin-bottom:0.4rem; text-transform:uppercase;">Purge Records Older Than:</label>
+              <select id="retentionDaysSelect" class="dash-filter-select" style="width:100%; padding:0.65rem;">
+                <option value="7">7 Days</option>
+                <option value="14">14 Days</option>
+                <option value="30" selected>30 Days (Standard Retention)</option>
+                <option value="60">60 Days</option>
+                <option value="90">90 Days</option>
+              </select>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
+              <button type="button" class="dash-btn-telemetry" id="retentionCancelBtn">Cancel</button>
+              <button type="button" class="dash-btn-telemetry dash-btn-telemetry--danger" id="retentionConfirmBtn">Execute Secure Purge</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Session Detail Modal -->
+        <div id="analyticsSessionDetailModal" class="dash-modal" style="display:none;" hidden>
+          <div class="dash-modal-backdrop" id="sessionDetailBackdrop" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99998;"></div>
+          <div class="dash-modal-dialog" style="max-width:640px; width:90%; max-height:85vh; overflow-y:auto; background:#191714; border:1px solid rgba(255,255,255,0.15); border-radius:1.25rem; padding:1.75rem; color:#fffdf9; box-shadow:0 20px 50px rgba(0,0,0,0.6); position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:99999;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem;">
+              <div>
+                <h3 style="margin:0; font-size:1.2rem; color:var(--acid);" id="sessionDetailTitle">Session Dossier</h3>
+                <span class="mono-label" id="sessionDetailSub" style="color:rgba(255,253,249,0.6);"></span>
+              </div>
+              <button type="button" class="dash-btn-telemetry" id="sessionDetailCloseBtn">✕ Close</button>
+            </div>
+            <div id="sessionDetailContent" style="display:flex; flex-direction:column; gap:1rem;"></div>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  function setupMasterAnalyticsController(main, session) {
+    if (session.role !== "master_admin") return;
+
+    let autoRefreshActive = true;
+    let autoRefreshTimer = null;
+    let activeSubview = "overview";
+    let cachedOverview = null;
+    let cachedAdminActivity = null;
+    let cachedVisitors = null;
+    let cachedDevices = null;
+    let cachedGeography = null;
+    let cachedSessions = null;
+    let currentSessionPage = 1;
+
+    function formatSeconds(sec) {
+      const s = Math.round(Number(sec) || 0);
+      if (s < 60) return `${s}s`;
+      const mins = Math.floor(s / 60);
+      const rem = s % 60;
+      if (mins < 60) return `${mins}m ${rem}s`;
+      const hrs = Math.floor(mins / 60);
+      const remM = mins % 60;
+      return `${hrs}h ${remM}m`;
+    }
+
+    const panel = main.querySelector("#analyticsDataPanel");
+    if (!panel) return;
+
+    const subnavButtons = panel.querySelectorAll(".dash-subnav-btn");
+    const subviewPanels = {
+      "overview": panel.querySelector("#subviewOverview"),
+      "admin-activity": panel.querySelector("#subviewAdminActivity"),
+      "visitors": panel.querySelector("#subviewVisitors"),
+      "devices": panel.querySelector("#subviewDevices"),
+      "geography": panel.querySelector("#subviewGeography"),
+      "sessions": panel.querySelector("#subviewSessions"),
+    };
+
+    function switchSubview(targetView) {
+      activeSubview = targetView;
+      subnavButtons.forEach(btn => {
+        btn.classList.toggle("is-active", btn.getAttribute("data-subview") === targetView);
+      });
+      Object.entries(subviewPanels).forEach(([name, el]) => {
+        if (!el) return;
+        const isTarget = name === targetView;
+        el.hidden = !isTarget;
+        el.style.display = isTarget ? "block" : "none";
+      });
+      fetchCurrentSubview();
+    }
+
+    subnavButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const view = btn.getAttribute("data-subview");
+        if (view) switchSubview(view);
+      });
+    });
+
+    // ── Data Fetching with Graceful Offline Handling ──
+    async function apiGetSafe(endpoint) {
+      try {
+        const res = await Auth.apiFetch(endpoint);
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        return await res.json();
+      } catch (err) {
+        setOfflineState(true);
+        throw err;
+      }
+    }
+
+    function setOfflineState(isOffline) {
+      const banner = panel.querySelector("#analyticsOfflineBanner");
+      if (banner) {
+        banner.hidden = !isOffline;
+        banner.style.display = isOffline ? "flex" : "none";
+      }
+      const syncBadge = panel.querySelector("#analyticsLastSync");
+      if (syncBadge) {
+        syncBadge.textContent = isOffline ? "Gateway Offline" : `Synced ${new Date().toLocaleTimeString()}`;
+        syncBadge.style.color = isOffline ? "#ff7e67" : "rgba(255,253,249,0.7)";
+      }
+    }
+
+    async function fetchOverview() {
+      try {
+        const data = await apiGetSafe("/analytics/master/overview");
+        setOfflineState(false);
+        cachedOverview = data;
+        renderOverview(data);
+      } catch {}
+    }
+
+    async function fetchAdminActivity() {
+      try {
+        const adminQ = panel.querySelector("#adminFilterEmail")?.value || "";
+        const actionQ = panel.querySelector("#adminFilterAction")?.value || "";
+        const ipQ = panel.querySelector("#adminFilterIp")?.value || "";
+        const queryParams = new URLSearchParams();
+        if (adminQ) queryParams.set("admin", adminQ);
+        if (actionQ) queryParams.set("action", actionQ);
+        if (ipQ) queryParams.set("ip", ipQ);
+
+        const data = await apiGetSafe(`/analytics/master/admin-activity?${queryParams.toString()}`);
+        setOfflineState(false);
+        cachedAdminActivity = data;
+        renderAdminActivity(data);
+      } catch {}
+    }
+
+    async function fetchVisitors() {
+      try {
+        const data = await apiGetSafe("/analytics/master/visitors");
+        setOfflineState(false);
+        cachedVisitors = data;
+        renderVisitors(data);
+      } catch {}
+    }
+
+    async function fetchDevices() {
+      try {
+        const data = await apiGetSafe("/analytics/master/devices");
+        setOfflineState(false);
+        cachedDevices = data;
+        renderDevices(data);
+      } catch {}
+    }
+
+    async function fetchGeography() {
+      try {
+        const data = await apiGetSafe("/analytics/master/geography");
+        setOfflineState(false);
+        cachedGeography = data;
+        renderGeography(data);
+      } catch {}
+    }
+
+    async function fetchSessions(page = 1) {
+      try {
+        currentSessionPage = page;
+        const searchQ = panel.querySelector("#sessionSearchInput")?.value || "";
+        const typeQ = panel.querySelector("#sessionFilterType")?.value || "";
+        const devQ = panel.querySelector("#sessionFilterDevice")?.value || "";
+        const queryParams = new URLSearchParams({ page: String(page), page_size: "20" });
+        if (searchQ) queryParams.set("visitor_id", searchQ);
+        if (typeQ) queryParams.set("session_type", typeQ);
+        if (devQ) queryParams.set("device", devQ);
+
+        const data = await apiGetSafe(`/analytics/master/sessions?${queryParams.toString()}`);
+        setOfflineState(false);
+        cachedSessions = data;
+        renderSessions(data);
+      } catch {}
+    }
+
+    function fetchCurrentSubview() {
+      if (activeSubview === "overview") fetchOverview();
+      else if (activeSubview === "admin-activity") fetchAdminActivity();
+      else if (activeSubview === "visitors") fetchVisitors();
+      else if (activeSubview === "devices") fetchDevices();
+      else if (activeSubview === "geography") fetchGeography();
+      else if (activeSubview === "sessions") fetchSessions(currentSessionPage);
+    }
+
+    function fetchAllTelemetry() {
+      fetchOverview();
+      if (activeSubview !== "overview") {
+        fetchCurrentSubview();
+      }
+    }
+
+    // ── Overview Rendering ──
+    function renderOverview(data) {
+      const kpiGrid = panel.querySelector("#analyticsKpiGrid");
+      if (!kpiGrid || !data) return;
+
+      kpiGrid.innerHTML = `
+        <div class="dash-kpi-card">
+          <div class="dash-kpi-card-header">
+            <span>Active Administrators</span>
+            <i class="pulse-dot" style="width:7px;height:7px;border-radius:50%;background:#4ade80;"></i>
+          </div>
+          <div class="dash-kpi-value dash-kpi-value--acid">${escapeHTML(data.active_admins_count)}</div>
+          <div class="dash-kpi-footer">Live in dashboard now</div>
+        </div>
+
+        <div class="dash-kpi-card">
+          <div class="dash-kpi-card-header">
+            <span>Active Live Sessions</span>
+            ${getIcon("activity", "dash-icon--xs")}
+          </div>
+          <div class="dash-kpi-value">${escapeHTML(data.active_sessions_count)}</div>
+          <div class="dash-kpi-footer">Interacting within 15 min</div>
+        </div>
+
+        <div class="dash-kpi-card">
+          <div class="dash-kpi-card-header">
+            <span>Unique Visitors Today</span>
+            ${getIcon("users", "dash-icon--xs")}
+          </div>
+          <div class="dash-kpi-value">${escapeHTML(data.visitors_today)}</div>
+          <div class="dash-kpi-footer">${escapeHTML(data.total_visitors)} total all-time visitors</div>
+        </div>
+
+        <div class="dash-kpi-card">
+          <div class="dash-kpi-card-header">
+            <span>Registered Squads</span>
+            ${getIcon("shield", "dash-icon--xs")}
+          </div>
+          <div class="dash-kpi-value dash-kpi-value--acid">${escapeHTML(data.total_registered_users)}</div>
+          <div class="dash-kpi-footer">+${escapeHTML(data.new_registrations_today)} squads registered today</div>
+        </div>
+
+        <div class="dash-kpi-card">
+          <div class="dash-kpi-card-header">
+            <span>Conversion Rate</span>
+            ${getIcon("zap", "dash-icon--xs")}
+          </div>
+          <div class="dash-kpi-value dash-kpi-value--acid">${escapeHTML(data.conversion_rate_percent)}%</div>
+          <div class="dash-kpi-footer">Visitor to Registered Squad</div>
+        </div>
+
+        <div class="dash-kpi-card">
+          <div class="dash-kpi-card-header">
+            <span>Total Page Views</span>
+            ${getIcon("eye", "dash-icon--xs")}
+          </div>
+          <div class="dash-kpi-value">${escapeHTML(data.total_pageviews)}</div>
+          <div class="dash-kpi-footer">Across all landing & portal pages</div>
+        </div>
+
+        <div class="dash-kpi-card">
+          <div class="dash-kpi-card-header">
+            <span>Average Session Duration</span>
+            ${getIcon("clock", "dash-icon--xs")}
+          </div>
+          <div class="dash-kpi-value">${escapeHTML(formatSeconds(data.avg_session_duration_seconds))}</div>
+          <div class="dash-kpi-footer">Engaged visitor dwell time</div>
+        </div>
+
+        <div class="dash-kpi-card">
+          <div class="dash-kpi-card-header">
+            <span>Bounce Rate</span>
+            ${getIcon("external", "dash-icon--xs")}
+          </div>
+          <div class="dash-kpi-value">${escapeHTML(data.bounce_rate_percent)}%</div>
+          <div class="dash-kpi-footer">Single-page navigation exits</div>
+        </div>
+      `;
+
+      // Render Hourly Chart
+      const hourlyWrap = panel.querySelector("#analyticsHourlyChart");
+      if (hourlyWrap && Array.isArray(data.hourly_trend)) {
+        const maxSessions = Math.max(...data.hourly_trend.map(h => h.sessions), 1);
+        hourlyWrap.innerHTML = data.hourly_trend.map(h => {
+          const heightPct = Math.max(Math.round((h.sessions / maxSessions) * 100), 5);
+          return `
+            <div class="dash-bar-col" title="${escapeHTML(h.hour)}: ${escapeHTML(h.sessions)} sessions">
+              <div class="dash-bar-fill" style="height: ${heightPct}%;"></div>
+              <span class="dash-bar-label">${escapeHTML(h.hour.split(":")[0])}</span>
+            </div>
+          `;
+        }).join("");
+      }
+
+      // Render Conversion Funnel
+      const funnelWrap = panel.querySelector("#analyticsFunnelStages");
+      const convRateLabel = panel.querySelector("#funnelConvRate");
+      if (convRateLabel) convRateLabel.textContent = `${data.conversion_rate_percent}% Conversion`;
+      if (funnelWrap && Array.isArray(data.funnel)) {
+        funnelWrap.innerHTML = data.funnel.map((f, idx) => {
+          return `
+            <div class="dash-funnel-step">
+              <span class="dash-funnel-step-name">${idx + 1}. ${escapeHTML(f.stage)}</span>
+              <span class="dash-funnel-step-val">${escapeHTML(f.count)}</span>
+            </div>
+          `;
+        }).join("");
+      }
+
+      // Render Top Pages & Exits
+      renderMetersList(panel.querySelector("#analyticsTopPagesList"), data.top_pages, "views", "page");
+      renderMetersList(panel.querySelector("#analyticsTopExitsList"), data.top_exits, "exits", "page");
+    }
+
+    function renderMetersList(container, items, countKey, labelKey) {
+      if (!container) return;
+      if (!Array.isArray(items) || items.length === 0) {
+        container.innerHTML = '<p class="dash-empty-state" style="padding:1rem;">No telemetry recorded yet.</p>';
+        return;
+      }
+      const maxCount = Math.max(...items.map(i => i[countKey]), 1);
+      container.innerHTML = items.map(item => {
+        const pct = Math.round((item[countKey] / maxCount) * 100);
+        return `
+          <div class="dash-meter-row">
+            <span class="dash-meter-label" title="${escapeHTML(item[labelKey])}">${escapeHTML(item[labelKey])}</span>
+            <div class="dash-meter-bar-container">
+              <div class="dash-meter-bar" style="width: ${pct}%;"></div>
+            </div>
+            <span class="dash-meter-val">${escapeHTML(item[countKey])}</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // ── Admin Activity Rendering ──
+    function renderAdminActivity(data) {
+      if (!data) return;
+
+      // Active Admins Count
+      const activeCount = (data.roster || []).filter(r => r.status === "active").length;
+      const countLabel = panel.querySelector("#activeAdminCountLabel");
+      if (countLabel) countLabel.textContent = `${activeCount} ACTIVE NOW`;
+
+      // Roster Grid
+      const rosterGrid = panel.querySelector("#analyticsPresenceGrid");
+      if (rosterGrid) {
+        rosterGrid.innerHTML = (data.roster && data.roster.length) ? data.roster.map(admin => {
+          const badgeClass = admin.status === "active" ? "dash-presence-badge--active" : admin.status === "idle" ? "dash-presence-badge--idle" : "dash-presence-badge--offline";
+          return `
+            <div class="dash-presence-card">
+              <div class="dash-presence-top">
+                <span class="dash-presence-badge ${badgeClass}">
+                  <i class="pulse-dot" style="width:5px;height:5px;border-radius:50%;background:currentColor;"></i>
+                  ${escapeHTML(admin.status)}
+                </span>
+                <span class="dash-pill-tag">${escapeHTML(admin.department || "Technical Team")}</span>
+              </div>
+              <div>
+                <h4 class="dash-presence-name">${escapeHTML(admin.name || "Administrator")}</h4>
+                <div class="dash-presence-email">${escapeHTML(admin.email)}</div>
+              </div>
+              <div class="dash-presence-meta">
+                <div><strong>Current Feature:</strong> ${escapeHTML(admin.current_page || "dashboard")}</div>
+                <div><strong>Last Active:</strong> ${escapeHTML(formatRegistrationDateTime(admin.last_active))}</div>
+                <div><strong>Client IP:</strong> ${escapeHTML(admin.ip || "unknown")}</div>
+              </div>
+            </div>
+          `;
+        }).join("") : '<p class="dash-empty-state">No administrators found.</p>';
+      }
+
+      // Security Alerts
+      const alertsWrap = panel.querySelector("#analyticsSecurityAlerts");
+      if (alertsWrap) {
+        alertsWrap.innerHTML = (data.security_alerts && data.security_alerts.length) ? data.security_alerts.map(a => `
+          <div class="dash-alert-item">
+            <div class="dash-alert-msg">
+              ${getIcon("alert-triangle", "dash-icon--sm")}
+              <span><strong>[${escapeHTML(a.action)}]</strong> ${escapeHTML(a.details || "Security event")}</span>
+            </div>
+            <span class="mono-label" style="color:rgba(255,253,249,0.7);">${escapeHTML(a.ip)} · ${escapeHTML(formatRegistrationDateTime(a.timestamp))}</span>
+          </div>
+        `).join("") : '<p class="dash-empty-state" style="padding:1rem;">No suspicious security triggers detected.</p>';
+      }
+
+      // Activity Table
+      const tbody = panel.querySelector("#adminActivityTableBody");
+      if (tbody) {
+        tbody.innerHTML = (data.activities && data.activities.length) ? data.activities.map(a => {
+          let tagClass = "dash-action-tag--default";
+          if (a.action.includes("LOGIN")) tagClass = a.status === "FAILED" ? "dash-action-tag--delete" : "dash-action-tag--login";
+          else if (a.action.includes("DELETE")) tagClass = "dash-action-tag--delete";
+          else if (a.action.includes("VERIFY")) tagClass = "dash-action-tag--verify";
+          else if (a.action.includes("CREATE")) tagClass = "dash-action-tag--create";
+
+          return `
+            <tr>
+              <td style="white-space:nowrap;">${escapeHTML(formatRegistrationDateTime(a.timestamp))}</td>
+              <td><strong>${escapeHTML(a.admin_name || a.admin_email)}</strong><br><span style="color:rgba(255,253,249,0.5);">${escapeHTML(a.admin_email)}</span></td>
+              <td><span class="dash-pill-tag">${escapeHTML(a.role)}</span><br><span style="color:rgba(255,253,249,0.5);">${escapeHTML(a.department)}</span></td>
+              <td><span class="dash-action-tag ${tagClass}">${escapeHTML(a.action)}</span></td>
+              <td><code style="color:var(--acid);">${escapeHTML(a.entity_id || a.entity_type || "—")}</code></td>
+              <td>${escapeHTML(a.page || "dashboard")}</td>
+              <td>${escapeHTML(a.ip)}<br><span style="color:rgba(255,253,249,0.5);">${escapeHTML(a.country || "Network")}</span></td>
+              <td><strong style="color:${a.status === 'SUCCESS' ? '#4ade80' : '#ff7e67'};">${escapeHTML(a.status)}</strong></td>
+            </tr>
+          `;
+        }).join("") : '<tr><td colspan="8" class="dash-empty-state" style="padding:2rem;">No matching admin activities recorded.</td></tr>';
+      }
+    }
+
+    // ── Visitors & Users Rendering ──
+    function renderVisitors(data) {
+      if (!data) return;
+
+      const anonStats = panel.querySelector("#anonVisitorsStats");
+      if (anonStats) {
+        anonStats.innerHTML = `
+          <div style="display:flex; flex-direction:column; gap:0.75rem;">
+            <div class="dash-meter-row">
+              <span class="dash-meter-label">Total Anonymous Visitors</span>
+              <span class="dash-meter-val">${escapeHTML(data.anonymous_visitors_count)}</span>
+            </div>
+            <div class="dash-meter-row">
+              <span class="dash-meter-label">New Visitors (1st session)</span>
+              <span class="dash-meter-val">${escapeHTML(data.new_visitors)}</span>
+            </div>
+            <div class="dash-meter-row">
+              <span class="dash-meter-label">Returning Visitors (2+ sessions)</span>
+              <span class="dash-meter-val">${escapeHTML(data.returning_visitors)}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      const regStats = panel.querySelector("#registeredUsersStats");
+      if (regStats) {
+        regStats.innerHTML = `
+          <div style="display:flex; flex-direction:column; gap:0.75rem;">
+            <div class="dash-meter-row">
+              <span class="dash-meter-label">Registered Squad Accounts</span>
+              <span class="dash-meter-val" style="color:var(--acid);">${escapeHTML(data.registered_users_count)}</span>
+            </div>
+            <div class="dash-meter-row">
+              <span class="dash-meter-label">Authentication Status</span>
+              <span class="dash-meter-val" style="color:#4ade80;">Active Vault</span>
+            </div>
+            <div class="dash-meter-row">
+              <span class="dash-meter-label">Data Separation Integrity</span>
+              <span class="dash-meter-val" style="color:#4ade80;">Enforced</span>
+            </div>
+          </div>
+        `;
+      }
+
+      // Common Paths
+      const pathsWrap = panel.querySelector("#analyticsNavPaths");
+      if (pathsWrap && Array.isArray(data.common_navigation_paths)) {
+        pathsWrap.innerHTML = data.common_navigation_paths.length ? data.common_navigation_paths.map(p => `
+          <div class="dash-meter-row">
+            <span class="dash-meter-label" title="${escapeHTML(p.path)}">${escapeHTML(p.path)}</span>
+            <span class="dash-meter-val">${escapeHTML(p.count)} sessions</span>
+          </div>
+        `).join("") : '<p class="dash-empty-state">No navigation trails recorded yet.</p>';
+      }
+
+      // Duration Buckets
+      renderMetersList(panel.querySelector("#analyticsDurationBuckets"), data.duration_distribution, "count", "range");
+    }
+
+    // ── Devices Rendering ──
+    function renderDevices(data) {
+      if (!data) return;
+      renderMetersList(panel.querySelector("#deviceTypesList"), data.device_types, "count", "name");
+      renderMetersList(panel.querySelector("#operatingSystemsList"), data.operating_systems, "count", "name");
+      renderMetersList(panel.querySelector("#browsersList"), data.browsers, "count", "name");
+      renderMetersList(panel.querySelector("#screenResolutionsList"), data.screen_resolutions, "count", "name");
+    }
+
+    // ── Geography Rendering ──
+    function renderGeography(data) {
+      if (!data) return;
+      renderMetersList(panel.querySelector("#countriesList"), data.countries, "count", "name");
+      renderMetersList(panel.querySelector("#citiesList"), data.cities, "count", "name");
+      renderMetersList(panel.querySelector("#providersList"), data.network_providers, "count", "name");
+      renderMetersList(panel.querySelector("#ipClassList"), data.network_classifications, "count", "name");
+    }
+
+    // ── Sessions Rendering ──
+    function renderSessions(data) {
+      if (!data) return;
+      const tbody = panel.querySelector("#sessionsExplorerTableBody");
+      const infoSpan = panel.querySelector("#sessionPaginationInfo");
+
+      if (infoSpan) {
+        infoSpan.textContent = `Showing ${data.sessions ? data.sessions.length : 0} of ${data.total || 0} sessions (Page ${data.page})`;
+      }
+
+      if (tbody) {
+        tbody.innerHTML = (data.sessions && data.sessions.length) ? data.sessions.map(s => {
+          const isReg = s.session_type === "registered_user";
+          const isAdmin = s.session_type === "admin";
+          const typeBadge = isReg
+            ? '<span class="dash-pill-tag dash-pill-tag--acid">REGISTERED</span>'
+            : isAdmin
+              ? '<span class="dash-pill-tag" style="background:rgba(59,130,246,0.2);color:#60a5fa;">ADMIN</span>'
+              : '<span class="dash-pill-tag">ANONYMOUS</span>';
+
+          const devStr = s.device?.server_derived?.parsed_device_category || "Desktop";
+          const osStr = s.device?.server_derived?.parsed_os_name || "Unknown";
+          const userStr = s.user_id || s.visitor_id || "Anonymous";
+
+          return `
+            <tr>
+              <td><code style="color:var(--acid);">${escapeHTML(s.session_id.slice(0, 14))}…</code></td>
+              <td>${typeBadge}</td>
+              <td title="${escapeHTML(userStr)}"><strong>${escapeHTML(userStr.slice(0, 18))}…</strong></td>
+              <td>${escapeHTML(devStr)} · ${escapeHTML(osStr)}</td>
+              <td>${escapeHTML(s.network?.country || "Network")}</td>
+              <td>${escapeHTML(s.page_views_count || 0)} pages</td>
+              <td>${escapeHTML(formatSeconds(s.duration_seconds))}</td>
+              <td style="white-space:nowrap;">${escapeHTML(formatRegistrationDateTime(s.last_active_at))}</td>
+              <td>
+                <button type="button" class="dash-btn-telemetry inspect-session-btn" data-session-id="${escapeHTML(s.session_id)}">
+                  ${getIcon("eye", "dash-icon--xs")} Inspect
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join("") : '<tr><td colspan="9" class="dash-empty-state" style="padding:2rem;">No matching sessions found.</td></tr>';
+
+        // Attach inspect handlers
+        tbody.querySelectorAll(".inspect-session-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const sid = btn.getAttribute("data-session-id");
+            const sess = (data.sessions || []).find(s => s.session_id === sid);
+            if (sess) showSessionModal(sess);
+          });
+        });
+      }
+    }
+
+    function showSessionModal(sess) {
+      const modal = panel.querySelector("#analyticsSessionDetailModal");
+      const title = panel.querySelector("#sessionDetailTitle");
+      const sub = panel.querySelector("#sessionDetailSub");
+      const content = panel.querySelector("#sessionDetailContent");
+      if (!modal || !content) return;
+
+      if (title) title.textContent = `Session: ${sess.session_id}`;
+      if (sub) sub.textContent = `Type: ${sess.session_type} · Duration: ${formatSeconds(sess.duration_seconds)}`;
+
+      content.innerHTML = `
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:0.75rem; background:rgba(0,0,0,0.3); padding:1rem; border-radius:0.75rem;">
+          <div><strong>Visitor ID:</strong> <code style="color:var(--acid);">${escapeHTML(sess.visitor_id)}</code></div>
+          <div><strong>User ID:</strong> <code>${escapeHTML(sess.user_id || "Unregistered")}</code></div>
+          <div><strong>IP Address:</strong> ${escapeHTML(sess.network?.ip || "unknown")}</div>
+          <div><strong>Country / City:</strong> ${escapeHTML(sess.network?.country || "unknown")} / ${escapeHTML(sess.network?.city || "unknown")}</div>
+          <div><strong>Device:</strong> ${escapeHTML(sess.device?.server_derived?.parsed_device_category || "Desktop")}</div>
+          <div><strong>Browser:</strong> ${escapeHTML(sess.device?.server_derived?.parsed_browser_name || "Unknown")}</div>
+        </div>
+
+        <div>
+          <h4 style="margin:0.75rem 0 0.5rem 0; font-size:0.9rem; color:#fff;">Navigation Path Sequence</h4>
+          <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+            ${(sess.navigation_path || []).map((p, idx) => `
+              <span class="dash-pill-tag" style="padding:0.4rem 0.65rem;">${idx + 1}. ${escapeHTML(p)}</span>
+            `).join("")}
+          </div>
+        </div>
+
+        <div>
+          <h4 style="margin:0.75rem 0 0.5rem 0; font-size:0.9rem; color:#fff;">Browser Telemetry Snapshot</h4>
+          <div class="dash-analytics-table-wrap">
+            <table class="dash-analytics-table">
+              <tr><td>Screen Resolution</td><td>${escapeHTML(sess.device?.browser_supplied?.screen?.width || "—")} × ${escapeHTML(sess.device?.browser_supplied?.screen?.height || "—")}</td></tr>
+              <tr><td>Viewport</td><td>${escapeHTML(sess.device?.browser_supplied?.viewport?.width || "—")} × ${escapeHTML(sess.device?.browser_supplied?.viewport?.height || "—")}</td></tr>
+              <tr><td>Device Pixel Ratio</td><td>${escapeHTML(sess.device?.browser_supplied?.screen?.pixel_ratio || 1)}x</td></tr>
+              <tr><td>Timezone / Language</td><td>${escapeHTML(sess.device?.browser_supplied?.navigator?.timezone || "UTC")} / ${escapeHTML(sess.device?.browser_supplied?.navigator?.language || "en")}</td></tr>
+              <tr><td>Hardware Concurrency</td><td>${escapeHTML(sess.device?.browser_supplied?.navigator?.hardware_concurrency || "Standard")} cores</td></tr>
+              <tr><td>Network Connection</td><td>${escapeHTML(sess.device?.browser_supplied?.network_connection_api?.effective_type || "Standard")}</td></tr>
+            </table>
+          </div>
+        </div>
+      `;
+
+      modal.hidden = false;
+      modal.style.display = "block";
+    }
+
+    // Modal close handlers
+    panel.querySelector("#sessionDetailCloseBtn")?.addEventListener("click", () => {
+      const modal = panel.querySelector("#analyticsSessionDetailModal");
+      if (modal) { modal.hidden = true; modal.style.display = "none"; }
+    });
+    panel.querySelector("#sessionDetailBackdrop")?.addEventListener("click", () => {
+      const modal = panel.querySelector("#analyticsSessionDetailModal");
+      if (modal) { modal.hidden = true; modal.style.display = "none"; }
+    });
+
+    // ── Retention Purge Modal ──
+    const retentionModal = panel.querySelector("#analyticsRetentionModal");
+    panel.querySelector("#analyticsRetentionBtn")?.addEventListener("click", () => {
+      if (retentionModal) { retentionModal.hidden = false; retentionModal.style.display = "block"; }
+    });
+    panel.querySelector("#retentionCancelBtn")?.addEventListener("click", () => {
+      if (retentionModal) { retentionModal.hidden = true; retentionModal.style.display = "none"; }
+    });
+    panel.querySelector("#analyticsRetentionBackdrop")?.addEventListener("click", () => {
+      if (retentionModal) { retentionModal.hidden = true; retentionModal.style.display = "none"; }
+    });
+
+    panel.querySelector("#retentionConfirmBtn")?.addEventListener("click", async () => {
+      const days = parseInt(panel.querySelector("#retentionDaysSelect")?.value || "30", 10);
+      try {
+        const res = await Auth.apiFetch("/analytics/master/retention/purge", {
+          method: "POST",
+          body: JSON.stringify({ days: days })
+        });
+        const result = await res.json();
+        if (retentionModal) { retentionModal.hidden = true; retentionModal.style.display = "none"; }
+        showToast(`Retention purge complete: removed ${result.purged_sessions || 0} sessions and ${result.purged_events || 0} events.`);
+        fetchAllTelemetry();
+      } catch {
+        showToast("Retention purge failed", "error");
+      }
+    });
+
+    // ── Filter Triggers ──
+    panel.querySelector("#adminFilterEmail")?.addEventListener("input", () => fetchAdminActivity());
+    panel.querySelector("#adminFilterAction")?.addEventListener("change", () => fetchAdminActivity());
+    panel.querySelector("#adminFilterIp")?.addEventListener("input", () => fetchAdminActivity());
+    panel.querySelector("#adminFilterResetBtn")?.addEventListener("click", () => {
+      const e1 = panel.querySelector("#adminFilterEmail");
+      const e2 = panel.querySelector("#adminFilterAction");
+      const e3 = panel.querySelector("#adminFilterIp");
+      if (e1) e1.value = "";
+      if (e2) e2.value = "";
+      if (e3) e3.value = "";
+      fetchAdminActivity();
+    });
+
+    panel.querySelector("#sessionSearchInput")?.addEventListener("input", () => fetchSessions(1));
+    panel.querySelector("#sessionFilterType")?.addEventListener("change", () => fetchSessions(1));
+    panel.querySelector("#sessionFilterDevice")?.addEventListener("change", () => fetchSessions(1));
+    panel.querySelector("#sessionFilterResetBtn")?.addEventListener("click", () => {
+      const s1 = panel.querySelector("#sessionSearchInput");
+      const s2 = panel.querySelector("#sessionFilterType");
+      const s3 = panel.querySelector("#sessionFilterDevice");
+      if (s1) s1.value = "";
+      if (s2) s2.value = "";
+      if (s3) s3.value = "";
+      fetchSessions(1);
+    });
+
+    panel.querySelector("#sessionPrevPageBtn")?.addEventListener("click", () => {
+      if (currentSessionPage > 1) fetchSessions(currentSessionPage - 1);
+    });
+    panel.querySelector("#sessionNextPageBtn")?.addEventListener("click", () => {
+      fetchSessions(currentSessionPage + 1);
+    });
+
+    // ── Live SSE Telemetry Stream & Controls ──
+    let analyticsEventSource = null;
+
+    function connectAnalyticsStream() {
+      if (analyticsEventSource) {
+        analyticsEventSource.close();
+        analyticsEventSource = null;
+      }
+      if (!autoRefreshActive) return;
+
+      const token = typeof Auth !== "undefined" && typeof Auth.getToken === "function" ? Auth.getToken() : "";
+      if (!token) return;
+
+      try {
+        const streamUrl = `${API_BASE}/analytics/master/stream?token=${encodeURIComponent(token)}`;
+        analyticsEventSource = new EventSource(streamUrl);
+
+        analyticsEventSource.onopen = () => {
+          syncBadge.textContent = "Live SSE Stream";
+          syncBadge.classList.add("pulse-pill");
+          banner.style.display = "none";
+          banner.hidden = true;
+        };
+
+        analyticsEventSource.onmessage = (event) => {
+          try {
+            const streamData = JSON.parse(event.data);
+            if (streamData.type === "master_telemetry_sync") {
+              if (streamData.server_time) {
+                const d = new Date(streamData.server_time);
+                syncBadge.textContent = `Live SSE · ${d.toLocaleTimeString()}`;
+              }
+              if (streamData.overview) {
+                renderOverview(streamData.overview);
+              }
+              if (currentSubview === "admin_activity") {
+                renderAdminActivity({
+                  roster: streamData.roster || [],
+                  security_alerts: streamData.security_alerts || [],
+                  activities: streamData.activities || []
+                });
+              }
+            }
+          } catch {}
+        };
+
+        analyticsEventSource.onerror = () => {
+          syncBadge.textContent = "SSE Reconnecting…";
+          syncBadge.classList.remove("pulse-pill");
+        };
+      } catch {}
+    }
+
+    function disconnectAnalyticsStream() {
+      if (analyticsEventSource) {
+        analyticsEventSource.close();
+        analyticsEventSource = null;
+      }
+      syncBadge.classList.remove("pulse-pill");
+    }
+
+    const autoBtn = panel.querySelector("#analyticsAutoRefreshBtn");
+    const autoLabel = panel.querySelector("#analyticsAutoRefreshLabel");
+    autoBtn?.addEventListener("click", () => {
+      autoRefreshActive = !autoRefreshActive;
+      if (autoLabel) autoLabel.textContent = autoRefreshActive ? "Live SSE: ON" : "Live SSE: OFF";
+      autoBtn.classList.toggle("dash-btn-telemetry--active", autoRefreshActive);
+      if (autoRefreshActive) {
+        connectAnalyticsStream();
+        showToast("Live SSE telemetry stream connected");
+      } else {
+        disconnectAnalyticsStream();
+        showToast("Live SSE telemetry paused");
+      }
+    });
+
+    panel.querySelector("#analyticsManualRefreshBtn")?.addEventListener("click", () => {
+      showToast("Syncing telemetry vault…");
+      fetchAllTelemetry();
+    });
+
+    panel.querySelector("#analyticsOfflineRetryBtn")?.addEventListener("click", () => {
+      fetchAllTelemetry();
+      connectAnalyticsStream();
+    });
+
+    // Handle tab visibility changes to pause/resume SSE
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        disconnectAnalyticsStream();
+      } else if (panel.classList.contains("is-active") && autoRefreshActive) {
+        connectAnalyticsStream();
+      }
+    }, { passive: true });
+
+    // Initial load handler
+    window.__initMasterAnalytics = () => {
+      fetchAllTelemetry();
+      connectAnalyticsStream();
+    };
+  }
+
   // ── Tab Management ──
   function setupDashboardTabs() {
     const tabList = main.querySelector(".dash-data-tabs");
@@ -1377,7 +2491,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const tabs = [...tabList.querySelectorAll('[role="tab"]')];
     const panels = {
       teams: main.querySelector("#teamDataPanel"),
-      admin: main.querySelector("#adminDataPanel")
+      admin: main.querySelector("#adminDataPanel"),
+      analytics: main.querySelector("#analyticsDataPanel")
     };
 
     const activate = (view) => {
@@ -1397,6 +2512,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         panel.hidden = !selected;
         panel.classList.toggle("is-active", selected);
       });
+      if (view === "analytics" && typeof window.__initMasterAnalytics === "function") {
+        window.__initMasterAnalytics();
+      }
     };
 
     tabs.forEach((tab, index) => {

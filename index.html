@@ -41,6 +41,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
   <script src="config.js" defer></script>
   <script src="auth.js" defer></script>
+  <script src="analytics.js" defer></script>
   <script src="script.js" defer></script>
 </head>
 <body class="site-body">
@@ -594,8 +595,70 @@
 
   <footer class="site-footer">
     <a class="wordmark" href="#top" aria-label="Back to top"><span aria-hidden="true">E—</span><span>SUMMIT</span><sup>26</sup></a>
-    <p>© 2026 CIIES, DIT University</p>
+    <div class="site-footer-center">
+      <p class="site-footer-copy">© 2026 CIIES, DIT University</p>
+      <div class="footer-telemetry-meta">
+        <span class="footer-telemetry-dot" aria-hidden="true"></span>
+        <span class="footer-telemetry-text">Safe, anonymous telemetry is active to optimize portal speed & experience.</span>
+        <button type="button" class="footer-telemetry-link" id="footerPrivacyToggle" aria-haspopup="dialog" aria-expanded="false">Details & ID Control</button>
+      </div>
+    </div>
     <a class="footer-back-top" href="#top" id="footerBackToTop">Back to top <span aria-hidden="true">↑</span></a>
   </footer>
+
+  <!-- Privacy & Experience Transparency Modal (Unobtrusive & Accessible) -->
+  <div id="footerPrivacyModal" class="footer-privacy-modal" hidden aria-hidden="true" role="dialog" aria-labelledby="footerPrivacyModalTitle">
+    <div class="footer-privacy-backdrop" id="footerPrivacyBackdrop"></div>
+    <div class="footer-privacy-card" role="document">
+      <div class="footer-privacy-header">
+        <div class="footer-privacy-header-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="footer-privacy-shield" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <h3 id="footerPrivacyModalTitle" class="footer-privacy-title">Experience & Privacy Transparency</h3>
+        </div>
+        <button type="button" class="footer-privacy-close" id="footerPrivacyClose" aria-label="Close dialog">✕</button>
+      </div>
+      <div class="footer-privacy-body">
+        <p class="footer-privacy-intro">
+          We believe in complete transparency. To make your E-Summit 2026 digital experience smooth, responsive, and seamless across devices, we collect lightweight, strictly anonymous first-party telemetry:
+        </p>
+        <div class="footer-privacy-features">
+          <div class="footer-privacy-feat">
+            <div class="footer-feat-icon" aria-hidden="true">⚡</div>
+            <div>
+              <strong>Performance & Navigation Speed</strong>
+              <span>Helps us identify slow pages, optimize track schedule loading, and eliminate layout bottlenecks.</span>
+            </div>
+          </div>
+          <div class="footer-privacy-feat">
+            <div class="footer-feat-icon" aria-hidden="true">📱</div>
+            <div>
+              <strong>Display & Accessibility Optimization</strong>
+              <span>Adapts responsive schedules, typography, and interactive cards for mobile and desktop screens.</span>
+            </div>
+          </div>
+          <div class="footer-privacy-feat">
+            <div class="footer-feat-icon" aria-hidden="true">🛡️</div>
+            <div>
+              <strong>Zero Cross-Site Tracking</strong>
+              <span>We never sell data, never use third-party advertising pixels, and never conduct invasive hardware fingerprinting.</span>
+            </div>
+          </div>
+        </div>
+        <div class="footer-privacy-id-box">
+          <div class="footer-privacy-id-top">
+            <span class="footer-privacy-id-label">Your Anonymous Identifier:</span>
+            <code id="footerVisitorIdDisplay" class="footer-privacy-id-code">Loading…</code>
+          </div>
+          <p class="footer-privacy-id-desc">
+            This random token is stored only in your local browser storage and is never linked to your personal identity unless you log in. You can reset it anytime.
+          </p>
+        </div>
+        <div class="footer-privacy-footer">
+          <button type="button" class="footer-btn-reset-id" id="footerResetVidBtn">Reset My ID</button>
+          <button type="button" class="footer-btn-close-modal" id="footerPrivacyDoneBtn">Got It</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
