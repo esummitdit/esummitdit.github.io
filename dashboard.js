@@ -243,7 +243,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       console.clear();
       console.log(
-        "%cE-Summit 2026 Active Defense%c\nAll administrative sessions, API requests, and asset queries are cryptographically signed, IP-bound, and monitored against unauthorized inspection.",
+        "%cDeveloper Notice%c\nThis feature is for developers only. If someone told you to copy-paste code here, do not proceed as it may compromise your session.",
         "color: #d84b2d; font-family: monospace; font-size: 15px; font-weight: bold;",
         "color: #999; font-family: monospace; font-size: 12px;"
       );
@@ -380,10 +380,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <span class="dash-team-desk-id-pill">${escapeHTML(team.group_id || "ES2026")}</span>
                 <span class="dash-team-desk-track-pill">${escapeHTML(team.track || "General Track")}</span>
                 <span class="dash-status-pill"><span class="pulse-dot" aria-hidden="true"></span><span>Confirmed Attendance</span></span>
-              </div>
-              <div class="dash-team-desk-timestamp" title="Official verified registration timestamp">
-                ${getIcon("calendar", "dash-icon--xs")}
-                <span>Registered: <strong>${escapeHTML(regTimeFull)}</strong></span>
+                <div class="dash-team-desk-timestamp" title="Official verified registration timestamp">
+                  ${getIcon("calendar", "dash-icon--xs")}
+                  <span>Registered: <strong>${escapeHTML(regTimeFull)}</strong></span>
+                </div>
               </div>
             </div>
 
@@ -404,11 +404,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <span class="metric-lbl">Group ID</span>
                 <strong class="metric-val">${escapeHTML(team.group_id || "—")}</strong>
               </div>
-              <div class="dash-team-metric-item">
+              <div class="dash-team-metric-item dash-team-metric-item--track">
                 <span class="metric-lbl">Event Track</span>
                 <strong class="metric-val">${escapeHTML(team.track || "General")}</strong>
               </div>
-              <div class="dash-team-metric-item">
+              <div class="dash-team-metric-item dash-team-metric-item--attendees">
                 <span class="metric-lbl">Attendees</span>
                 <strong class="metric-val">${members.length} Confirmed</strong>
               </div>
@@ -419,11 +419,18 @@ document.addEventListener("DOMContentLoaded", async () => {
             </div>
           </header>
 
-          <!-- Venue Digital Passes Bar -->
+          <!-- Venue Digital Passes Header Bar -->
           <div class="dash-team-passes-banner">
             <div class="dash-team-passes-title-group">
               <span class="dash-section-kicker">VENUE ACCESS CREDENTIALS</span>
               <h2 class="dash-team-passes-title">Attendee Digital Passes (${members.length})</h2>
+              <aside class="dash-passes-desk-notice" role="note">
+                <span class="dash-passes-desk-notice-badge">SECURITY PROTOCOL</span>
+                <div class="dash-passes-desk-notice-content">
+                  ${getIcon("shield", "dash-icon--xs")}
+                  <span>Keep downloaded passes on attendees' phones for instant security check-in.</span>
+                </div>
+              </aside>
             </div>
           </div>
 
@@ -431,15 +438,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           <div class="dash-roster-grid">
             ${members.map((member, index) => renderDigitalIdCardHTML(team, member, index)).join("") || '<p class="dash-empty-state">No attendees attached to this team yet.</p>'}
           </div>
-
-          <!-- Venue Check-In Security Advisory -->
-          <aside class="dash-passes-desk-notice" role="note">
-            <span class="dash-passes-desk-notice-badge">SECURITY PROTOCOL</span>
-            <div class="dash-passes-desk-notice-content">
-              ${getIcon("shield", "dash-icon--xs")}
-              <span>Keep downloaded passes on attendees' phones for instant check-in at the security desk.</span>
-            </div>
-          </aside>
         </div>
       `;
 
@@ -527,9 +525,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         <!-- Venue Staff Check-In Code -->
         <div class="dash-secret-id">
-          <div class="dash-secret-id-copy">
-            <span class="secret-label">Staff Verification Code</span>
-            <strong class="secret-code">${escapeHTML(code)}</strong>
+          <div class="dash-secret-id-info">
+            <div class="secret-label-row">
+              ${getIcon("shield", "dash-icon--xs")}
+              <span class="secret-label">Staff Verification Code</span>
+            </div>
+            <code class="secret-code">${escapeHTML(code)}</code>
           </div>
           <button type="button" class="dash-code-copy-btn" data-copy-code="${escapeHTML(code)}" aria-label="Copy verification code">
             ${getIcon("copy", "dash-icon--xs")} <span>Copy</span>
@@ -3449,12 +3450,15 @@ document.addEventListener("DOMContentLoaded", async () => {
                 </div>
 
                 <div class="dash-secret-id">
-                  <div class="dash-secret-id-copy">
-                    <span class="secret-label">Staff verification code</span>
-                    <strong class="secret-code">${escapeHTML(code)}</strong>
+                  <div class="dash-secret-id-info">
+                    <div class="secret-label-row">
+                      ${getIcon("shield", "dash-icon--xs")}
+                      <span class="secret-label">Staff Verification Code</span>
+                    </div>
+                    <code class="secret-code">${escapeHTML(code)}</code>
                   </div>
-                  <button type="button" class="dash-code-copy-btn" data-copy-code="${escapeHTML(code)}" aria-label="Copy code">
-                    ${getIcon("copy", "dash-icon--xs")} Copy
+                  <button type="button" class="dash-code-copy-btn" data-copy-code="${escapeHTML(code)}" aria-label="Copy verification code">
+                    ${getIcon("copy", "dash-icon--xs")} <span>Copy</span>
                   </button>
                 </div>
 

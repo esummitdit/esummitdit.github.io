@@ -509,11 +509,13 @@ function initSculpture(container, reduceMotion) {
   };
 
   const morphTargets = createMorphTargets(originalPositions);
+  const sourcePositionsBuffer = new Float32Array(originalPositions.length);
+  sourcePositionsBuffer.set(originalPositions);
   const formStudy = {
     active: false,
     phase: -1,
     phaseStartedAt: 0,
-    source: originalPositions,
+    source: sourcePositionsBuffer,
     resolve: null
   };
 
@@ -558,9 +560,8 @@ function initSculpture(container, reduceMotion) {
     renderer.setSize(width, height, false);
   }
 
-  const easeInOutQuint = (progress) => progress < 0.5
-    ? 16 * progress ** 5
-    : 1 - ((-2 * progress + 2) ** 5) / 2;
+  // Smooth sinusoidal ease: continuous fluid velocity across phase transitions without dead stops
+  const easeSmooth = (p) => 0.5 - 0.5 * Math.cos(p * Math.PI);
 
   const polyformNames = [
     "DODECAHEDRON", "STELLATED OCTAHEDRON", "RHOMBICUBOCTAHEDRON", 
@@ -591,13 +592,14 @@ function initSculpture(container, reduceMotion) {
   function updateFormStudy(time) {
     if (!formStudy.active) return;
 
-    const spinDuration = 900;
-    const morphDuration = 1125;
-    const returnDuration = 1550;
+    const spinDuration = 700;
+    const morphDuration = 850;
+    const returnDuration = 1050;
     const isSpinPhase = formStudy.phase === -1;
     const isReturnPhase = formStudy.phase === morphTargets.length;
     const duration = isSpinPhase ? spinDuration : isReturnPhase ? returnDuration : morphDuration;
-    const progress = Math.min(1, (time - formStudy.phaseStartedAt) / duration);
+    const elapsed = time - formStudy.phaseStartedAt;
+    const progress = Math.min(1, Math.max(0, elapsed / duration));
 
     let displayPhase = formStudy.phase;
     if (!isSpinPhase && progress < 0.5) {
@@ -607,36 +609,42 @@ function initSculpture(container, reduceMotion) {
 
     if (!isSpinPhase) {
       const target = isReturnPhase ? originalPositions : morphTargets[formStudy.phase];
-      const eased = easeInOutQuint(progress);
+      const eased = easeSmooth(progress);
       const positions = geometry.attributes.position.array;
+      const src = formStudy.source;
       for (let i = 0; i < positions.length; i += 1) {
-        positions[i] = formStudy.source[i] + (target[i] - formStudy.source[i]) * eased;
+        positions[i] = src[i] + (target[i] - src[i]) * eased;
       }
       geometry.attributes.position.needsUpdate = true;
     }
 
-    const pulse = Math.sin(progress * Math.PI);
-    sculpture.scale.lerp(scaleTarget.setScalar(1 + pulse * (isSpinPhase ? 0.08 : 0.055)), 0.16);
-    surface.material.opacity = 0.76 + pulse * 0.15;
+    // Continuous organic breathing pulse detached from phase boundaries to prevent scale hitching
+    const organicBreath = 1 + Math.sin(time * 0.0026) * 0.032;
+    sculpture.scale.lerp(scaleTarget.setScalar(organicBreath), 0.12);
+    surface.material.opacity = 0.76 + Math.sin(time * 0.003) * 0.08;
 
     if (progress < 1) return;
 
+    // Advance to next phase smoothly without zero-frame freezing or memory allocations
     if (isSpinPhase) {
       formStudy.phase = 0;
-      formStudy.source = new Float32Array(geometry.attributes.position.array);
+      sourcePositionsBuffer.set(geometry.attributes.position.array);
+      formStudy.source = sourcePositionsBuffer;
     } else if (isReturnPhase) {
       geometry.attributes.position.array.set(originalPositions);
       geometry.attributes.position.needsUpdate = true;
       surface.material.opacity = 0.76;
-      formStudy.active = false;
-      formStudy.phase = -1;
+      // Smoothly loop the polyform journey so the showcase never abruptly freezes
+      formStudy.phase = 0;
+      sourcePositionsBuffer.set(originalPositions);
+      formStudy.source = sourcePositionsBuffer;
       const resolve = formStudy.resolve;
       formStudy.resolve = null;
       resolve?.();
-      return;
     } else {
       formStudy.phase += 1;
-      formStudy.source = new Float32Array(geometry.attributes.position.array);
+      sourcePositionsBuffer.set(geometry.attributes.position.array);
+      formStudy.source = sourcePositionsBuffer;
     }
     formStudy.phaseStartedAt = time;
   }
@@ -648,7 +656,8 @@ function initSculpture(container, reduceMotion) {
     formStudy.active = true;
     formStudy.phase = -1;
     formStudy.phaseStartedAt = performance.now();
-    formStudy.source = new Float32Array(geometry.attributes.position.array);
+    sourcePositionsBuffer.set(geometry.attributes.position.array);
+    formStudy.source = sourcePositionsBuffer;
     updatePolyformDisplay(formStudy.phase);
     return new Promise((resolve) => {
       formStudy.resolve = resolve;
@@ -663,9 +672,9 @@ function initSculpture(container, reduceMotion) {
       launchIntensity += (launchTarget - launchIntensity) * 0.045;
       const studyVelocity = formStudy.active ? 1 : 0;
       const momentumVelocity = momentumTarget * 0.002;
-      sculpture.rotation.y += 0.0012 + momentumVelocity + launchIntensity * 0.003 + pointer.x * 0.0006 + studyVelocity * 0.003;
-      sculpture.rotation.x += 0.0005 + momentumVelocity * 0.4 + launchIntensity * 0.001 + pointer.y * 0.0003 + studyVelocity * 0.001;
-      sculpture.rotation.z += Math.sin(t * 2.0) * (0.0003 + launchIntensity * 0.0005);
+      sculpture.rotation.y += 0.0012 + momentumVelocity + launchIntensity * 0.016 + pointer.x * 0.0006 + studyVelocity * 0.0042;
+      sculpture.rotation.x += 0.0005 + momentumVelocity * 0.4 + launchIntensity * 0.008 + pointer.y * 0.0003 + studyVelocity * 0.0015;
+      sculpture.rotation.z += Math.sin(t * 2.0) * (0.0003 + launchIntensity * 0.003) + studyVelocity * 0.0006;
 
       // 3D Orbital Light Rig movement
       keyLight.position.x = 5 + Math.sin(t * 1.8) * 3.5;
@@ -692,8 +701,8 @@ function initSculpture(container, reduceMotion) {
       pointsMaterial.size = 0.035 + Math.sin(t * 4.5) * 0.007;
       particleField.rotation.y = t * 0.12;
       particleField.rotation.x = t * 0.06;
-      orbitOuter.rotation.z -= 0.001 + momentumVelocity * 0.5 + launchIntensity * 0.003;
-      orbitInner.rotation.z += 0.0016 + momentumVelocity * 0.6 + launchIntensity * 0.004;
+      orbitOuter.rotation.z -= 0.001 + momentumVelocity * 0.5 + launchIntensity * 0.018;
+      orbitInner.rotation.z += 0.0016 + momentumVelocity * 0.6 + launchIntensity * 0.024;
 
       // Smooth interactive 3D camera parallax tilt
       camera.position.x += (pointer.x * 0.75 - camera.position.x) * 0.04;
@@ -724,6 +733,7 @@ function initSculpture(container, reduceMotion) {
   return {
     renderer,
     resize,
+    renderImmediate() { renderer.render(scene, camera); },
     setLaunching(value) { launchTarget = value ? 1 : 0; },
     setMomentum(value) { momentumTarget = Math.max(0, Math.min(1, value)); },
     setHovering(value) { isHovering = !!value; },
@@ -772,14 +782,21 @@ function setUpSculptureControl(sceneState, reduceMotion, autoPlay = false) {
   }
 
   if (autoPlay && !reduceMotion) {
-    // Delay slightly for initial WebGL context boot then start morphing
-    setTimeout(playStudy, 200);
+    if (document.body.classList.contains("is-loading")) {
+      // Start polyform study right after the opening swoop seats the sculpture into the hero card
+      window.addEventListener("openingSequenceComplete", () => {
+        setTimeout(playStudy, 80);
+      }, { once: true });
+    } else {
+      setTimeout(playStudy, 200);
+    }
   }
 }
 
 function runOpeningSequence(sceneState, loadingContainer, heroContainer, overlay, loadingBranding, reduceMotion) {
   const canvas = sceneState.renderer.domElement;
   const transitionDuration = 1300;
+  const isNarrowLayout = window.matchMedia("(max-width: 850px)").matches;
   let isLaunching = false;
   let launch = null;
 
@@ -789,7 +806,6 @@ function runOpeningSequence(sceneState, loadingContainer, heroContainer, overlay
     const heroHeadline = document.getElementById("hero-title");
     const finalHeadline = heroHeadline ? heroHeadline.getBoundingClientRect() : { left: 40, top: 120, width: 400, height: 200 };
     const targetAspect = (target.width / (target.height || 1)) || 1;
-    const isNarrowLayout = window.matchMedia("(max-width: 850px)").matches;
 
     if (loadingBranding) {
       const labelHeight = 28;
@@ -820,33 +836,33 @@ function runOpeningSequence(sceneState, loadingContainer, heroContainer, overlay
       titleBounds.height = titleBounds.bottom - titleBounds.top;
     }
 
-    const maxHeight = Math.min(window.innerHeight * (isNarrowLayout ? 0.38 : 0.84), isNarrowLayout ? 360 : 760);
-    const maxWidth = Math.min(
-      window.innerWidth * (isNarrowLayout ? 0.78 : 0.5),
-      maxHeight * targetAspect,
-      isNarrowLayout ? 360 : 760
-    );
-    const widthNeededForTitleHalf = titleBounds
-      ? Math.max(titleBounds.width * 0.96, titleBounds.height * targetAspect * 1.54)
-      : 360;
-    const width = isNarrowLayout
-      ? Math.max(220, Math.min(maxWidth, maxHeight * targetAspect))
-      : Math.max(300, Math.min(widthNeededForTitleHalf, maxWidth));
-    const height = width / targetAspect;
+    let width, height, centerX, centerY;
+    if (isNarrowLayout) {
+      const maxHeight = Math.min(window.innerHeight * 0.38, 360);
+      const maxWidth = Math.min(window.innerWidth * 0.78, maxHeight * targetAspect, 360);
+      width = Math.max(220, Math.min(maxWidth, maxHeight * targetAspect));
+      height = width / targetAspect;
+      centerX = window.innerWidth * 0.5;
+      const desiredY = Math.max(window.innerHeight * 0.52, (brandingBounds ? brandingBounds.bottom : 180) + height / 2 + 20);
+      centerY = Math.min(window.innerHeight - height / 2 - 32, desiredY);
+    } else {
+      // Desktop: Cinematic widescreen opening sphere.
+      // Bigger immersive scale covering the entire text area, centered vertically in the viewframe.
+      const sphereDiameter = Math.min(
+        window.innerHeight * 1.04,
+        Math.max(window.innerWidth * 0.62, brandingBounds ? brandingBounds.width * 1.40 : 720)
+      );
+      height = sphereDiameter;
+      width = sphereDiameter * targetAspect;
 
-    const titleMidpoint = titleBounds ? titleBounds.left + titleBounds.width / 2 : 0;
-    const titleRightSide = titleBounds ? titleMidpoint + titleBounds.width * 0.09 : 0;
-    const centerX = !isNarrowLayout && titleBounds
-      ? Math.min(
-          window.innerWidth - 16 - width / 2,
-          Math.max(16 + width / 2, titleRightSide + width / 2)
-        )
-      : window.innerWidth * 0.5;
-    const centerY = isNarrowLayout && brandingBounds
-      ? Math.max(window.innerHeight * 0.52, brandingBounds.bottom + height / 2 + 24)
-      : titleBounds
-        ? titleBounds.top + titleBounds.height / 2
-        : window.innerHeight * 0.52;
+      // Positioned a bit up from center for majestic framing
+      centerY = window.innerHeight * 0.46;
+
+      // Positioned a bit more on the left side framing the E— branding
+      const brandingLeft = brandingBounds ? brandingBounds.left : window.innerWidth * 0.10;
+      const brandingWidth = brandingBounds ? brandingBounds.width : window.innerWidth * 0.38;
+      centerX = Math.max(width * 0.42, brandingLeft + brandingWidth * 0.38);
+    }
 
     Object.assign(loadingContainer.style, {
       left: `${(centerX - width / 2) / zoom}px`,
@@ -866,9 +882,13 @@ function runOpeningSequence(sceneState, loadingContainer, heroContainer, overlay
     loadingContainer.style.transition = "none";
     loadingContainer.style.transform = "";
     sceneState.resize(heroContainer);
+    if (sceneState.renderImmediate) sceneState.renderImmediate();
     sceneState.setLaunching(false);
     if (overlay) overlay.remove();
     document.body.classList.remove("is-loading", "is-launching");
+
+    // Signal completion so further animations can commence seamlessly
+    window.dispatchEvent(new CustomEvent("openingSequenceComplete"));
 
     // Reveal hero elements smoothly
     const heroReveals = document.querySelectorAll("#top .reveal");
@@ -927,6 +947,11 @@ function runOpeningSequence(sceneState, loadingContainer, heroContainer, overlay
       if (sceneState.setMomentum) sceneState.setMomentum(1);
       document.body.classList.add("is-launching");
       if (overlay) overlay.classList.add("is-launching");
+      if (loadingBranding) {
+        loadingBranding.style.setProperty("display", "none", "important");
+        loadingBranding.style.setProperty("opacity", "0", "important");
+        loadingBranding.style.setProperty("visibility", "hidden", "important");
+      }
       loadingContainer.style.transition = "none";
 
       const startedAt = performance.now();
@@ -937,19 +962,46 @@ function runOpeningSequence(sceneState, loadingContainer, heroContainer, overlay
       const animateLaunch = (now) => {
         const elapsed = now - startedAt;
         const progress = Math.min(1, elapsed / transitionDuration);
-        const eased = 1 - Math.pow(1 - progress, 3);
+
+        // Cinematic S-curve ease for widescreen camera pan:
+        // Elegant liftoff, majestic panoramic sweep across center, cushioned touchdown
+        const cinematicEase = (p) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
+        const eased = isNarrowLayout ? (1 - Math.pow(1 - progress, 3)) : cinematicEase(progress);
 
         const currentTarget = heroContainer.getBoundingClientRect();
         const targetCenterX = currentTarget.left + currentTarget.width / 2;
         const targetCenterY = currentTarget.top + currentTarget.height / 2;
 
         const currentZoom = getViewportZoom();
-        const translateX = ((targetCenterX - initialCenterX) * eased) / currentZoom;
-        const translateY = ((targetCenterY - initialCenterY) * eased) / currentZoom;
         const targetScale = currentTarget.width / initialWidth;
         const scale = 1 + (targetScale - 1) * eased;
 
-        loadingContainer.style.transform = `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`;
+        let translateX, translateY, roll = 0;
+        if (isNarrowLayout) {
+          translateX = ((targetCenterX - initialCenterX) * eased) / currentZoom;
+          translateY = ((targetCenterY - initialCenterY) * eased) / currentZoom;
+        } else {
+          // Dramatic deep-dipped Fibonacci swoop across widescreen canvas
+          const deltaX = targetCenterX - initialCenterX;
+          const downSwoop = Math.min(window.innerHeight * 0.36, 340);
+
+          const c1X = initialCenterX + deltaX * 0.26;
+          const c1Y = initialCenterY + downSwoop * 1.35;
+          const c2X = initialCenterX + deltaX * 0.72;
+          const c2Y = targetCenterY + downSwoop * 1.10;
+
+          const u = 1 - eased;
+          const curX = u * u * u * initialCenterX + 3 * u * u * eased * c1X + 3 * u * eased * eased * c2X + eased * eased * eased * targetCenterX;
+          const curY = u * u * u * initialCenterY + 3 * u * u * eased * c1Y + 3 * u * eased * eased * c2Y + eased * eased * eased * targetCenterY;
+
+          translateX = (curX - initialCenterX) / currentZoom;
+          translateY = (curY - initialCenterY) / currentZoom;
+
+          // Smooth banking roll during the deep panoramic sweep (levels out cleanly to 0 at docking)
+          roll = Math.sin(progress * Math.PI) * 20;
+        }
+
+        loadingContainer.style.transform = `translate3d(${translateX}px, ${translateY}px, 0) rotate(${roll}deg) scale(${scale})`;
 
         if (progress < 1) {
           requestAnimationFrame(animateLaunch);
